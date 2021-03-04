@@ -1,0 +1,30 @@
+name: RFC XML Check
+
+on: [push]
+
+jobs:
+  build:
+
+    runs-on: ubuntu-latest
+    
+    steps:
+    - uses: actions/checkout@v1
+    - name: dependencies
+      run: |
+        sudo apt-get install cmake aspell xmlstarlet python3 python3-pip python3-setuptools python3-wheel
+        sudo pip3 install xml2rfc
+        which xml2rfc
+    - name: xml2rfc
+      run: |
+        mkdir -p build
+        (cd build && cmake ..)
+        cmake --build build -v
+    - uses: actions/upload-artifact@v2
+      with:
+        name: spec
+        path: |
+          build/spec/draft-*.html
+          build/spec/draft-*.txt
+          build/spec/misspelling.txt
+          build/spec/*errors.txt
+          build/spec/*valid.txt
