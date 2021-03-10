@@ -81,7 +81,6 @@ else()
     add_custom_command(
         OUTPUT "${EXTRACTED_CDDL}"
         DEPENDS "${DRAFT_NAME_XML}"
-            "${CMAKE_CURRENT_SOURCE_DIR}/../bpv7.cddl"
         COMMAND ${XMLSTARLET} sel --text -t -v '//sourcecode[@type="cddl"]' "${DRAFT_NAME_XML}" >"${EXTRACTED_CDDL}"
     )
     add_custom_command(
@@ -106,17 +105,20 @@ else()
     )
 
     # Check validity against CDDL for each chunk
-    if(CBORVERIFY)
-        set(CBORVALID_TXT "cborvalid.txt")
+    find_program(DIAG2CBOR diag2cbor.rb)
+    if(NOT DIAG2CBOR)
+        message(WARNING "No `diag2cbor.rb` found")
+    else()
+        set(CBORVALIDERRORS_TXT "cborvaliderrors.txt")
         set(CHECK_CBOR "${CMAKE_CURRENT_SOURCE_DIR}/check_cbor.sh")
         add_custom_command(
-            OUTPUT "${CBORVALID_TXT}"
+            OUTPUT "${CBORVALIDERRORS_TXT}"
             DEPENDS "${DRAFT_NAME_XML}" "${SPLIT_ARTWORK}" "${CHECK_CBOR}" "${COMBINED_CDDL}"
-            COMMAND ${PYTHON} "${SPLIT_ARTWORK}" "${DRAFT_NAME_XML}" '//sourcecode[@type="cbor"]' sh "${CHECK_CBOR}" "${COMBINED_CDDL}" 2>"${CBORVALID_TXT}" 1>&2
+            COMMAND ${PYTHON} "${SPLIT_ARTWORK}" "${DRAFT_NAME_XML}" '//sourcecode[@type="cbor"]' sh "${CHECK_CBOR}" "${COMBINED_CDDL}" 2>"${CBORVALIDERRORS_TXT}" 1>&2 || true
         )
         add_custom_target(
             cborvalid ALL
-            DEPENDS "${CBORVALID_TXT}"
+            DEPENDS "${CBORVALIDERRORS_TXT}"
         )
     endif()
 endif()
