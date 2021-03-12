@@ -17,7 +17,7 @@ jobs:
     - name: xml2rfc
       run: |
         mkdir -p build
-        (cd build && cmake ..)
+        (cd build && cmake .. -DCMAKE_INSTALL_DOCDIR=$PWD/install)
         cmake --build build -v
     - uses: actions/upload-artifact@v2
       with:
@@ -31,4 +31,4 @@ jobs:
       uses: JamesIves/github-pages-deploy-action@4.1.0
       with:
         branch: gh-pages # The branch the action should deploy to.
-        folder: build/spec # The folder the action should deploy.
+        folder: build/install # The folder the action should deploy.

@@ -53,6 +53,13 @@ add_custom_target(
     specs ALL
     DEPENDS "${DRAFT_NAME_TXT}" "${DRAFT_NAME_HTML}" "${MISSPELLING_TXT}"
 )
+install(
+    FILES
+        "${CMAKE_CURRENT_BINARY_DIR}/${DRAFT_NAME_TXT}"
+        "${CMAKE_CURRENT_BINARY_DIR}/${DRAFT_NAME_HTML}"
+        "${CMAKE_CURRENT_BINARY_DIR}/${MISSPELLING_TXT}"
+    TYPE DOC
+)
 
 # Process each CBOR fragment independently for well-formedness
 find_program(CBORVERIFY diag2pretty.rb)
@@ -68,6 +75,10 @@ else()
     add_custom_target(
         cborerrors ALL
         DEPENDS "${CBORERRORS_TXT}"
+    )
+    install(
+        FILES "${CMAKE_CURRENT_BINARY_DIR}/${CBORERRORS_TXT}"
+        TYPE DOC
     )
 endif()
 
@@ -92,6 +103,12 @@ else()
                 "${CMAKE_CURRENT_SOURCE_DIR}/../bpv7.cddl"
                 >"${COMBINED_CDDL}"
     )
+    install(
+        FILES
+            "${CMAKE_CURRENT_BINARY_DIR}/${EXTRACTED_CDDL}"
+            "${CMAKE_CURRENT_BINARY_DIR}/${COMBINED_CDDL}"
+        TYPE DOC
+    )
 
     set(CDDLERRORS_TXT "cddlerrors.txt")
     add_custom_command(
@@ -102,6 +119,10 @@ else()
     add_custom_target(
         cddlerrors ALL
         DEPENDS "${CDDLERRORS_TXT}"
+    )
+    install(
+        FILES "${CMAKE_CURRENT_BINARY_DIR}/${CDDLERRORS_TXT}"
+        TYPE DOC
     )
 
     # Check validity against CDDL for each chunk
@@ -119,6 +140,10 @@ else()
         add_custom_target(
             cborvalid ALL
             DEPENDS "${CBORVALIDERRORS_TXT}"
+        )
+        install(
+            FILES "${CMAKE_CURRENT_BINARY_DIR}/${CBORVALIDERRORS_TXT}"
+            TYPE DOC
         )
     endif()
 endif()
