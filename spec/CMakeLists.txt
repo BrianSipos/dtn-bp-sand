@@ -22,6 +22,7 @@ set(SPLIT_ARTWORK "${CMAKE_CURRENT_SOURCE_DIR}/split_artwork.py")
 set(DRAFT_NAME_XML "${CMAKE_CURRENT_SOURCE_DIR}/${DRAFT_NAME}.xml")
 set(DRAFT_NAME_TXT "${DRAFT_NAME}.txt")
 set(DRAFT_NAME_HTML "${DRAFT_NAME}.html")
+set(DRAFT_NAME_PDF "${DRAFT_NAME}.pdf")
 add_custom_command(
     OUTPUT "${DRAFT_NAME_TXT}"
     DEPENDS "${DRAFT_NAME_XML}"
@@ -32,6 +33,11 @@ add_custom_command(
     DEPENDS "${DRAFT_NAME_XML}"
     COMMAND ${XML2RFC} --no-network --html -o "${DRAFT_NAME_HTML}" "${DRAFT_NAME_XML}"
 )
+add_custom_command(
+    OUTPUT "${DRAFT_NAME_PDF}"
+    DEPENDS "${DRAFT_NAME_XML}"
+    COMMAND ${XML2RFC} --no-network --pdf -o "${DRAFT_NAME_PDF}" "${DRAFT_NAME_XML}"
+)
 
 set(DICTIONARY_TXT "${CMAKE_CURRENT_SOURCE_DIR}/dictionary.txt")
 set(SPELLCHECK_XSL "${CMAKE_CURRENT_SOURCE_DIR}/spellcheck.xsl")
@@ -39,19 +45,23 @@ set(MISSPELLING_TXT "misspelling.txt")
 add_custom_command(
     OUTPUT "dictionary.cwl"
     DEPENDS "${DICTIONARY_TXT}"
-    COMMAND cat "${DICTIONARY_TXT}" | 
+    COMMAND cat "${DICTIONARY_TXT}" |
         ${ASPELL} --lang=en create master "./dictionary.cwl"
 )
 add_custom_command(
     OUTPUT "${MISSPELLING_TXT}"
     DEPENDS "${DRAFT_NAME_XML}" "${SPELLCHECK_XSL}" "dictionary.cwl"
-    COMMAND ${XMLSTARLET} tr "${SPELLCHECK_XSL}" "${DRAFT_NAME_XML}" | 
-        ${ASPELL} --mode=sgml --lang=EN_US --extra-dicts=./dictionary.cwl list | 
+    COMMAND ${XMLSTARLET} tr "${SPELLCHECK_XSL}" "${DRAFT_NAME_XML}" |
+        ${ASPELL} --mode=sgml --lang=EN_US --extra-dicts=./dictionary.cwl list |
         sort | uniq > "${MISSPELLING_TXT}"
 )
 add_custom_target(
     specs ALL
     DEPENDS "${DRAFT_NAME_TXT}" "${DRAFT_NAME_HTML}" "${MISSPELLING_TXT}"
+)
+add_custom_target(
+    pdf
+    DEPENDS "${DRAFT_NAME_PDF}"
 )
 install(
     FILES
@@ -60,6 +70,7 @@ install(
         "${CMAKE_CURRENT_BINARY_DIR}/${MISSPELLING_TXT}"
     TYPE DOC
 )
+
 
 # Process each CBOR fragment independently for well-formedness
 find_program(CBORVERIFY diag2pretty.rb)
@@ -70,7 +81,7 @@ else()
     add_custom_command(
         OUTPUT "${CBORERRORS_TXT}"
         DEPENDS "${DRAFT_NAME_XML}" "${SPLIT_ARTWORK}"
-        COMMAND ${PYTHON} "${SPLIT_ARTWORK}" "${DRAFT_NAME_XML}" '//sourcecode[@type="cbor"]' "${CBORVERIFY}" 2>"${CBORERRORS_TXT}" 1>&2
+        COMMAND ${PYTHON} "${SPLIT_ARTWORK}" "${DRAFT_NAME_XML}" '//sourcecode[@type="cbor"]' "${CBORVERIFY}" 2>"${CBORERRORS_TXT}" 1>&2 || true
     )
     add_custom_target(
         cborerrors ALL
@@ -83,38 +94,42 @@ else()
 endif()
 
 # Process all CDDL concatenated together
+set(EXTRACTED_CDDL "extracted.cddl")
+set(COMBINED_CDDL "combined.cddl")
+add_custom_command(
+    OUTPUT "${EXTRACTED_CDDL}"
+    DEPENDS "${DRAFT_NAME_XML}"
+    COMMAND ${XMLSTARLET} sel --text -t -v '//sourcecode[@type="cddl"]' "${DRAFT_NAME_XML}" >"${EXTRACTED_CDDL}"
+    COMMAND sed -i "'s/[[:space:]]*$$//'" "${EXTRACTED_CDDL}"
+)
+add_custom_command(
+    OUTPUT "${COMBINED_CDDL}"
+    DEPENDS "${EXTRACTED_CDDL}"
+        "${CMAKE_CURRENT_SOURCE_DIR}/../bpv7.cddl"
+    COMMAND cat
+        "${EXTRACTED_CDDL}"
+        "${CMAKE_CURRENT_SOURCE_DIR}/../bpv7.cddl"
+        >"${COMBINED_CDDL}"
+)
+add_custom_target(
+    cddl ALL
+    DEPENDS "${COMBINED_CDDL}"
+)
+install(
+    FILES
+        "${CMAKE_CURRENT_BINARY_DIR}/${EXTRACTED_CDDL}"
+        "${CMAKE_CURRENT_BINARY_DIR}/${COMBINED_CDDL}"
+    TYPE DOC
+)
 find_program(CDDLTOOL cddl)
 if(NOT CDDLTOOL)
     message(WARNING "No `cddl` found")
 else()
-    set(EXTRACTED_CDDL "extracted.cddl")
-    set(COMBINED_CDDL "combined.cddl")
-    add_custom_command(
-        OUTPUT "${EXTRACTED_CDDL}"
-        DEPENDS "${DRAFT_NAME_XML}"
-        COMMAND ${XMLSTARLET} sel --text -t -v '//sourcecode[@type="cddl"]' "${DRAFT_NAME_XML}" >"${EXTRACTED_CDDL}"
-    )
-    add_custom_command(
-        OUTPUT "${COMBINED_CDDL}"
-        DEPENDS "${EXTRACTED_CDDL}"
-            "${CMAKE_CURRENT_SOURCE_DIR}/../bpv7.cddl"
-        COMMAND cat
-                "${EXTRACTED_CDDL}"
-                "${CMAKE_CURRENT_SOURCE_DIR}/../bpv7.cddl"
-                >"${COMBINED_CDDL}"
-    )
-    install(
-        FILES
-            "${CMAKE_CURRENT_BINARY_DIR}/${EXTRACTED_CDDL}"
-            "${CMAKE_CURRENT_BINARY_DIR}/${COMBINED_CDDL}"
-        TYPE DOC
-    )
-
     set(CDDLERRORS_TXT "cddlerrors.txt")
     add_custom_command(
         OUTPUT "${CDDLERRORS_TXT}"
         DEPENDS "${COMBINED_CDDL}"
-        COMMAND ${CDDLTOOL} "${COMBINED_CDDL}" generate 2>"${CDDLERRORS_TXT}" 1>&2 || true
+        COMMAND ${CDDLTOOL} compile-cddl --cddl "${COMBINED_CDDL}" 2>"${CDDLERRORS_TXT}" 1>&2 || true
     )
     add_custom_target(
         cddlerrors ALL
@@ -129,13 +144,13 @@ else()
     find_program(DIAG2CBOR diag2cbor.rb)
     if(NOT DIAG2CBOR)
         message(WARNING "No `diag2cbor.rb` found")
-    else()
+    elseif(VALIDATE_CBOR)
         set(CBORVALIDERRORS_TXT "cborvaliderrors.txt")
         set(CHECK_CBOR "${CMAKE_CURRENT_SOURCE_DIR}/check_cbor.sh")
         add_custom_command(
             OUTPUT "${CBORVALIDERRORS_TXT}"
             DEPENDS "${DRAFT_NAME_XML}" "${SPLIT_ARTWORK}" "${CHECK_CBOR}" "${COMBINED_CDDL}"
-            COMMAND ${PYTHON} "${SPLIT_ARTWORK}" "${DRAFT_NAME_XML}" '//sourcecode[@type="cbor"]' sh "${CHECK_CBOR}" "${COMBINED_CDDL}" 2>"${CBORVALIDERRORS_TXT}" 1>&2 || true
+            COMMAND ${PYTHON} "${SPLIT_ARTWORK}" "${DRAFT_NAME_XML}" '//sourcecode[@type="cbor"]' "${CHECK_CBOR}" "${COMBINED_CDDL}" 2>"${CBORVALIDERRORS_TXT}" 1>&2 || true
         )
         add_custom_target(
             cborvalid ALL
