@@ -93,6 +93,7 @@ else()
     )
 endif()
 
+
 # Process all CDDL concatenated together
 set(EXTRACTED_CDDL "extracted.cddl")
 set(COMBINED_CDDL "combined.cddl")
