@@ -15,6 +15,8 @@ def main():
     parser = argparse.ArgumentParser()
     parser.add_argument('--log-level', default='info',
                         help='The minimum logging severity displayed.')
+    parser.add_argument('--lines', default=False, action='store_true',
+                        help='Replace all newlines with whitespace and send to one command process as separate lines.')
     parser.add_argument('infile', help='The file to read from.')
     parser.add_argument('xpath', help='The XPath expression to match.')
     parser.add_argument('command', nargs=argparse.REMAINDER,
@@ -31,12 +33,23 @@ def main():
         xml_parser = etree.XMLParser()
         doc = etree.parse(infile, xml_parser)
 
-    exitcodes = []
+    parts = []
+    if args.lines:
+        parts.append('')
     for elem in doc.xpath(args.xpath):
         text = elem.text.strip()
-        LOGGER.info('Processing element text:\n%s', text)
+        if args.lines:
+            text = text.replace('\r', ' ')
+            text = text.replace('\n', ' ')
+            parts[0] += text + '\n'
+        else:
+            parts.append(text)
+        LOGGER.debug('Processing element text:\n%s', text)
+
+    exitcodes = []
+    for part in parts:
         proc = subprocess.Popen(args.command, stdin=subprocess.PIPE)
-        proc.communicate(text.encode('utf8'))
+        proc.communicate(part.encode('utf8'))
         proc.stdin.close()
         exitcodes.append(proc.wait())
 
