@@ -1,9 +1,9 @@
 # BPv7 Secure Advertisement and Neighborhood Discovery
 
-The internet-draft is tracked as [draft-sipos-dtn-bpsand](https://datatracker.ietf.org/doc/draft-sipos-dtn-bpsand/).
+The internet-draft is tracked as [draft-sipos-dtn-bp-sand](https://datatracker.ietf.org/doc/draft-sipos-dtn-bp-sand/).
 
-A local build of the current main branch is available [draft-sipos-dtn-bpsand.html](https://briansipos.github.io/dtn-neighbor-msg/draft-sipos-dtn-bpsand.html).
-A difference from the datatracker draft and this local version can be [viewed side-by-side](https://author-tools.ietf.org/diff?doc_1=draft-sipos-dtn-bpsand&url_2=https://briansipos.github.io/dtn-neighbor-msg/draft-sipos-dtn-bpsand.txt&raw=1).
+A local build of the current main branch is available [draft-sipos-dtn-bp-sand.html](https://briansipos.github.io/dtn-neighbor-msg/draft-sipos-dtn-bp-sand.html).
+A difference from the datatracker draft and this local version can be [viewed side-by-side](https://author-tools.ietf.org/diff?doc_1=draft-sipos-dtn-bp-sand&url_2=https://briansipos.github.io/dtn-neighbor-msg/draft-sipos-dtn-bp-sand.txt&raw=1).
 
 Prerequisites to building can be installed on Ubuntu with:
 ```
