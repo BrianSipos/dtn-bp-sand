@@ -2,7 +2,7 @@
 <rfc xmlns:xi="http://www.w3.org/2001/XInclude" category="std" consensus="true" docName="draft-sipos-dtn-bp-sand-00" ipr="trust200902" submissionType="IETF" tocInclude="true" version="3" xml:lang="en">
   <front>
     <title abbrev="BPv7 SAND">
-      BPv7 Secure Advertisement and Neighborhood Discovery
+      BPv7 Secure Advertisement and Neighborhood Discovery (SAND)
     </title>
     <seriesInfo name="Internet-Draft" value="draft-sipos-dtn-bp-sand-00"/>
     <author fullname="Brian Sipos" initials="B." surname="Sipos">
@@ -16,6 +16,12 @@
           <country>United States of America</country>
         </postal>
         <email>brian.sipos+ietf@gmail.com</email>
+      </address>
+    </author>
+    <author fullname="Joshua Deaton" initials="J." surname="Deaton">
+      <organization abbrev="SAIC">Science Applications International Corporation</organization>
+      <address>
+        <email>joshua.e.deaton@nasa.gov</email>
       </address>
     </author>
     <date/>
@@ -2493,12 +2499,39 @@ Specifications of new service identifiers need to define how each EID-scheme-spe
         <xi:include href="https://xml2rfc.tools.ietf.org/public/rfc/bibxml3/reference.I-D.ietf-tvr-requirements.xml"/>
         <xi:include href="https://xml2rfc.tools.ietf.org/public/rfc/bibxml3/reference.I-D.irtf-dtnrg-ipnd.xml"/>
         <xi:include href="https://xml2rfc.tools.ietf.org/public/rfc/bibxml3/reference.I-D.sipos-dtn-edge-zeroconf.xml"/>
+        <reference anchor="github-dtn-demo-agent" target="https://github.com/BrianSipos/dtn-demo-agent/">
+          <front>
+            <title>BP SAND Example Implementation</title>
+            <author fullname="Brian Sipos" initials="B." surname="Sipos">
+              <organization abbrev="JHU/APL">The Johns Hopkins University Applied Physics Laboratory</organization>
+            </author>
+            <date/>
+          </front>
+        </reference>
       </references>
     </references>
     <section anchor="sec-doc-ack" numbered="false">
       <name>Acknowledgments</name>
       <t>
 Much pre-draft review was performed to make the document clear and readable by Sarah Heiner of JHU/APL.
+      </t>
+    </section>
+    <section removeInRFC="true" numbered="false">
+      <name>Implementation Status</name>
+      <t>
+[NOTE to the RFC Editor: please remove this section before publication, as well as the reference to <xref target="RFC7942"/> and <xref target="github-dtn-demo-agent"/>.]
+      </t>
+      <t>
+This section records the status of known implementations of the protocol defined by this specification at the time of posting of this Internet-Draft, and is based on a proposal described in <xref target="RFC7942"/>.
+The description of implementations in this section is intended to assist the IETF in its decision processes in progressing drafts to RFCs.
+Please note that the listing of any individual implementation here does not imply endorsement by the IETF.
+Furthermore, no effort has been spent to verify the information presented here that was supplied by IETF contributors.
+This is not intended as, and must not be construed to be, a catalog of available implementations or their features.
+Readers are advised to note that other implementations can exist.
+      </t>
+      <t>
+An example implementation of the this draft of SAND has been created as a GitHub project <xref target="github-dtn-demo-agent"/> and is intended to use as a proof-of-concept and as a possible source of interoperability testing.
+This example implementation uses D-Bus as the CL-BP Agent interface, so it only runs on hosts which provide the Python "dbus" library.
       </t>
     </section>
   </back>

@@ -14,8 +14,8 @@ export PATH=$PATH:~/.cargo/bin
 ```
 and then the document can be built with
 ```
-cmake -S . -B build
-cmake --build build
+cmake -S . -B build/default
+cmake --build build/default
 ```
 
 # Demo Convergence Layer Agent
