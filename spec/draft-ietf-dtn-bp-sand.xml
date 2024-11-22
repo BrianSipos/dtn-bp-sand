@@ -114,7 +114,7 @@ The entire CDDL structure can be extracted from the XML version of this document
         </t>
         <sourcecode>'//sourcecode[@type="cddl"]'</sourcecode>
         <t>
-The following initial fragment defines the top-level symbols of this document's CDDL, including the ASB data structure with its parameter/result sockets.
+The following initial fragment defines the top-level symbols of this document's CDDL.
         </t>
         <sourcecode type="cddl">
 start = sand-adu-seq / sand-msg
@@ -1696,7 +1696,7 @@ The initial types for current schemes being: IPN service numbers as <tt>uint</tt
           </dd>
           <dt>Well-Known Service Number:</dt>
           <dd>
-This pair uses key 2 and value of a <tt>uint</tt> item corresponding to one of the registered values from the "'ipn' Scheme URI Well-known Service Numbers for BPv7" registry within <xref target="IANA-BUNDLE"/>.
+This pair uses key 2 and value of a <tt>uint</tt> item corresponding to one of the registered values from the "'ipn' Scheme URI Well-known Service Numbers for BPv7" registry within <xref target="IANA-URI"/>.
 If this parameter is absent and the Service ID itself is an IPN service number it <bcp14>SHALL</bcp14> be looked up as a Well-known Service Number.
           </dd>
           <dt>Application State:</dt>
@@ -1900,7 +1900,7 @@ Registration procedures referred to in this section are defined in <xref target=
       <section anchor="sec-iana-well-known-imc">
         <name>Well-Known IMC Group and Service</name>
         <t>
-Within the registry group of <xref target="IANA-BUNDLE"/>, the registry titled "'imc' Scheme Well-known Group Numbers for BPv7" has been updated to include the following entry.
+Within the URI Schemes registry group of <xref target="IANA-URI"/>, the registry titled "'imc' Scheme Well-known Group Numbers for BPv7" has been updated to include the following entry.
         </t>
         <table align="center" anchor="tab-iana-imc-group">
           <name>'imc' Scheme Well-known Group Numbers for BPv7</name>
@@ -1920,7 +1920,7 @@ Within the registry group of <xref target="IANA-BUNDLE"/>, the registry titled "
           </tbody>
         </table>
         <t>
-Within the registry group of <xref target="IANA-BUNDLE"/>, the registry titled "'imc' Scheme Well-known Service Numbers for BPv7" has been updated to include the following entry.
+Within the URI Schemes registry group of <xref target="IANA-URI"/>, the registry titled "'imc' Scheme Well-known Service Numbers for BPv7" has been updated to include the following entry.
         </t>
         <table align="center" anchor="tab-iana-imc-service">
           <name>'imc' Scheme Well-known Service Numbers for BPv7</name>
@@ -1943,7 +1943,7 @@ Within the registry group of <xref target="IANA-BUNDLE"/>, the registry titled "
       <section anchor="sec-iana-well-known-ipn">
         <name>Well-Known IPN Service</name>
         <t>
-Within the registry group of <xref target="IANA-BUNDLE"/>, the registry titled "'ipn' Scheme URI Well-known Service Numbers for BPv7" has been updated to include the following entry.
+Within the URI Schemes registry group of <xref target="IANA-URI"/>, the registry titled "'ipn' Scheme URI Well-known Service Numbers for BPv7" has been updated to include the following entry.
         </t>
         <table align="center" anchor="tab-iana-ipn-service">
           <name>'ipn' Scheme URI Well-known Service Numbers for BPv7</name>
@@ -1967,7 +1967,7 @@ Within the registry group of <xref target="IANA-BUNDLE"/>, the registry titled "
         <name>SAND Message Parameter Keys</name>
         <t>EDITOR NOTE: registry to-be-created upon publication of this specification.</t>
         <t>
-IANA will create, under the "Bundle Protocol" registry group <xref target="IANA-BUNDLE"/>, a registry titled "SAND Message Parameter Keys" and initialize it with the contents of <xref target="tab-iana-msg-param"/>.
+IANA will create, under the "Bundle Protocol" registry group <xref target="IANA-BPSAND"/>, a registry titled "SAND Message Parameter Keys" and initialize it with the contents of <xref target="tab-iana-msg-param"/>.
 The registration procedure is Specification Required.
         </t>
         <t>
@@ -2028,7 +2028,7 @@ Expert(s) are encouraged to be biased towards approving registrations unless the
         <name>SAND Message Types</name>
         <t>EDITOR NOTE: registry to-be-created upon publication of this specification.</t>
         <t>
-IANA will create, under the "Bundle Protocol" registry group <xref target="IANA-BUNDLE"/>, a registry titled "SAND Message Types" and initialize it with the contents of <xref target="tab-iana-msg-type"/>.
+IANA will create, under the "Bundle Protocol" registry group <xref target="IANA-BPSAND"/>, a registry titled "SAND Message Types" and initialize it with the contents of <xref target="tab-iana-msg-type"/>.
 For positive code points the registration procedure is Specification Required.
 Negative code points are reserved for use on private networks for functions not published to the IANA.
         </t>
@@ -2106,7 +2106,7 @@ Expert(s) are encouraged to be biased towards approving registrations unless the
         <name>SAND CL Parameter Keys</name>
         <t>EDITOR NOTE: registry to-be-created upon publication of this specification.</t>
         <t>
-IANA will create, under the "Bundle Protocol" registry group <xref target="IANA-BUNDLE"/>, a registry titled "SAND CL Parameter Keys" and initialize it with the contents of <xref target="tab-iana-cl-param"/>.
+IANA will create, under the "Bundle Protocol" registry group <xref target="IANA-BPSAND"/>, a registry titled "SAND CL Parameter Keys" and initialize it with the contents of <xref target="tab-iana-cl-param"/>.
 The registration procedure is Specification Required.
         </t>
         <t>
@@ -2177,7 +2177,7 @@ Expert(s) are encouraged to be biased towards approving registrations unless the
         <name>SAND CL Types</name>
         <t>EDITOR NOTE: registry to-be-created upon publication of this specification.</t>
         <t>
-IANA will create, under the "Bundle Protocol" registry group <xref target="IANA-BUNDLE"/>, a registry titled "SAND CL Types" and initialize it with the contents of <xref target="tab-iana-cl-type"/>.
+IANA will create, under the "Bundle Protocol" registry group <xref target="IANA-BPSAND"/>, a registry titled "SAND CL Types" and initialize it with the contents of <xref target="tab-iana-cl-type"/>.
 For positive code points the registration procedure is Specification Required.
 Negative code points are reserved for use on private networks for functions not published to the IANA.
         </t>
@@ -2245,7 +2245,7 @@ Expert(s) are encouraged to be biased towards approving registrations unless the
         <name>SAND Peer Parameter Keys</name>
         <t>EDITOR NOTE: registry to-be-created upon publication of this specification.</t>
         <t>
-IANA will create, under the "Bundle Protocol" registry group <xref target="IANA-BUNDLE"/>, a registry titled "SAND Peer Parameter Keys" and initialize it with the contents of <xref target="tab-iana-peer-param"/>.
+IANA will create, under the "Bundle Protocol" registry group <xref target="IANA-BPSAND"/>, a registry titled "SAND Peer Parameter Keys" and initialize it with the contents of <xref target="tab-iana-peer-param"/>.
 The registration procedure is Specification Required.
         </t>
         <t>
@@ -2327,7 +2327,7 @@ Expert(s) are encouraged to be biased towards approving registrations unless the
         <name>SAND Endpoint Parameter Keys</name>
         <t>EDITOR NOTE: registry to-be-created upon publication of this specification.</t>
         <t>
-IANA will create, under the "Bundle Protocol" registry group <xref target="IANA-BUNDLE"/>, a registry titled "SAND Endpoint Parameter Keys" and initialize it with the contents of <xref target="tab-iana-endpoint-param"/>.
+IANA will create, under the "Bundle Protocol" registry group <xref target="IANA-BPSAND"/>, a registry titled "SAND Endpoint Parameter Keys" and initialize it with the contents of <xref target="tab-iana-endpoint-param"/>.
 The registration procedure is Specification Required.
         </t>
         <t>
@@ -2384,7 +2384,7 @@ Expert(s) are encouraged to be biased towards approving registrations unless the
         <name>SAND Endpoint Service Schemes</name>
         <t>EDITOR NOTE: registry to-be-created upon publication of this specification.</t>
         <t>
-IANA will create, under the "Bundle Protocol" registry group <xref target="IANA-BUNDLE"/>, a registry titled "SAND Endpoint Service Schemes" and initialize it with the contents of <xref target="tab-iana-service-id"/>.
+IANA will create, under the "Bundle Protocol" registry group <xref target="IANA-BPSAND"/>, a registry titled "SAND Endpoint Service Schemes" and initialize it with the contents of <xref target="tab-iana-service-id"/>.
 The registration procedure is Standards Action, which is identical to the procedure for the "Bundle Protocol URI Scheme Types" registry.
 Reserved values from that registry also apply to this registry and should be kept in-sync by IANA.
         </t>
@@ -2441,9 +2441,18 @@ Specifications of new service identifiers need to define how each EID-scheme-spe
       <name>References</name>
       <references>
         <name>Normative References</name>
-        <reference anchor="IANA-BUNDLE" target="https://www.iana.org/assignments/bundle/">
+        <reference anchor="IANA-BPSAND" target="https://www.iana.org/assignments/bp-sand/">
           <front>
-            <title>Bundle Protocol</title>
+            <title>Bundle Protocol (BP) Secure Advertisement and Neighborhood Discovery (SAND)</title>
+            <author>
+              <organization>IANA</organization>
+            </author>
+            <date/>
+          </front>
+        </reference>
+        <reference anchor="IANA-URI" target="https://www.iana.org/assignments/uri-schemes/">
+          <front>
+            <title>Uniform Resource Identifier (URI) Schemes</title>
             <author>
               <organization>IANA</organization>
             </author>
