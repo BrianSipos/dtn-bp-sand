@@ -5,6 +5,10 @@
   </xsl:template>
   <xsl:template match="sourcecode[@type='cbor']">
   </xsl:template>
+  <xsl:template match="sourcecode[@type='cborseq']">
+  </xsl:template>
+  <xsl:template match="sourcecode[@type='cborhex']">
+  </xsl:template>
   <xsl:template match="sourcecode[@type='cddl']">
   </xsl:template>
   <!-- standard copy template -->

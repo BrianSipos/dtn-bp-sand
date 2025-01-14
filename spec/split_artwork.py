@@ -25,7 +25,7 @@ def main():
     args = parser.parse_args()
     logging.basicConfig(
         level=args.log_level.upper(),
-        stream=sys.stdout
+        stream=sys.stderr
     )
     logging.root.debug('command args: %s', args)
 
@@ -44,10 +44,10 @@ def main():
             parts[0] += text + '\n'
         else:
             parts.append(text)
-        LOGGER.debug('Processing element text:\n%s', text)
 
     exitcodes = []
     for part in parts:
+        LOGGER.debug('Processing part text:\n%s', text)
         proc = subprocess.Popen(args.command, stdin=subprocess.PIPE)
         proc.communicate(part.encode('utf8'))
         proc.stdin.close()

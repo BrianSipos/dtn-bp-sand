@@ -1,4 +1,4 @@
-# BPv7 Secure Advertisement and Neighborhood Discovery
+# BPv7 Secure Advertisement and Neighborhood Discovery (SAND)
 
 The internet-draft is tracked as [draft-ietf-dtn-bp-sand](https://datatracker.ietf.org/doc/draft-ietf-dtn-bp-sand/).
 
@@ -7,18 +7,19 @@ A difference from the datatracker draft and this local version can be [viewed si
 
 Prerequisites to building can be installed on Ubuntu with:
 ```
-sudo apt-get install -y install aspell cmake python3 python3-pip python3-setuptools python3-wheel cargo xmlstarlet
-sudo pip3 install xml2rfc
-cargo install cddl
-export PATH=$PATH:~/.cargo/bin
+sudo apt-get install -y cmake python3 python3-pip python3-setuptools python3-wheel ruby xmlstarlet aspell cargo
+pip3 install xml2rfc abnf
+sudo gem install cbor-diag
+sudo cargo install --root /usr/local cddl
 ```
-and then the document can be built with
+
+Then the document can be built with
 ```
 cmake -S . -B build/default
 cmake --build build/default
 ```
 
-# Demo Convergence Layer Agent
+# Demo Implementation
 
 The demo agent is in a separate project [dtn-demo-agent](https://github.com/BSipos-RKF/dtn-demo-agent).
 

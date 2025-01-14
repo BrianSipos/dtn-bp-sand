@@ -16,19 +16,17 @@ concurrency:
 
 jobs:
   build:
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-24.04
     steps:
       - uses: actions/checkout@v4
       - name: dependencies
         run: |
-          sudo apt-get install -y aspell cmake python3 python3-pip python3-setuptools python3-wheel ruby cargo xmlstarlet
-          sudo pip3 install --upgrade pip
+          sudo apt-get install -y cmake python3 python3-pip python3-setuptools python3-wheel ruby xmlstarlet aspell cargo
           sudo pip3 install xml2rfc abnf
           sudo gem install cbor-diag
-          cargo install cddl
+          sudo cargo install --root /usr/local cddl
       - name: xml2rfc
         run: |
-          export PATH=$PATH:~/.cargo/bin
           cmake -S . -B build -DCMAKE_INSTALL_DOCDIR=$PWD/build/install
           cmake --build build -v
           cmake --install build
@@ -46,7 +44,7 @@ jobs:
       url: ${{ steps.deployment.outputs.page_url }}
     steps:
       - uses: actions/checkout@v4
-      - uses: actions/download-artifact@v4
+      - uses: actions/download-artifact@v4.1.7
         with:
           name: spec
           path: build/install

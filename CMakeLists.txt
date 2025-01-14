@@ -3,7 +3,4 @@ project(
     draft-ietf-dtn-bp-sand
     LANGUAGES
 )
-
-option(VALIDATE_CBOR "Run diag2cbor on fragments from the document" ON)
-
 add_subdirectory(spec)
