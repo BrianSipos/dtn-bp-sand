@@ -76,6 +76,7 @@ add_custom_command(
 add_custom_target(
     misspelling ALL
     DEPENDS "${MISSPELLING_TXT}"
+    COMMAND cat "${MISSPELLING_TXT}"
     # success means file is present and empty
     COMMAND test -f "${MISSPELLING_TXT}" -a ! -s "${MISSPELLING_TXT}"
     COMMENT "Checking ${MISSPELLING_TXT}"
