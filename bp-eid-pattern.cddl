@@ -1,0 +1,36 @@
+
+eid-pattern = any-scheme-item / eid-pattern-set
+eid-pattern-set = [1* eid-pattern-item]
+eid-pattern-item = scheme-pat-item / any-ssp-item
+; Each pattern still follows eid-structure
+scheme-pat-item = $eid-pat-item .within eid-structure
+
+
+any-scheme-item = true
+
+
+any-ssp-item = (uint .gt 0) / tstr
+
+
+$eid-pat-item /= [
+  scheme-num: 2,
+  SSP: ipn-ssp
+]
+ipn-ssp = [
+  3*3 ipn-part-pat,
+]
+ipn-part-pat = uint / ipn-range / true
+
+ipn-range = [ 1* ipn-interval-pair ]
+ipn-interval-pair = (
+  ; only the first interval offset can be zero
+  offset: uint,
+  ; only the last interval length can be null
+  length: (uint .gt 0) / null,
+)
+
+
+embed-eid-pattern = bstr .cbor eid-pattern
+
+
+embed-eid-structure = bstr .cborseq eid-structure

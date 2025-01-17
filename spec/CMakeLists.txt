@@ -126,12 +126,16 @@ add_custom_command(
     DEPENDS "${EXTRACTED_CDDL}"
         "${CMAKE_CURRENT_SOURCE_DIR}/../cose.cddl"
         "${CMAKE_CURRENT_SOURCE_DIR}/../cose_x509.cddl"
+        "${CMAKE_CURRENT_SOURCE_DIR}/../cose_c509.cddl"
         "${CMAKE_CURRENT_SOURCE_DIR}/../bpv7.cddl"
+        "${CMAKE_CURRENT_SOURCE_DIR}/../bp-eid-pattern.cddl"
     COMMAND cat
         "${EXTRACTED_CDDL}"
         "${CMAKE_CURRENT_SOURCE_DIR}/../cose.cddl"
         "${CMAKE_CURRENT_SOURCE_DIR}/../cose_x509.cddl"
+        "${CMAKE_CURRENT_SOURCE_DIR}/../cose_c509.cddl"
         "${CMAKE_CURRENT_SOURCE_DIR}/../bpv7.cddl"
+        "${CMAKE_CURRENT_SOURCE_DIR}/../bp-eid-pattern.cddl"
         >"${COMBINED_CDDL}"
 )
 add_custom_target(

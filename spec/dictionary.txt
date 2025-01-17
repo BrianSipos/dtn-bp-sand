@@ -133,6 +133,7 @@ retransmit
 Retransmit
 retransmitted
 RKF
+Routeable
 SSL
 SSP
 STARTTLS
@@ -160,9 +161,4 @@ URI
 UTF
 wireshark
 Wireshark
-xA
-xBF
-xC
-xDF
-xFFFF
 XPath
