@@ -1598,7 +1598,7 @@ The absence of this pair <bcp14>SHALL</bcp14> be interpreted as a willingness of
 This pair uses key -2 and value of <tt>uint</tt> representing a willingness to route (see later definition) for bundles with a non-singleton destination EID.
 The absence of this pair <bcp14>SHALL</bcp14> be interpreted as a willingness of zero (not willing).
           </dd>
-          <dt>Routable Endpoints:</dt>
+          <dt>Routeable Endpoints:</dt>
           <dd>
 This pair uses key -3 and value of <tt>bstr</tt> containing an encoded <tt>eid-pattern</tt> from <xref target="I-D.sipos-dtn-eid-pattern"/>.
 The value contains the set of endpoints not participating in SAND but for which the source node is willing to route.
@@ -1610,7 +1610,7 @@ Each willingness value is an integer in the inclusive range from 0 through 6, wh
 In the absence of additional configuration, a node which is willing to route <bcp14>SHALL</bcp14> have a default willingness of 3 and include the associated message item.
         </t>
         <t>
-The presence of a Routable Endpoints pattern allows a participating router to expose node information from a stub network setting "behind" the router.
+The presence of a Routeable Endpoints pattern allows a participating router to expose node information from a stub network setting "behind" the router.
 All of these endpoints <bcp14>SHALL</bcp14> be treated as having persistent and reliable connectivity to the router sending the message.
 <cref>More TBD</cref>
         </t>
@@ -1623,7 +1623,7 @@ router-msg = {
     $$msg-common-grp,
     ? will-route-singleton,
     ? will-route-multipoint,
-    ? routable-endpoints,
+    ? routeable-endpoints,
 }
 will-route-singleton = (
     -1: will-route .default 0
@@ -1633,7 +1633,7 @@ will-route-multipoint = (
 )
 will-route = (0 .. 6) .within uint
 
-routable-endpoints = (
+routeable-endpoints = (
     -3: bstr .cbor eid-pattern, ; From I-D.sipos-dtn-eid-pattern
 )
           </sourcecode>
