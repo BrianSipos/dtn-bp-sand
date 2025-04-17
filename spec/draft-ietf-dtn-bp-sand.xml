@@ -1,8 +1,8 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <rfc xmlns:xi="http://www.w3.org/2001/XInclude" category="std" consensus="true" docName="draft-ietf-dtn-bp-sand-00" ipr="trust200902" submissionType="IETF" tocInclude="true" version="3" xml:lang="en">
   <front>
-    <title abbrev="BPv7 SAND">
-      BPv7 Secure Advertisement and Neighborhood Discovery (SAND)
+    <title abbrev="BP SAND">
+      Bundle Protocol (BP) Secure Advertisement and Neighborhood Discovery (SAND)
     </title>
     <seriesInfo name="Internet-Draft" value="draft-ietf-dtn-bp-sand-00"/>
     <author fullname="Brian Sipos" initials="B." surname="Sipos">
@@ -30,6 +30,7 @@
     <abstract>
       <t>
 This document defines the Secure Advertisement and Neighborhood Discovery (SAND) protocol for Bundle Protocol version 7 (BPv7) within a delay-tolerant network (DTN).
+This protocol defines a general purpose advertisement mechanism with an initial set of data types able to be advertised by participating nodes in a BPv7 network.
       </t>
     </abstract>
   </front>
@@ -57,7 +58,7 @@ It also would require allocation of well-known UDP port number and IP multicast 
       <t>
 To mitigate the need for manual parameter discovery and configuration, an online neighborhood discovery protocol can be used, and such a protocol is defined in this document.
 The Secure Advertisement and Neighborhood Discovery (SAND) protocol operates at and above the BP-layer, as shown in <xref target="fig-dtn-ip-stack"/>, which insulates it from strict dependence on any specific CL for its message transport and allows the use of BPSec for message security.
-The full protocol stack of this document uses the UDPCL of <xref target="I-D.sipos-dtn-udpcl"/> as a zero-configuration default for its any-source multicast (ASM) capabilities but SAND could be, and is expected to be, used over other CLs to include unicast transports which might be informed by lower-layer discovery protocols (see <xref target="sec-protocol-discovery"/>).
+The full protocol stack of this document uses the UDPCL of <xref target="I-D.ietf-dtn-udpcl"/> as a zero-configuration default for its any-source multicast (ASM) capabilities but SAND could be, and is expected to be, used over other CLs to include unicast transports which might be informed by lower-layer discovery protocols (see <xref target="sec-protocol-discovery"/>).
       </t>
       <figure anchor="fig-dtn-ip-stack">
         <name>The Locations of SAND and BP above the Internet Protocol Stack</name>
@@ -665,7 +666,7 @@ Beyond its necessary use as a bundle EID, the SAND Singleton EID also serves as 
         <t>
 For the remainder of this document a bundle with a source matching the SAND Singleton EID will be referred to as a SAND Bundle.
 A SAND Bundle will have a destination of either the SAND Group EID or another SAND Singleton EID.
-This is illustrated by the following EID Pattern of <xref target="I-D.sipos-dtn-eid-pattern"/>.
+This is illustrated by the following EID Pattern of <xref target="I-D.ietf-dtn-eid-pattern"/>.
         </t>
         <sourcecode>
 imc:TBA1.TBA2|ipn:*.*.TBA3|dtn://**/TBA4
@@ -781,7 +782,7 @@ Part of the ability of the SAND to be a <em>discovery</em> protocol is the need 
 This is accomplished by using the UDPCL with an IP multicast destination, either IPv4 or IPv6 or both as needed on each interface.
         </t>
         <t>
-All SAND-participating nodes <bcp14>SHALL</bcp14> listen for UDPCL packets on default port 4556, defined in <xref section="6.2" target="I-D.sipos-dtn-udpcl"/>, and by joining IP multicast group(s) defined in <xref section="6.1" target="I-D.sipos-dtn-udpcl"/> on all interfaces over which the entity is participating in discovery.
+All SAND-participating nodes <bcp14>SHALL</bcp14> listen for UDPCL packets on default port 4556, defined in <xref section="6.2" target="I-D.ietf-dtn-udpcl"/>, and by joining IP multicast group(s) defined in <xref section="6.1" target="I-D.ietf-dtn-udpcl"/> on all interfaces over which the entity is participating in discovery.
 Nodes <bcp14>MAY</bcp14> listen for UDPCL packets destined for other (unicast) addresses and/or on other ports as needed.
         </t>
         <t>
@@ -1022,14 +1023,15 @@ identity-msg = {
     msg-base&lt;2&gt;,
     $$msg-common-grp,
     ? x5bag,
-    ? c5bag,
+;     ? c5bag,
 }
 x5bag = (
     -1: COSE_X509  ; From [RFC 9360]
 )
-c5bag = (
-    -2: COSE_C509  ; From I-D.ietf-cose-cbor-encoded-cert
-)
+; Commenting out pending C509 CDDL consistency updates
+; c5bag = (
+;     -2: COSE_C509  ; From I-D.ietf-cose-cbor-encoded-cert
+; )
           </sourcecode>
         </figure>
       </section>
@@ -1283,7 +1285,7 @@ $cl-recv /= {
         <section anchor="sec-cl-udpclv2">
           <name>UDPCLv2</name>
           <t>
-This CL Type specifically refers to the UDPCL Version 2 of <xref target="I-D.sipos-dtn-udpcl"/>.
+This CL Type specifically refers to the UDPCL Version 2 of <xref target="I-D.ietf-dtn-udpcl"/>.
           </t>
           <t>
 If the Port Number parameter is absent, the default UDPCL port 4556 <bcp14>SHALL</bcp14> be used.
@@ -1598,9 +1600,9 @@ The absence of this pair <bcp14>SHALL</bcp14> be interpreted as a willingness of
 This pair uses key -2 and value of <tt>uint</tt> representing a willingness to route (see later definition) for bundles with a non-singleton destination EID.
 The absence of this pair <bcp14>SHALL</bcp14> be interpreted as a willingness of zero (not willing).
           </dd>
-          <dt>Routable Endpoints:</dt>
+          <dt>Routeable Endpoints:</dt>
           <dd>
-This pair uses key -3 and value of <tt>bstr</tt> containing an encoded <tt>eid-pattern</tt> from <xref target="I-D.sipos-dtn-eid-pattern"/>.
+This pair uses key -3 and value of <tt>bstr</tt> containing an encoded <tt>eid-pattern</tt> from <xref target="I-D.ietf-dtn-eid-pattern"/>.
 The value contains the set of endpoints not participating in SAND but for which the source node is willing to route.
 The value <bcp14>MAY</bcp14> be an any-scheme pattern or contain an any-SSP pattern.
           </dd>
@@ -1610,7 +1612,7 @@ Each willingness value is an integer in the inclusive range from 0 through 6, wh
 In the absence of additional configuration, a node which is willing to route <bcp14>SHALL</bcp14> have a default willingness of 3 and include the associated message item.
         </t>
         <t>
-The presence of a Routable Endpoints pattern allows a participating router to expose node information from a stub network setting "behind" the router.
+The presence of a Routeable Endpoints pattern allows a participating router to expose node information from a stub network setting "behind" the router.
 All of these endpoints <bcp14>SHALL</bcp14> be treated as having persistent and reliable connectivity to the router sending the message.
 <cref>More TBD</cref>
         </t>
@@ -1623,7 +1625,7 @@ router-msg = {
     $$msg-common-grp,
     ? will-route-singleton,
     ? will-route-multipoint,
-    ? routable-endpoints,
+    ? routeable-endpoints,
 }
 will-route-singleton = (
     -1: will-route .default 0
@@ -1633,8 +1635,8 @@ will-route-multipoint = (
 )
 will-route = (0 .. 6) .within uint
 
-routable-endpoints = (
-    -3: bstr .cbor eid-pattern, ; From I-D.sipos-dtn-eid-pattern
+routeable-endpoints = (
+    -3: embed-eid-pattern, ; From I-D.ietf-dtn-eid-pattern
 )
           </sourcecode>
         </figure>
@@ -1869,7 +1871,7 @@ The victim node can block bundles from network peers which are thought to be inc
         </t>
         <t>
 Because the <xref format="title" target="sec-transport-cl"/> uses UDP transport, the recommended configurations of this document result in behaviors which conform to the limitations of <xref target="RFC8085"/>, specifically Section 4.
-This protocol uses the "congestion avoidance" strategy by having implementations choose appropriate timer intervals for minimum SAND updates and, when applicable, for UDPCL redundant transmission <xref section="3.3.1" target="I-D.sipos-dtn-udpcl"/>.
+This protocol uses the "congestion avoidance" strategy by having implementations choose appropriate timer intervals for minimum SAND updates and, when applicable, for UDPCL redundant transmission <xref section="3.3.1" target="I-D.ietf-dtn-udpcl"/>.
         </t>
       </section>
       <section anchor="sec-security-identity">
@@ -2485,8 +2487,8 @@ Specifications of new service identifiers need to define how each EID-scheme-spe
         <xi:include href="https://xml2rfc.tools.ietf.org/public/rfc/bibxml/reference.RFC.9360.xml"/>
         <xi:include href="https://xml2rfc.tools.ietf.org/public/rfc/bibxml3/reference.I-D.ietf-cose-cbor-encoded-cert.xml"/>
         <xi:include href="https://xml2rfc.tools.ietf.org/public/rfc/bibxml3/reference.I-D.ietf-dtn-bpsec-cose.xml"/>
-        <xi:include href="https://xml2rfc.tools.ietf.org/public/rfc/bibxml3/reference.I-D.sipos-dtn-udpcl.xml"/>
-        <xi:include href="https://xml2rfc.tools.ietf.org/public/rfc/bibxml3/reference.I-D.sipos-dtn-eid-pattern.xml"/>
+        <xi:include href="https://xml2rfc.tools.ietf.org/public/rfc/bibxml3/reference.I-D.ietf-dtn-udpcl.xml"/>
+        <xi:include href="https://xml2rfc.tools.ietf.org/public/rfc/bibxml3/reference.I-D.ietf-dtn-eid-pattern.xml"/>
       </references>
       <references>
         <name>Informative References</name>

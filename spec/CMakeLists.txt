@@ -1,5 +1,6 @@
 # Inherit variables from top-level project
 set(DRAFT_NAME "${PROJECT_NAME}")
+set(DOC_INCLUDES )
 
 find_program(XML2RFC xml2rfc)
 if(NOT XML2RFC)
@@ -23,20 +24,37 @@ set(DRAFT_NAME_XML "${CMAKE_CURRENT_SOURCE_DIR}/${DRAFT_NAME}.xml")
 set(DRAFT_NAME_TXT "${DRAFT_NAME}.txt")
 set(DRAFT_NAME_HTML "${DRAFT_NAME}.html")
 set(DRAFT_NAME_PDF "${DRAFT_NAME}.pdf")
+set(DRAFT_NAME_EXPAND "${DRAFT_NAME}-exp.xml")
 add_custom_command(
     OUTPUT "${DRAFT_NAME_TXT}"
-    DEPENDS "${DRAFT_NAME_XML}"
+    DEPENDS "${DRAFT_NAME_XML}" ${DOC_INCLUDES}
     COMMAND ${XML2RFC} --no-network --text -o "${DRAFT_NAME_TXT}" "${DRAFT_NAME_XML}"
 )
 add_custom_command(
     OUTPUT "${DRAFT_NAME_HTML}"
-    DEPENDS "${DRAFT_NAME_XML}"
+    DEPENDS "${DRAFT_NAME_XML}" ${DOC_INCLUDES}
     COMMAND ${XML2RFC} --no-network --html -o "${DRAFT_NAME_HTML}" "${DRAFT_NAME_XML}"
 )
 add_custom_command(
     OUTPUT "${DRAFT_NAME_PDF}"
-    DEPENDS "${DRAFT_NAME_XML}"
+    DEPENDS "${DRAFT_NAME_XML}" ${DOC_INCLUDES}
     COMMAND ${XML2RFC} --no-network --pdf -o "${DRAFT_NAME_PDF}" "${DRAFT_NAME_XML}"
+)
+add_custom_command(
+    OUTPUT "${DRAFT_NAME_EXPAND}"
+    DEPENDS "${DRAFT_NAME_XML}" ${DOC_INCLUDES}
+    COMMAND ${XML2RFC} --no-network --expand -o "${DRAFT_NAME_EXPAND}" "${DRAFT_NAME_XML}"
+)
+add_custom_target(
+    specs ALL
+    DEPENDS 
+        "${DRAFT_NAME_TXT}"
+        "${DRAFT_NAME_HTML}"
+        "${DRAFT_NAME_EXPAND}"
+)
+add_custom_target(
+    pdf
+    DEPENDS "${DRAFT_NAME_PDF}"
 )
 
 set(DICTIONARY_TXT "${CMAKE_CURRENT_SOURCE_DIR}/dictionary.txt")
@@ -56,17 +74,19 @@ add_custom_command(
         sort | uniq > "${MISSPELLING_TXT}"
 )
 add_custom_target(
-    specs ALL
-    DEPENDS "${DRAFT_NAME_TXT}" "${DRAFT_NAME_HTML}" "${MISSPELLING_TXT}"
+    misspelling ALL
+    DEPENDS "${MISSPELLING_TXT}"
+    COMMAND cat "${MISSPELLING_TXT}"
+    # success means file is present and empty
+    COMMAND test -f "${MISSPELLING_TXT}" -a ! -s "${MISSPELLING_TXT}"
+    COMMENT "Checking ${MISSPELLING_TXT}"
 )
-add_custom_target(
-    pdf
-    DEPENDS "${DRAFT_NAME_PDF}"
-)
+
 install(
     FILES
         "${CMAKE_CURRENT_BINARY_DIR}/${DRAFT_NAME_TXT}"
         "${CMAKE_CURRENT_BINARY_DIR}/${DRAFT_NAME_HTML}"
+        "${CMAKE_CURRENT_BINARY_DIR}/${DRAFT_NAME_EXPAND}"
         "${CMAKE_CURRENT_BINARY_DIR}/${MISSPELLING_TXT}"
     TYPE DOC
 )
@@ -104,10 +124,18 @@ add_custom_command(
 add_custom_command(
     OUTPUT "${COMBINED_CDDL}"
     DEPENDS "${EXTRACTED_CDDL}"
+        "${CMAKE_CURRENT_SOURCE_DIR}/../cose.cddl"
+        "${CMAKE_CURRENT_SOURCE_DIR}/../cose_x509.cddl"
+        "${CMAKE_CURRENT_SOURCE_DIR}/../cose_c509.cddl"
         "${CMAKE_CURRENT_SOURCE_DIR}/../bpv7.cddl"
+        "${CMAKE_CURRENT_SOURCE_DIR}/../bp-eid-pattern.cddl"
     COMMAND cat
         "${EXTRACTED_CDDL}"
+        "${CMAKE_CURRENT_SOURCE_DIR}/../cose.cddl"
+        "${CMAKE_CURRENT_SOURCE_DIR}/../cose_x509.cddl"
+        "${CMAKE_CURRENT_SOURCE_DIR}/../cose_c509.cddl"
         "${CMAKE_CURRENT_SOURCE_DIR}/../bpv7.cddl"
+        "${CMAKE_CURRENT_SOURCE_DIR}/../bp-eid-pattern.cddl"
         >"${COMBINED_CDDL}"
 )
 add_custom_target(
