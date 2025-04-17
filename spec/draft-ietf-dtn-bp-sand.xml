@@ -1,8 +1,8 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <rfc xmlns:xi="http://www.w3.org/2001/XInclude" category="std" consensus="true" docName="draft-ietf-dtn-bp-sand-00" ipr="trust200902" submissionType="IETF" tocInclude="true" version="3" xml:lang="en">
   <front>
-    <title abbrev="BPv7 SAND">
-      BPv7 Secure Advertisement and Neighborhood Discovery (SAND)
+    <title abbrev="BP SAND">
+      Bundle Protocol (BP) Secure Advertisement and Neighborhood Discovery (SAND)
     </title>
     <seriesInfo name="Internet-Draft" value="draft-ietf-dtn-bp-sand-00"/>
     <author fullname="Brian Sipos" initials="B." surname="Sipos">
@@ -30,6 +30,7 @@
     <abstract>
       <t>
 This document defines the Secure Advertisement and Neighborhood Discovery (SAND) protocol for Bundle Protocol version 7 (BPv7) within a delay-tolerant network (DTN).
+This protocol defines a general purpose advertisement mechanism with an initial set of data types able to be advertised by participating nodes in a BPv7 network.
       </t>
     </abstract>
   </front>
@@ -1022,14 +1023,15 @@ identity-msg = {
     msg-base&lt;2&gt;,
     $$msg-common-grp,
     ? x5bag,
-    ? c5bag,
+;     ? c5bag,
 }
 x5bag = (
     -1: COSE_X509  ; From [RFC 9360]
 )
-c5bag = (
-    -2: COSE_C509  ; From I-D.ietf-cose-cbor-encoded-cert
-)
+; Commenting out pending C509 CDDL consistency updates
+; c5bag = (
+;     -2: COSE_C509  ; From I-D.ietf-cose-cbor-encoded-cert
+; )
           </sourcecode>
         </figure>
       </section>
