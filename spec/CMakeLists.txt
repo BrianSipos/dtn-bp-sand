@@ -121,22 +121,18 @@ add_custom_command(
     COMMAND ${XMLSTARLET} sel --text -t -v '//sourcecode[@type="cddl"]' "${DRAFT_NAME_XML}" >"${EXTRACTED_CDDL}"
     COMMAND sed -i "'s/[[:space:]]*$$//'" "${EXTRACTED_CDDL}"
 )
+set(SOURCE_CDDL 
+    "${CMAKE_CURRENT_SOURCE_DIR}/../cose.cddl"
+    "${CMAKE_CURRENT_SOURCE_DIR}/../cose_x509.cddl"
+    "${CMAKE_CURRENT_SOURCE_DIR}/../cose_c509.cddl"
+    "${CMAKE_CURRENT_SOURCE_DIR}/../bpv7.cddl"
+    "${CMAKE_CURRENT_SOURCE_DIR}/../udpclv2.cddl"
+    "${CMAKE_CURRENT_SOURCE_DIR}/../bp-eid-pattern.cddl"
+)
 add_custom_command(
     OUTPUT "${COMBINED_CDDL}"
-    DEPENDS "${EXTRACTED_CDDL}"
-        "${CMAKE_CURRENT_SOURCE_DIR}/../cose.cddl"
-        "${CMAKE_CURRENT_SOURCE_DIR}/../cose_x509.cddl"
-        "${CMAKE_CURRENT_SOURCE_DIR}/../cose_c509.cddl"
-        "${CMAKE_CURRENT_SOURCE_DIR}/../bpv7.cddl"
-        "${CMAKE_CURRENT_SOURCE_DIR}/../bp-eid-pattern.cddl"
-    COMMAND cat
-        "${EXTRACTED_CDDL}"
-        "${CMAKE_CURRENT_SOURCE_DIR}/../cose.cddl"
-        "${CMAKE_CURRENT_SOURCE_DIR}/../cose_x509.cddl"
-        "${CMAKE_CURRENT_SOURCE_DIR}/../cose_c509.cddl"
-        "${CMAKE_CURRENT_SOURCE_DIR}/../bpv7.cddl"
-        "${CMAKE_CURRENT_SOURCE_DIR}/../bp-eid-pattern.cddl"
-        >"${COMBINED_CDDL}"
+    DEPENDS "${EXTRACTED_CDDL}" ${SOURCE_CDDL}
+    COMMAND cat "${EXTRACTED_CDDL}" ${SOURCE_CDDL} >"${COMBINED_CDDL}"
 )
 add_custom_target(
     cddl ALL
