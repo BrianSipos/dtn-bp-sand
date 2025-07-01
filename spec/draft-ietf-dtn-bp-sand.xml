@@ -1384,7 +1384,7 @@ udpcl-ext-support = (
           </figure>
         </section>
         <section anchor="sec-cl-ltpcl-udp">
-          <name>LTPCL Over UDP</name>
+          <name>CCSDS LTPCL Over UDP</name>
           <t>
 While there is no IETF specification for transporting BPv7 bundles over the Licklider Transport Protocol (LTP) of <xref target="RFC5326"/>, the CCSDS profile of BPv7 includes a specification for this in Appendix B of <xref target="CCSDS-BPv7"/> using Client Service ID value 4.
 Additionally the LTP-over-UDP binding is defined in <xref section="3.3" target="RFC7122"/>.
@@ -1889,7 +1889,8 @@ endpoint-list = (
           <name>Endpoint Definition</name>
           <t>
 Because different endpoints (and their applications) are likely to have varying parameter sets, each endpoint definition is encoded as a CBOR map following the same conventions of SAND Message structure.
-There are several common endpoint parameters related to validity schedule and information about security policy.
+Because a node is expected to have a possibly large number of endpoints registered with similar advertised parameters, each endpoint definition is organized around an EID Pattern rather than a single EID.
+There are common endpoint parameters related to security policy.
           </t>
           <t>
 The common endpoint parameters are listed below and correspond with the CDDL of <xref target="fig-endpoint-params-common"/>.
@@ -1900,6 +1901,7 @@ Endpoint parameters with negative keys are reserved for private or experimental 
             <dt>EID Pattern:</dt>
             <dd>
 This pair uses key 0 and a value of a <tt>bstr</tt> embedding an EID Pattern as defined in <xref section="4" target="I-D.ietf-dtn-eid-pattern"/>.
+Each of the other items in the parent definition applies to all EIDs matched by this pattern.
 For singleton endpoints, the node-identifying portion of the pattern <bcp14>SHALL</bcp14> agree with the message source node.
             </dd>
             <dt>Payload Security Required:</dt>
@@ -1918,7 +1920,6 @@ The security flag at bit 1 indicates that the any accepted security block <bcp14
           <figure anchor="fig-endpoint-params-common">
             <name>Endpoint Definition and Common Parameters CDDL</name>
             <sourcecode type="cddl">
-; Service ID is interpreted within the Source EID scheme
 endpoint-defn = endpoint-base .within sand-generic-structure
 endpoint-base = {
     0: embed-eid-pattern, ; From [I-D.ietf-dtn-eid-pattern]
@@ -2514,7 +2515,7 @@ Expert(s) are encouraged to be biased towards approving registrations unless the
             </tr>
             <tr>
               <td>3</td>
-              <td>LTPCL Over UDP</td>
+              <td>CCSDS LTPCL Over UDP</td>
               <td><xref target="sec-cl-ltpcl-udp"/> of [This specification]</td>
             </tr>
             <tr>
