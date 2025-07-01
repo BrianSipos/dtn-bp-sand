@@ -1,4 +1,4 @@
-# BPv7 Secure Advertisement and Neighborhood Discovery (SAND)
+# Bundle Protocol Secure Advertisement and Neighborhood Discovery (SAND)
 
 The internet-draft is tracked as [draft-ietf-dtn-bp-sand](https://datatracker.ietf.org/doc/draft-ietf-dtn-bp-sand/).
 

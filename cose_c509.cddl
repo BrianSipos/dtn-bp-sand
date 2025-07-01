@@ -1,1 +1,4 @@
 ; FIXME: manually extracted from https://github.com/cose-wg/CBOR-certificates markdown
+
+COSE_C509 = C509CertData / [ 2* C509CertData ]
+C509CertData = bstr ; .cborseq C509Certificate

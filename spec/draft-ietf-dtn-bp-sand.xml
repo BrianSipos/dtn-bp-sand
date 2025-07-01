@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<rfc xmlns:xi="http://www.w3.org/2001/XInclude" category="std" consensus="true" docName="draft-ietf-dtn-bp-sand-00" ipr="trust200902" submissionType="IETF" tocInclude="true" version="3" xml:lang="en">
+<rfc xmlns:xi="http://www.w3.org/2001/XInclude" category="std" consensus="true" docName="draft-ietf-dtn-bp-sand-00" ipr="trust200902" submissionType="IETF" tocDepth="4" tocInclude="true" version="3" xml:lang="en">
   <front>
     <title abbrev="BP SAND">
       Bundle Protocol (BP) Secure Advertisement and Neighborhood Discovery (SAND)
@@ -139,9 +139,11 @@ Terminology used within the SAND protocol includes the following:
           <dt>1-hop Reachable:</dt>
           <dd>A one-way determination of whether a destination node is reachable via a single BP hop.</dd>
           <dt>1-hop Neighbor:</dt>
-          <dd>A participating node for which this node is 1-hop reachable.</dd>
+          <dd>A participating node for which this node is 1-hop reachable. The other node does not need to also be 1-hop reachable from this node to be a neighbor.</dd>
+          <dt>Mutual Neighbors:</dt>
+          <dd>Two nodes which each identify the other as a 1-hop neighbor.</dd>
           <dt>2-hop Neighbor:</dt>
-          <dd>A participating node which is a 1-hop neighbor of a 1-hop neighbor of this node.</dd>
+          <dd>A participating node which is a 1-hop neighbor of a 1-hop neighbor of this node, but is not itself a 1-hop neighbor of this node.</dd>
           <dt>Neighborhood:</dt>
           <dd>The collection of all 1-hop and 2-hop neighbors of a participating node.</dd>
         </dl>
@@ -150,23 +152,25 @@ Terminology used within the SAND protocol includes the following:
     <section anchor="sec-prococol">
       <name>General Protocol Description</name>
       <t>
-The service of this protocol is the discovery of secure identities and capabilities of peer nodes within a 2-hop neighborhood without needing any pre-configuration on the participating node or on other nodes in the network.
+The service of this protocol is the discovery of security credentials and capabilities of peer nodes within a 2-hop neighborhood without needing any pre-configuration on the participating node or on other nodes in the network.
       </t>
       <t>
-Each participating node uses per-interface and per-neighbor timers to determine when to solicit and when to advertise data.
+Each participating node uses per-underlayer and per-neighbor timers to determine when to solicit and when to advertise data.
 Some external events (e.g. network- or link-level discovery) can be used to reset timers so that discovery can be completed more quickly.
       </t>
       <t>
-The types of data able to be advertised by a node are the following.
+The types of data able to be advertised by a node are the following, each associated with a subsection defining its message type and structure.
 Each type of data can be associated with a desired update time interval to ensure timely synchronization between peers.
       </t>
       <dl>
-        <dt>Secure identities:</dt>
-        <dd>Contains PKIX certificates for signing and key-agreement/encryption with the node's identities, signed by a trusted CA hierarchy.</dd>
+        <dt>Security credentials:</dt>
+        <dd>Defined in <xref target="sec-msg-credential"/> to contain credentials (<em>e.g.</em>, PKIX certificates) associated with the node's identities which are used for signing/key-agreement/encryption.</dd>
+        <dt>Underlayer interfaces:</dt>
+        <dd>Defined in <xref target="sec-msg-underlayer"/> to contain information about what underlayer networks (and endpoints) are available on the node.</dd>
         <dt>Convergence Layer instances:</dt>
-        <dd>Contains CL types and parameters needed to communicate with the node.</dd>
+        <dd>Defined in <xref target="sec-msg-cl"/> to contain CL types and parameters needed to communicate with the node through specific underlayer networks.</dd>
         <dt>Node resource forecast:</dt>
-        <dd>Contains power-state and other forecasts for the node..</dd>
+        <dd>Contains operating state and other forecasts for the node..</dd>
         <dt>Local (1-hop) topology:</dt>
         <dd>Contains 1-hop neighbors seen by the node.</dd>
         <dt>Routing willingness:</dt>
@@ -177,7 +181,7 @@ Each type of data can be associated with a desired update time interval to ensur
       <section>
         <name>Extensibility</name>
         <t>
-Future specifications can use this same messaging and transport mechanism to define additional message types and modes, including types for private or experimental use (see <xref target="sec-iana-msg-type"/>).
+Future specifications can use this same messaging and transport mechanism to define additional message types and modes, including types for private or experimental use (see <xref target="sec-iana-msg"/>).
 Future modes could involve multi-hop flooding of bundles to distribute data for link-state style routing algorithms.
         </t>
       </section>
@@ -228,10 +232,10 @@ The information in this table are general to the node as a whole and not for any
               <td>This is the full time horizon for resource schedules in this information base.</td>
             </tr>
             <tr>
-              <td>Power Schedule</td>
+              <td>Operating Schedule</td>
               <td>
-This represents a time-varying power state of the local node (as either "on" or "off") within the validity interval.
-A power schedule which indicates "always on" is a valid default.
+This represents a time-varying operating state of the local node (as either "on" or "off") within the validity interval.
+An operating schedule which indicates "always on" is a valid default.
               </td>
             </tr>
           </tbody>
@@ -317,7 +321,7 @@ The Validity Duration <bcp14>MUST</bcp14> be longer than the Maximum Time Interv
           </tbody>
         </table>
         <t>
-The Identity information of <xref target="tab-info-local-identity-ee"/> is a logical table used both as a source for sending <xref format="title" target="sec-msg-identity"/> messages as well as for deriving BPSec policy used to send signed payloads and/or receive encrypted payloads.
+The Identity information of <xref target="tab-info-local-identity-ee"/> is a logical table used both as a source for sending <xref format="title" target="sec-msg-credential"/> messages as well as for deriving BPSec policy used to send signed payloads and/or receive encrypted payloads.
         </t>
         <table align="center" anchor="tab-info-local-identity-ee">
           <name>Local Identity Information Columns</name>
@@ -450,9 +454,9 @@ Multiple sources of information are aggregated together into this table.
               <td><cref>TBD</cref></td>
             </tr>
             <tr>
-              <td>Power Schedule</td>
+              <td>Operating Schedule</td>
               <td>
-This represents a time-varying power state of the node (as either "on" or "off") as reported in <xref format="title" target="sec-msg-resource"/> messages.</td>
+This represents a time-varying operating state of the node (as either "on" or "off") as reported in <xref format="title" target="sec-msg-resource"/> messages.</td>
             </tr>
           </tbody>
         </table>
@@ -479,7 +483,7 @@ Due to having multiple-network connectivity, it is possible to have multiple rec
             </tr>
             <tr>
               <td>Latest Timestamps</td>
-              <td>This is the latest bundle creation timestamp (<xref section="4.2.7" target="RFC9171"/>) for each <xref target="sec-iana-msg-type">SAND Message Type</xref> received from the neighbor on this interface, which is used to filter-out old, out-of-order messages in <xref target="sec-transport-latest"/>.</td>
+              <td>This is the latest bundle creation timestamp (<xref section="4.2.7" target="RFC9171"/>) for each <xref target="sec-iana-msg">SAND Message Type</xref> received from the neighbor on this interface, which is used to filter-out old, out-of-order messages in <xref target="sec-transport-latest"/>.</td>
             </tr>
             <tr>
               <td>DNS Name Set</td>
@@ -495,7 +499,7 @@ Due to having multiple-network connectivity, it is possible to have multiple rec
             </tr>
             <tr>
               <td>Reachability</td>
-              <td>An indication of whether this neighbor has been only received from (HEARD), or if this node is present in that neighbor's own 1-hop peer list (SYMMETRIC), or if no messages have been received after some time (LOST).</td>
+              <td>An indication of whether this neighbor has been only received from (HEARD), or if this node is present in that neighbor's own 1-hop neighbor list (SYMMETRIC), or if no messages have been received after some time (LOST).</td>
             </tr>
             <tr>
               <td>Path Metrics</td>
@@ -526,7 +530,7 @@ Due to having multiple-network connectivity, it is possible to have multiple rec
             </tr>
             <tr>
               <td>CL Type</td>
-              <td>This is the type of CL being represented, which need not be unique when there are multiple instances of a CL operating on a single node-and-interface.</td>
+              <td>This is the type of CL being represented, which need not be unique when there are multiple instances of a CL operating on a single node-and-underlayer.</td>
             </tr>
             <tr>
               <td>CL Parameters</td>
@@ -560,12 +564,12 @@ Due to having multiple-network connectivity, it is possible to have multiple rec
             </tr>
             <tr>
               <td>Latest Timestamps</td>
-              <td>This is the latest bundle creation timestamp (<xref section="4.2.7" target="RFC9171"/>) for each <xref target="sec-iana-msg-type">SAND Message Type</xref> received from the node, which is used to filter-out old, out-of-order messages in <xref target="sec-transport-latest"/>.</td>
+              <td>This is the latest bundle creation timestamp (<xref section="4.2.7" target="RFC9171"/>) for each <xref target="sec-iana-msg">SAND Message Type</xref> received from the node, which is used to filter-out old, out-of-order messages in <xref target="sec-transport-latest"/>.</td>
             </tr>
           </tbody>
         </table>
         <t>
-<cref>TBD</cref>
+          <cref>TBD</cref>
         </t>
         <table align="center" anchor="tab-info-peer-reachability">
           <name>Peer Reachability Information Columns</name>
@@ -591,7 +595,7 @@ Due to having multiple-network connectivity, it is possible to have multiple rec
           </tbody>
         </table>
         <t>
-The Peer Certificate Information of <xref target="tab-info-peer-certs"/> is used as way to store and cache certificates received via <xref format="title" target="sec-msg-identity"/> messages and validated in a time-independent way.
+The Peer Certificate Information of <xref target="tab-info-peer-certs"/> is used as way to store and cache certificates received via <xref format="title" target="sec-msg-credential"/> messages and validated in a time-independent way.
         </t>
         <t>
 This means that certificates <bcp14>SHALL</bcp14> only be considered for caching by a node unless they have been part of a chain validated in accordance with the procedures of <xref section="6" target="RFC5280"/>, up to a root CA from the Trust Anchor information of <xref target="tab-info-local-identity-ca"/>, while ignoring validity times.
@@ -751,7 +755,7 @@ A SAND Bundle <bcp14>MAY</bcp14> contain a Block Confidentiality Block (BCB) whi
 If the BCB acceptors are not using group keys or known individual-recipient keys, the SAND Bundle <bcp14>SHOULD NOT</bcp14> be transported over a multicast CL.
         </t>
         <t>
-When BPSec blocks can contain either certificate contents or thumbprints, the use of thumbprints is <bcp14>RECOMMENDED</bcp14> along with the use of <xref format="title" target="sec-msg-identity"/> messages to convey identity between nodes.
+When BPSec blocks can contain either certificate contents or thumbprints, the use of thumbprints is <bcp14>RECOMMENDED</bcp14> along with the use of <xref format="title" target="sec-msg-credential"/> messages to convey full credentials between nodes.
 To avoid the bootstrapping issue described in <xref target="sec-security-identity"/>, the requirements of that section need to be met by a participating node.
         </t>
       </section>
@@ -768,8 +772,8 @@ This logic applies per-message-type so a single SAND Bundle can contain some mes
 This comparison logic below along with the BPv7 requirement of timestamp uniqueness provide a strict ordering of all bundles from a source.
         </t>
         <t>
-After receiving and processing each SAND Message, a node <bcp14>SHALL</bcp14> record the Creation Timestamp from the bundle along with the bundle source and message type.
-After receiving but before fully processing each SAND Message, a node <bcp14>SHALL</bcp14> look up the latest processed Creation Timestamp based on the bundle source and message type.
+After receiving and processing each SAND Message, a node <bcp14>SHALL</bcp14> record the Reference Time from the message (using the bundle Creation Timestamp as alternative) along with the bundle source and message type.
+After receiving but before fully processing each SAND Message, a node <bcp14>SHALL</bcp14> look up the latest processed Reference Time based on the bundle source and message type.
 If the received message is identical to or earlier than the latest processed timestamp it <bcp14>SHALL</bcp14> be ignored by the application.
 The timestamp comparison <bcp14>SHALL</bcp14> be based on ordering of the DTN Time followed by the Sequence Number.
 Ignoring a superseded message <bcp14>SHALL NOT</bcp14> be considered a failure of processing the message, its containing ADU, or its containing bundle.
@@ -835,7 +839,7 @@ This convention also applies to subordinate maps within SAND messages.
         <name>SAND Generic Structure CDDL</name>
         <sourcecode type="cddl">
 sand-generic-structure = {
-    * label => value,
+    * label =&gt; value,
 }
 ; Generic map label
 label = int16
@@ -852,13 +856,13 @@ priv16 = nint .ge -32768
       </figure>
       <t>
 The message common parameters are listed below and correspond with the CDDL of <xref target="fig-msg-params-common"/>.
-These are also registered in the IANA registry defined in <xref target="sec-iana-msg-param"/>.
+These are also registered in the IANA registry defined in <xref target="sec-iana-msg"/>.
       </t>
       <dl>
         <dt>Message Type:</dt>
         <dd>
 This pair uses key 0 and value of <tt>int16</tt> identifying the type of message.
-The registry of message types is IANA-managed and defined in <xref target="sec-iana-msg-type"/>.
+The registry of message types is IANA-managed and defined in <xref target="sec-iana-msg"/>.
         </dd>
         <dt anchor="item-ref-time">Reference Time:</dt>
         <dd>
@@ -980,118 +984,135 @@ msg-type = int16
           </sourcecode>
         </figure>
       </section>
-      <section anchor="sec-msg-identity">
-        <name>Identity Advertisement</name>
+      <section anchor="sec-msg-credential">
+        <name>Credential Advertisement</name>
         <t>
-The Identity Advertisement message contains PKIX certificates identifying the source node with key material for different security purposes.
+The Credential Advertisement message contains security credentials which identify the source node and contain key material for different security purposes.
+Each credential is itself verifiable up to a trusted root which is assumed to be configured in receivers of the advertisement.
         </t>
         <t>
-Certificates in this message are sourced from the Identity Information Base of <xref target="tab-info-local-identity-ee"/>.
-The certificates themselves contain validity time intervals which have no strict relationship to the validity time of the containing advertisement message or the lifetime of the containing bundle, and do not relate to any SAND-form of schedule.
-The creator of an Identity Advertisement message <bcp14>MAY</bcp14> filter-in or filter-out certificates based on their validity time.
+Credentials in this message are sourced from the Identity Information Base of <xref target="tab-info-local-identity-ee"/>.
+Each credential can contain validity time intervals which have no strict relationship to the validity time of the containing advertisement message or the lifetime of the containing bundle, and do not relate to any SAND-form of schedule.
+The creator of an Credential Advertisement message <bcp14>MAY</bcp14> filter-in or filter-out credentials based on their validity time.
         </t>
         <t>
-Certificates valid at the time of creation <bcp14>SHOULD</bcp14> be present.
-Some certificates <bcp14>MAY</bcp14> have validity time in the distant past or future.
-Those non-present-time certificates could be needed to verify old signatures or to pre-load future rollover keys respectively.
+Each message <bcp14>SHOULD</bcp14> contain credentials valid at the time of creation.
+Each message <bcp14>MAY</bcp14> contain credentials valid only in the past or future.
+Those non-present-time credentials could be needed to verify old signatures or to pre-load future rollover keys respectively.
         </t>
         <t>
-The Identity Advertisement message <bcp14>SHALL</bcp14> be identified by message type 2.
-The message parameters are listed below and correspond with the CDDL of <xref target="fig-msg-identity"/>.
+The Credential Advertisement message <bcp14>SHALL</bcp14> be identified by message type 2.
+The message parameters are listed below and correspond with the CDDL of <xref target="fig-msg-credential"/>.
         </t>
         <dl>
           <dt>X509 Bag:</dt>
           <dd>
-This pair uses key -1 and value <tt>COSE_X509</tt> defined in <xref target="RFC9360"/>.
+This pair uses key -1 and value type <tt>COSE_X509</tt> defined in <xref target="RFC9360"/> to convey PKIX certificates as an unordered "bag".
+Each bag <bcp14>MAY</bcp14> contain multiple end-entity certificates identifying the source node with different validity time or different extension items.
+Each bag <bcp14>SHOULD</bcp14> contain intermediate CA certificates up to, but not including, the root CA needed to verify all end-entity certificates.
           </dd>
           <dt>C509 Bag:</dt>
           <dd>
-This pair uses key -2 and value <tt>COSE_C509</tt> defined in <xref target="I-D.ietf-cose-cbor-encoded-cert"/>.
+This pair uses key -2 and value type <tt>COSE_C509</tt> defined in <xref target="I-D.ietf-cose-cbor-encoded-cert"/> to convey C509 certificates as an unordered "bag".
+Each bag <bcp14>MAY</bcp14> contain multiple end-entity certificates identifying the source node with different validity time or different extension items.
+Each bag <bcp14>SHOULD</bcp14> contain intermediate CA certificates up to, but not including, the root CA needed to verify all end-entity certificates.
           </dd>
         </dl>
         <t>
-Each Identity Advertisement <bcp14>SHALL</bcp14> contain an X509 Bag, a C509 Bag, or both.
+Each Credential Advertisement <bcp14>SHALL</bcp14> contain an at least one end-entity credential identifying the sending node.
+A Credential Advertisement <bcp14>SHALL NOT</bcp14> contain any end-entity credential that does not identify the sending node.
         </t>
         <t>
-The Identity Advertisement message is populated in-part using the data identified in <xref target="tab-info-local-identity-ee"/>, part of the Local Node Information Base described in <xref target="local-info-bases"/>.
+The Credential Advertisement message is populated in-part using the data identified in <xref target="tab-info-local-identity-ee"/>, part of the Local Node Information Base described in <xref target="local-info-bases"/>.
         </t>
-        <figure anchor="fig-msg-identity">
-          <name>Identity Advertisement Message CDDL</name>
+        <figure anchor="fig-msg-credential">
+          <name>Credential Advertisement Message CDDL</name>
           <sourcecode type="cddl">
-$sand-msg /= identity-msg
-identity-msg = {
+$sand-msg /= cred-msg
+cred-msg = {
     msg-base&lt;2&gt;,
     $$msg-common-grp,
-    ? x5bag,
-;     ? c5bag,
+    ? cred-x5bag,
+    ? cred-c5bag,
 }
-x5bag = (
+cred-x5bag = (
     -1: COSE_X509  ; From [RFC 9360]
 )
-; Commenting out pending C509 CDDL consistency updates
-; c5bag = (
-;     -2: COSE_C509  ; From I-D.ietf-cose-cbor-encoded-cert
-; )
+cred-c5bag = (
+    -2: COSE_C509  ; From [I-D.ietf-cose-cbor-encoded-cert]
+)
           </sourcecode>
         </figure>
       </section>
-      <section anchor="sec-msg-interface">
-        <name>Interface Advertisement</name>
+      <section anchor="sec-msg-underlayer">
+        <name>Underlayer Advertisement</name>
         <t>
-The Interface Advertisement message contains information about the ULN interface on which the SAND Bundle has been sent, providing recipients information about communicating with the source node.
-When creating Interface Advertisement messages, the source node will populate it with parameters specific to the network on which the interface is an access point.
+The Underlayer Advertisement message contains information about the ULN interface(s) on which a SAND Bundle has been sent, providing recipients information about communicating with the source node via the underlayer.
+When creating Underlayer Advertisement messages, the source node will populate it with parameters specific to the network on which the interface is an access point.
         </t>
+        <aside>
+          <t>
+The well-known parameters defined in this document are focused on IP-based underlayer networks because this protocol is a product of the IETF.
+Other ULN technologies can be supported by SAND to advertise other forms of network addresses and/or protocol identifiers by either registering well-known type-specific parameters or using the private use range of type-specific parameters.
+          </t>
+        </aside>
         <t>
-Each Interface Advertisement message SHALL be transported with a Hop Limit of 1.
+Each Underlayer Advertisement message SHALL be transported with a Hop Limit of 1.
 Only 1-hop neighbors are capable of using underlayer network parameters so there is no need to forward this to any other nodes in the network.
         </t>
         <t>
-The Interface Advertisement message <bcp14>SHALL</bcp14> be identified by message type 8.
-The message parameters are listed below and correspond with the CDDL of <xref target="fig-msg-interface"/>.
+The Underlayer Advertisement message <bcp14>SHALL</bcp14> be identified by message type 8.
+The message parameters are listed below and correspond with the CDDL of <xref target="fig-msg-underlayer"/>.
         </t>
         <dl>
           <dt>Validity Schedule:</dt>
           <dd>
-This pair uses key -1 and value of a <tt>schedule</tt> item as defined in <xref target="fig-msg-schedule"/>.
+This pair uses key -1 and value type <tt>schedule</tt> as defined in <xref target="fig-msg-schedule"/>.
 Each time at which the schedule is valid indicates when the interface or link is expected to be usable.
 If this parameter is absent the interface <bcp14>SHALL</bcp14> be treated as always valid (within the validity schedule of the node itself, see <xref target="sec-msg-resource"/>).
           </dd>
           <dt>DNS Name List:</dt>
           <dd>
-This pair uses key -2 and value of a single <tt>tstr</tt> or array of <tt>tstr</tt> from DNS names in accordance with <xref target="RFC1034"/>.
-If this parameter is absent the node <bcp14>SHALL</bcp14> be treated as not having a DNS name on the network.
+This pair uses key -2 and value type <tt>tstr</tt> or array of <tt>tstr</tt> from DNS names in accordance with <xref target="RFC1034"/>.
+If this parameter is absent the node <bcp14>SHALL</bcp14> be treated as not having a DNS name on the underlay network.
           </dd>
           <dt>IP Address List:</dt>
           <dd>
+            <t>
 This pair uses key -3 and value of a single <tt>bstr</tt> or array of <tt>bstr</tt> from IPv4 or IPv6 addresses encoded as four-byte or 16-byte sequences respectively (consistent with untagged values of <xref target="RFC9164"/>).
-If this parameter is absent the node <bcp14>SHALL</bcp14> be treated as having only the IP address from which the containing bundle was sent.
+If this parameter is absent the node <bcp14>SHALL</bcp14> be treated as having only the IP address from which the containing bundle was sent, if it was received through an IP-based CL.
+            </t>
+            <t>
+This address list <bcp14>MAY</bcp14> contain link-local addresses if the sender has an expectation that CLs will be usable over the associated IP endpoint.
+            </t>
           </dd>
           <dt>Link MTU:</dt>
           <dd>
 This pair uses key -4 and value indicating the link MTU, as seen by the interface of the source node, in units of octets.
 This value <bcp14>SHOULD</bcp14> adhere to the lower limit of 68 octets for IPv4 <xref target="RFC791"/> or 1280 for IPv6 <xref target="RFC8200"/>.
+Other ULN technologies will still have an MTU value but with a different lower bound.
 If this parameter is absent then other means of configuring or estimating link or path MTU are needed.
           </dd>
         </dl>
         <t>
         </t>
-        <figure anchor="fig-msg-interface">
-          <name>Interface Advertisement Message CDDL</name>
+        <figure anchor="fig-msg-underlayer">
+          <name>Underlayer Advertisement Message CDDL</name>
           <sourcecode type="cddl">
-$sand-msg /= interface-msg
-interface-msg = {
+$sand-msg /= uln-msg
+uln-msg = {
     msg-base&lt;8&gt;,
     $$msg-common-grp,
-    ? if-schedule,
-    ? if-dns-name-list,
-    ? if-ip-addr-list,
-    ? if-mtu,
+    ? uln-schedule,
+    ? uln-dns-name-list,
+    ? uln-ip-addr-list,
+    ? uln-mtu,
 }
-if-schedule = (
+uln-schedule = (
     -1: schedule,
 )
 
-if-dns-name-list = (
+uln-dns-name-list = (
     -2: dns-name-ctr
 )
 dns-name-ctr = dns-name / [1* dns-name]
@@ -1107,7 +1128,7 @@ dns-name-syntax = '
     digit = %x30-39
 '
 
-if-ip-addr-list = (
+uln-ip-addr-list = (
     -3: ip-addr-ctr
 )
 ip-addr-ctr = ip-address / [1* ip-address]
@@ -1116,7 +1137,7 @@ ip-address = ipv4-address / ipv6-address
 ipv4-address = bstr .size 4
 ipv6-address = bstr .size 16
 
-if-mtu = (
+uln-mtu = (
     -4: mtu-size
 )
 mtu-size = uint .gt 0
@@ -1140,7 +1161,7 @@ The message parameters are listed below and correspond with the CDDL of <xref ta
         <dl>
           <dt>Convergence Layer List:</dt>
           <dd>
-This pair uses key -1 and value of an array containing <tt>cl-recv</tt> items defined later in this section.
+This pair uses key -1 and value type of an array containing <xref format="title" target="sec-msg-cl-inst"/> items defined later in this section.
 Each Convergence Layer List <bcp14>SHALL</bcp14> contain at least one item.
 A Convergence Layer List item <bcp14>MAY</bcp14> have a non-unique CL Type parameter, indicating multiple instances of a particular CL.
           </dd>
@@ -1148,12 +1169,7 @@ A Convergence Layer List item <bcp14>MAY</bcp14> have a non-unique CL Type param
         <t>
 Each Convergence Layer Advertisement <bcp14>SHALL</bcp14> contain a Convergence Layer List.
 Each item of the Convergence Layer List <bcp14>SHOULD</bcp14> be reachable via the interface over which the enveloping message is sent.
-        </t>
-        <t>
-Each Convergence Layer Advertisement <bcp14>MAY</bcp14> contain any combination of DNS Name List, IP Address List, and Link MTU items.
-When present, the DNS Name List, IP Address List, and Link MTU values <bcp14>SHALL</bcp14> apply to all convergence layers in the message.
-Individual CLs <bcp14>MAY</bcp14> contain additional DNS names and/or IP addresses specific to that CL instance.
-Duplication between message-level DNS Name or IP Address and CL-level values <bcp14>SHOULD</bcp14> be avoided, but has no effect on the interpretation of the values.
+Advertising CL instances which are not reachable by receiving SAND participants is simply a waste of advertising resources and possibly by resources on other participants trying to determine reachability.
         </t>
         <figure anchor="fig-msg-cl">
           <name>CL Advertisement Message CDDL</name>
@@ -1169,62 +1185,64 @@ cl-list = (
 )
           </sourcecode>
         </figure>
-        <t>
+        <section anchor="sec-msg-cl-inst">
+          <name>CL Instance</name>
+          <t>
 Because different CLs are likely to have varying parameter sets, each CL is encoded as a CBOR map following the same conventions of SAND Message structure.
 There are several common CL parameters related to network- and transport-layer: a DNS name or IPv4/IPv6 address used to communicate with the node, and information about transport security policy.
-        </t>
-        <t>
+          </t>
+          <t>
 It is also an important distinction that the CL parameterization is about the capability of delivering bundles to the advertising node.
 It is not about ability of the node to transmit bundles, which may in fact be more broad than its ability to receive.
 For example, in the situation where a node has an ephemeral IP address and no DNS name that node may not listen with any CL yet, because some CLs are bidirectional, it may have symmetric (BP layer) connectivity to some set of peer nodes.
 Even in that case there is still value in discovering the presence of the non-listening node because there is the potential for a contact (coming from that node) to allow bundle routes to other nodes "behind" that non-listening node.
-        </t>
-        <t>
+          </t>
+          <t>
 The CL common parameters are listed below and correspond with the CDDL of <xref target="fig-cl-params-common"/>.
-These are also registered in the IANA registry defined in <xref target="sec-iana-cl-param"/>.
-        </t>
-        <dl>
-          <dt>CL Type:</dt>
-          <dd>
+These are also registered in the IANA registry defined in <xref target="sec-iana-cl"/>.
+          </t>
+          <dl>
+            <dt>CL Type:</dt>
+            <dd>
 This pair uses key 0 and value of <tt>int16</tt> identifying the type of CL being defined.
-Possible CL Type values are defined <xref target="sec-iana-cl-type"/> where, similar to message types, positive values are for well-known CL types and negative values are for private or experimental types.
-          </dd>
-          <dt>Bind Address List:</dt>
-          <dd>
+Possible CL Type values are defined <xref target="sec-iana-cl"/> where, similar to message types, positive values are for well-known CL types and negative values are for private or experimental types.
+            </dd>
+            <dt>Bind Address List:</dt>
+            <dd>
 This pair uses key 3 and value of a single <tt>bstr</tt> or array of <tt>bstr</tt> from IPv4 or IPv6 addresses encoded as four-byte or 16-byte sequences respectively (consistent with untagged values of <xref target="RFC9164"/>).
 Each address represents a destination to which the CL is bound in order to receive traffic.
 If this parameter is absent, the CL <bcp14>SHALL</bcp14> bet treated as if it was bound to the "any endpoint" IPv4 <em>and</em> IPv6 addresses (<tt>0.0.0.0</tt> and <tt>::</tt> respectively).
 If a node has either IPv4 or IPv6 addresses assigned but is not listening on the associated address family, this list <bcp14>SHALL</bcp14> contain the associated "any destination" bind address on which it is listening.
-          </dd>
-          <dt>Bind Port Number:</dt>
-          <dd>
+            </dd>
+            <dt>Bind Port Number:</dt>
+            <dd>
 This pair uses key 4 and value of <tt>uint</tt> indicating the transport-layer port number to which the CL is bound.
 If this parameter is absent the default (<em>i.e.</em>, IANA assigned) port number <bcp14>SHALL</bcp14> be used.
-          </dd>
-          <dt>Transport Security Required:</dt>
-          <dd>
+            </dd>
+            <dt>Transport Security Required:</dt>
+            <dd>
 This pair uses key 5 and value of <tt>bool</tt> indicating whether transport security is required (when <tt>true</tt>) or prohibited (when <tt>false</tt>).
 If this parameter is absent there is no information about the required policy.
-          </dd>
-          <dt>Role:</dt>
-          <dd>
-            <t>
+            </dd>
+            <dt>Role:</dt>
+            <dd>
+              <t>
 This pair uses key 6 and value of <tt>uint</tt> containing flags indicating which CL-specific roles the source node can act as.
-            </t>
-            <t>
+              </t>
+              <t>
 The role flag at bit 0 indicates that the node can act in an passive role.
 The role flag at bit 1 indicates that the node can act in an active role.
 If this parameter is absent it is assumed to be <tt>0b11</tt> (the node can be either role).
-            </t>
-            <t>
+              </t>
+              <t>
 The definition of an "active role" is CL-specific but is expected to involve initiating outgoing conversations/connections/sessions rather than listening for incoming ones.
 Even when acting in the active role only, the CL <bcp14>MAY</bcp14> still be bound to a specific port number.
-            </t>
-          </dd>
-        </dl>
-        <figure anchor="fig-cl-params-common">
-          <name>CL Structure and Common Parameters CDDL</name>
-          <sourcecode type="cddl">
+              </t>
+            </dd>
+          </dl>
+          <figure anchor="fig-cl-params-common">
+            <name>CL Structure and Common Parameters CDDL</name>
+            <sourcecode type="cddl">
 cl-recv = $cl-recv .within sand-generic-structure
 
 ; Generic for CLs, where `val` is the CL Type value
@@ -1242,7 +1260,7 @@ cl-bind-addr-list = (
     3: ip-addr-ctr,
 )
 cl-bind-port = (
-    4: uint .lt 0xFFFF
+    4: 1 .. 0xFFFF
 )
 ; A hint about the security need, if any, for this CL
 cl-transport-sec-require = (
@@ -1256,67 +1274,159 @@ cl-role-flags = &amp;(
     passive: 0,
     active: 1,
 )
-          </sourcecode>
-        </figure>
-        <t>
-If multiple values for DNS Name and/or IP Address are present for a CL it is an implementation matter to choose which one to attempt first, and whether multiple attempts are made sequentially or simultaneously.
-See <xref target="RFC8305"/> for detailed discussion of one possible algorithm for handling multiple network names/addresses.
-        </t>
+            </sourcecode>
+          </figure>
+          <t>
+An Underlayer Advertisement from a node can contain any combination of DNS Name List, IP Address List, and Link MTU items.
+Because of this individual CL Instances <bcp14>MAY</bcp14> contain additional DNS names and/or IP addresses specific to that instance.
+Duplication between underlayer DNS Name or IP Address and CL instance values <bcp14>SHOULD</bcp14> be avoided, but has no effect on the interpretation of the values.
+          </t>
+          <t>
+If multiple values are present in Bind Address List for a CL it is an implementation matter to choose which one to attempt first, and whether multiple attempts are made sequentially or simultaneously.
+See <xref target="RFC8305"/> for detailed discussion of one possible algorithm for handling multiple network addresses for the same service.
+          </t>
         <section anchor="sec-cl-tcpclv4">
           <name>TCPCLv4</name>
           <t>
-This CL Type specifically refers to the TCPCL version 4 of <xref target="RFC9174"/>.
+This CL type specifically refers to the TCPCL version 4 of <xref target="RFC9174"/>.
+This CL type <bcp14>SHALL</bcp14> be identified by code point 1.
           </t>
           <t>
 If the Port Number parameter is absent, the default TCPCL port 4556 <bcp14>SHALL</bcp14> be used.
 The Transport Security Required parameter <bcp14>SHALL</bcp14> indicate both the Contact Header <tt>USE_TLS</tt> flag and the post-negotiation policy enforcement (<em>i.e.</em>, when the session will be disallowed).
 The Role parameter <bcp14>SHALL</bcp14> indicate whether the the TCPCL entity on the node can function as either active or passive or both.
           </t>
+          <t>
+The CL-specific parameters are listed below and correspond with the CDDL of <xref target="fig-cl-tcpclv4"/>.
+These are also registered in the IANA registry defined in <xref target="sec-iana-cl"/>.
+          </t>
+          <dl>
+            <dt>Message Type Support:</dt>
+            <dd>
+This pair uses key -1 and value type of an array of TCPCL message type code points indicating which types the advertising node supports.
+Well-known code points are managed in the "Bundle Protocol TCP Convergence-Layer Version 4 Message Types" registry of <xref target="IANA-BP"/>.
+All nodes <bcp14>SHALL</bcp14> include the minimum support defined in <xref target="RFC9174"/> as types 0x01 through 0x07 inclusive.
+            </dd>
+            <dt>Session Extension Type Support:</dt>
+            <dd>
+This pair uses key -2 and value type of an array of TCPCL session extension type code points indicating which types the advertising node supports.
+Well-known code points are managed in the "Bundle Protocol TCP Convergence-Layer Version 4 Session Extension Types" registry of <xref target="IANA-BP"/>.
+There is no required minimum support defined in <xref target="RFC9174"/>.
+            </dd>
+            <dt>Transfer Extension Type Support:</dt>
+            <dd>
+This pair uses key -3 and value type of an array of TCPCL transfer extension type code points indicating which types the advertising node supports.
+Well-known code points are managed in the "Bundle Protocol TCP Convergence-Layer Version 4 Transfer Extension Types" registry of <xref target="IANA-BP"/>.
+All nodes <bcp14>SHALL</bcp14> include the minimum support defined in <xref target="RFC9174"/> as type 0x01.
+            </dd>
+          </dl>
           <figure anchor="fig-cl-tcpclv4">
             <name>TCPCLv4 Parameters CDDL</name>
             <sourcecode type="cddl">
 $cl-recv /= {
     cl-base&lt;1&gt;,
     $$cl-common-grp,
+    ? tcpcl-msg-support,
+    ? tcpcl-sessext-support,
+    ? tcpcl-xferext-support
 }
+
+tcpcl-msg-support = (
+    -1: [+ tcpcl-msg-type]
+)
+tcpcl-msg-type = 0 .. 0xFF
+
+tcpcl-sessext-support = (
+    -2: [+ tcpcl-ext-type], ; session extension types from [IANA-BP]
+)
+tcpcl-xferext-support = (
+    -3: [+ tcpcl-ext-type], ; transfer extension types from [IANA-BP]
+)
+tcpcl-ext-type = 0 .. 0xFFFF
             </sourcecode>
           </figure>
         </section>
         <section anchor="sec-cl-udpclv2">
           <name>UDPCLv2</name>
           <t>
-This CL Type specifically refers to the UDPCL Version 2 of <xref target="I-D.ietf-dtn-udpcl"/>.
+This CL type specifically refers to the UDPCL Version 2 of <xref target="I-D.ietf-dtn-udpcl"/>.
+This CL type <bcp14>SHALL</bcp14> be identified by code point 2.
           </t>
           <t>
 If the Port Number parameter is absent, the default UDPCL port 4556 <bcp14>SHALL</bcp14> be used.
 The Transport Security Required parameter <bcp14>SHALL</bcp14> indicate the need for DTLS security when receiving CL messages.
           </t>
+          <t>
+The CL-specific parameters are listed below and correspond with the CDDL of <xref target="fig-cl-udpclv2"/>.
+These are also registered in the IANA registry defined in <xref target="sec-iana-cl"/>.
+          </t>
+          <dl>
+            <dt>Extension Support:</dt>
+            <dd>
+This pair uses key -1 and value type of an array of UDPCL extension code points indicating which extensions the advertising node supports.
+Well-known code points are managed in the "UDPCLv2 Extensions" registry of <xref target="IANA-BP"/>.
+This information is equivalent to the contents of <xref section="3.5.1" target="I-D.ietf-dtn-udpcl"/> without needing to operate the actual CL. 
+            </dd>
+          </dl>
           <figure anchor="fig-cl-udpclv2">
             <name>UDPCLv2 Parameters CDDL</name>
             <sourcecode type="cddl">
 $cl-recv /= {
     cl-base&lt;2&gt;,
     $$cl-common-grp,
+    ? udpcl-ext-support,
 }
+
+udpcl-ext-support = (
+    -1: [+ ext-key], ; ext-key from [I-D.ietf-dtn-udpcl]
+)
             </sourcecode>
           </figure>
         </section>
-        <section anchor="sec-cl-ltpcl">
-          <name>LTPCL</name>
+        <section anchor="sec-cl-ltpcl-udp">
+          <name>CCSDS LTPCL Over UDP</name>
           <t>
-While there is no IETF specification for transporting BPv7 bundles over the Licklider Transport Protocol (LTP), the CCSDS profile of BPv7 includes a specification for this in Appendix B of <xref target="CCSDS-BPv7"/>.
+While there is no IETF specification for transporting BPv7 bundles over the Licklider Transport Protocol (LTP) of <xref target="RFC5326"/>, the CCSDS profile of BPv7 includes a specification for this in Appendix B of <xref target="CCSDS-BPv7"/> using Client Service ID value 4.
+Additionally the LTP-over-UDP binding is defined in <xref section="3.3" target="RFC7122"/>.
+This CL type <bcp14>SHALL</bcp14> be identified by code point 3.
           </t>
           <t>
 If the Port Number parameter is absent, the default LTP port 1113 <bcp14>SHALL</bcp14> be used.
 The BPv7 use of LTP does not specify a transport-layer security mechanism.
           </t>
-          <figure anchor="fig-cl-ltpcl">
+          <t>
+The CL-specific parameters are listed below and correspond with the CDDL of <xref target="fig-cl-ltpcl-udp"/>.
+These are also registered in the IANA registry defined in <xref target="sec-iana-cl"/>.
+          </t>
+          <dl>
+            <dt>Engine ID:</dt>
+            <dd>
+This pair uses key -1 and value type <tt>uint</tt> to advertise the specific Engine ID used by this LTP entity when sending and correlating LTP segments.
+Knowing the Engine ID of a peer before initiating or responding to LTP sessions is necessary for some implementations.
+            </dd>
+            <dt>Extension Support:</dt>
+            <dd>
+This pair uses key -2 and value type of an array of LTP extension tag code points indicating which tags the advertising node supports.
+Well-known code points are managed in the "LTP Extension Tags" registry of <xref target="IANA-LTP"/>.
+There is no required minimum support defined in <xref target="RFC5326"/>.
+            </dd>
+          </dl>
+          <figure anchor="fig-cl-ltpcl-udp">
             <name>LTPCL Parameters CDDL</name>
             <sourcecode type="cddl">
 $cl-recv /= {
     cl-base&lt;2&gt;,
     $$cl-common-grp,
+    ? ltp-engine-id,
+    ? ltp-ext-support,
 }
+
+ltp-engine-id = (
+    -1: uint,
+)
+ltp-ext-support = (
+    -2: [+ uint]
+)
             </sourcecode>
           </figure>
         </section>
@@ -1324,6 +1434,7 @@ $cl-recv /= {
           <name>TCPCLv3</name>
           <t>
 While there is no concrete specification for transporting BPv7 bundles over TCPCL version 3 <xref target="RFC7242"/>, this specification makes an allocation to allow a node to advertise that it is using this combination of protocols.
+This CL type <bcp14>SHALL</bcp14> be identified by code point 32766.
           </t>
           <t>
 If the Port Number parameter is absent, the default TCPCL port 4556 <bcp14>SHALL</bcp14> be used.
@@ -1343,6 +1454,7 @@ $cl-recv /= {
           <name>RFC 7122 UDPCL</name>
           <t>
 While there is no concrete specification for transporting BPv7 bundles over the UDPCL as defined in <xref target="RFC7122"/>, this specification makes an allocation to allow a node to express that it is using this combination of protocols.
+This CL type <bcp14>SHALL</bcp14> be identified by code point 32767.
           </t>
           <figure anchor="fig-cl-udpcl-7122">
             <name>RFC 7122 UDPCL Parameters CDDL</name>
@@ -1354,11 +1466,12 @@ $cl-recv /= {
             </sourcecode>
           </figure>
         </section>
+        </section>
       </section>
       <section anchor="sec-msg-resource">
         <name>Resource Advertisement</name>
         <t>
-The Resource Advertisement message is used to indicates the node's resource forecast (power state and storage) for some near time horizon.
+The Resource Advertisement message is used to indicates the node's resource forecast (operating state and storage) for some near time horizon.
 This corresponds to a node-scope schedule of <xref section="2.3.1" target="I-D.ietf-tvr-requirements"/> and these resource relate to all of the CLs exposed in the <xref format="title" target="sec-msg-cl"/> message from the same node.
 Per the definitions in <xref target="sec-msg"/>, each schedule applies within the Validity Duration of the message.
         </t>
@@ -1370,10 +1483,10 @@ The Resource Advertisement message <bcp14>SHALL</bcp14> be identified by message
 The message parameters are listed below and correspond with the CDDL of <xref target="fig-msg-resource"/>.
         </t>
         <dl>
-          <dt>Power State:</dt>
+          <dt>Operating State:</dt>
           <dd>
 This pair uses key -1 and value of a <tt>schedule</tt> item as defined in <xref target="fig-msg-schedule"/>.
-Each time at which the schedule is valid indicates when the node is forecast to be powered-on.
+Each time at which the schedule is valid indicates when the node is forecast to be operating.
           </dd>
         </dl>
         <figure anchor="fig-msg-resource">
@@ -1383,9 +1496,9 @@ $sand-msg /= resource-msg
 resource-msg = {
     msg-base&lt;4&gt;,
     $$msg-common-grp,
-    ? power-state,
+    ? operating-state,
 }
-power-state = (
+operating-state = (
     -1: schedule,
 )
 ; More TBD
@@ -1408,15 +1521,15 @@ The Local Topology Advertisement message <bcp14>SHALL</bcp14> be identified by m
 The message parameters are listed below and correspond with the CDDL of <xref target="fig-msg-local-topo"/>.
         </t>
         <dl>
-          <dt>Peer List:</dt>
+          <dt>Neighbor List:</dt>
           <dd>
-This pair uses key -1 and value of an array of structures indicating the SAND Singleton EID and communication status of each 1-hop neighbor of the source node (see <xref target="sec-msg-local-topo-peer"/>).
-Each Peer List <bcp14>SHALL</bcp14> contain at least one item.
-Each Peer List item <bcp14>SHALL</bcp14> have a unique Node ID parameter.
+This pair uses key -1 and value of an array of <xref format="title" target="sec-msg-local-topo-nbr"/> maps indicating the SAND Singleton EID and routing-related Routing Metrics for each 1-hop neighbor of the source node.
+Each Neighbor List <bcp14>SHALL</bcp14> contain at least one item.
+Each Neighbor List item <bcp14>SHALL</bcp14> have a unique Node ID parameter.
           </dd>
         </dl>
         <t>
-Each Local Topology Advertisement <bcp14>SHALL</bcp14> contain a Peer List.
+Each Local Topology Advertisement <bcp14>SHALL</bcp14> contain a Neighbor List.
         </t>
         <figure anchor="fig-msg-local-topo">
           <name>Local Topology Advertisement CDDL</name>
@@ -1425,148 +1538,224 @@ $sand-msg /= localtopo-msg
 localtopo-msg = {
     msg-base&lt;5&gt;,
     $$msg-common-grp,
-    peer-list,
+    locotopo-nbr-list,
 }
-peer-list = (
-    -1: [1* peer]
+locotopo-nbr-list = (
+    -1: [1* locotopo-nbr]
 )
           </sourcecode>
         </figure>
-        <section anchor="sec-msg-local-topo-peer">
-          <name>Peer Items</name>
+        <section anchor="sec-msg-local-topo-nbr">
+          <name>Neighbor Node</name>
           <t>
-Each item of the Peer List represents a combination of a 1-hop neighbor node and metrics associated with network traffic from and to that node.
+Each item of the Neighbor List represents a combination of a 1-hop neighbor node, its direct parameters, and routing metrics associated with traffic from and to that node.
           </t>
-        <t>
-The common peer parameters are listed below and correspond with the CDDL of <xref target="fig-peer-param"/>.
-These are also registered in the IANA registry defined in <xref target="sec-iana-peer-param"/>.
-Peer parameters with negative keys are reserved for private or experimental use.
-        </t>
-        <aside>
           <t>
-These parameters function, in a limited form, as a way to represent a short-time-horizon contact plan between the source node and the peer node.
+The common neighbor parameters are listed below and correspond with the CDDL of <xref target="fig-nbr-param"/>.
+These are also registered in an IANA registry defined in <xref target="sec-iana-local-topo"/>.
+Neighbor parameters with negative keys are reserved for private or experimental use.
           </t>
-        </aside>
-        <dl>
-          <dt>Node ID:</dt>
-          <dd>
+          <dl>
+            <dt>Node ID:</dt>
+            <dd>
 This pair uses key 0 and value of <tt>eid</tt> from <xref target="RFC9171"/> representing the unique SAND Singleton EID for the neighbor node.
-          </dd>
-          <dt>Reachability:</dt>
-          <dd>
-            <t>
-This pair uses key 2 and value of <tt>uint</tt> containing an enumerated value indicating the status of communication with the neighbor.
+            </dd>
+            <dt>MPR Selection:</dt>
+            <dd>
+This pair uses key 1 and value of <cref>TBD</cref> representing the choice of this node as an MPR for the source node.
+            </dd>
+            <dt>Reachability:</dt>
+            <dd>
+              <t>
+This pair uses key 2 and value type <tt>uint</tt> containing an enumerated value indicating the status of communication with the neighbor.
 The value is one of the following:
             </t>
-            <dl>
-              <dt>HEARD (1):</dt>
-              <dd>This means a message has been received from the peer but this node has not yet appeared in the local topology advertised by that peer.</dd>
-              <dt>SYMMETRIC (2):</dt>
-              <dd>This means that this node is present in the local topology advertised by the peer, so at least one message has been received in both directions between the nodes.</dd>
-              <dt>LOST (3):</dt>
-              <dd>This means that no message has been received from the peer within an implementation-defined timeout interval.</dd>
-            </dl>
-          </dd>
-          <dt>Validity Schedule:</dt>
-          <dd>
-This pair uses key 3 and value of a <tt>schedule</tt> item as defined in <xref target="fig-msg-schedule"/>.
-Each time at which the schedule is valid indicates when communication is expected to be available (in either direction).
-This is different than the resource schedule of the node itself, and represents availability of the shared network between the source node and this peer.
-          </dd>
-          <dt>MPR Selection:</dt>
-          <dd>
-This pair uses key 10 and value of <cref>TBD</cref> representing the choice of this node as an MPR for the source node.
-          </dd>
-          <dt>RX Delay:</dt>
-          <dd>
-This pair uses key 4 and value of <tt>time-duration</tt> indicating the expected one-way light time (OWLT) of traffic from the peer in milliseconds.
-          </dd>
-          <dt>TX Delay:</dt>
-          <dd>
-This pair uses key 5 and value of <tt>time-duration</tt> indicating the expected OWLT of traffic to the peer in milliseconds.
-          </dd>
-          <dt>RX Data Rate:</dt>
-          <dd>
-This pair uses key 6 and value of <tt>unsigned-fraction</tt> indicating the expected maximum data rate of traffic from the peer in octets per second.
-          </dd>
-          <dt>TX Data Rate:</dt>
-          <dd>
-This pair uses key 7 and value of <tt>unsigned-fraction</tt> indicating the expected maximum data rate of traffic to the peer in octets per second.
-          </dd>
-          <dt>RX Bit Error Rate:</dt>
-          <dd>
-This pair uses key 8 and value of <tt>unsigned-fraction</tt> indicating the expected bit error rate (BER) of traffic from the peer as a ratio.
-          </dd>
-          <dt>TX Bit Error Rate:</dt>
-          <dd>
-This pair uses key 9 and value of <tt>unsigned-fraction</tt> indicating the expected BER of traffic to the peer as a ratio.
-          </dd>
-        </dl>
-        <t>
-For conciseness of encoding, the <tt>unsigned-fraction</tt> values <bcp14>SHOULD</bcp14> limit the mantissa to less than 8 bits.
-This limits the precision of encoded values but because these are all rough estimates that should be sufficient for contact planning purposes.
-        </t>
-        <t>
-There is no required combination of RX and TX parameters for any peer.
-Because these might be estimated from traffic or some kind of underlying discovery protocol (<em>e.g.</em>, DLEP) it is possible to obtain estimates for some subset of these but not all of them.
-        </t>
-        <t>
-For both RX and TX Data Rate values, the rate is averaged over the entire valid time, so it is actually average-of-maximum rate.
-Another way to think of it is that the sum-total valid time duration multiplied by the data rate value will yield a total data volume that is transferable from (or to) the peer within the validity duration.
-        </t>
-        <figure anchor="fig-peer-param">
-          <name>Peer Structure and Parameters CDDL</name>
-          <sourcecode type="cddl">
-peer = peer-base .within sand-generic-structure
+              <dl>
+                <dt>HEARD (1):</dt>
+                <dd>This means a message has been received from the peer but this node has not yet appeared in the local topology advertised by that peer.</dd>
+                <dt>SYMMETRIC (2):</dt>
+                <dd>This means that this node is present in the local topology advertised by the peer, so at least one message has been received in both directions between the nodes.</dd>
+                <dt>LOST (3):</dt>
+                <dd>This means that no message has been received from the peer within an implementation-defined timeout interval.</dd>
+              </dl>
+            </dd>
+            <dt>Routing Metrics List:</dt>
+            <dd>
+This pair uses key 3 and value type of an array of <xref format="title" target="sec-msg-local-topo-metrics"/> related to the neighbor node.
+Each Routing Metrics List <bcp14>SHALL</bcp14> contain at least one item.
+Each Routing Metrics List item <bcp14>SHALL</bcp14> have a unique combination of Routing Type, Direction, and Validity Schedule parameters.
+            </dd>
+          </dl>
+          <figure anchor="fig-nbr-param">
+            <name>Peer Structure and Parameters CDDL</name>
+            <sourcecode type="cddl">
+locotopo-nbr = locotopo-nbr-base .within sand-generic-structure
 
-peer-base = {
-    peer-nodeid,
-    peer-comm-status,
-    $$peer-grp
+locotopo-nbr-base = {
+    ; mandatory items
+    nbr-nodeid,
+    nbr-comm-status,
+    nbr-metrics-list,
+    ; optional items
+    $$nbr-common-grp,
+    * priv16 => any,
 }
-$$peer-grp //= (
-    ? peer-schedule
-    ? peer-rx-delay,
-    ? peer-tx-delay,
-    ? peer-rx-datarate,
-    ? peer-tx-datarate,
-    ? peer-rx-ber,
-    ? peer-tx-ber,
-)
 
-peer-nodeid = (
+nbr-nodeid = (
     0: eid ; From [RFC 9171]
 )
-peer-comm-status = (
-    2: peer-comm-status-enum
-)
-peer-comm-status-enum = &amp;(
-    HEARD: 1,
-    SYMMETRIC: 2,
-    LOST: 3,
+
+nbr-comm-status = (
+    1: &amp;(
+        HEARD: 1,
+        SYMMETRIC: 2,
+        LOST: 3,
+    )
 )
 
-peer-schedule = (
+nbr-metrics-list = (
+    2: [1* nbr-metrics]
+)
+            </sourcecode>
+          </figure>
+        </section>
+        <section anchor="sec-msg-local-topo-metrics">
+          <name>Routing Metrics</name>
+          <t>
+Each Routing Metrics map is associated with a specific routing type and a set of metrics for BP and underlayer traffic from and to that node.
+Some of the Routing Metrics parameters are common across all algorithms and some are inputs to a specific routing algorithm.
+          </t>
+          <t>
+It is expected that two nodes which each see the other as a 1-hop neighbor will provide opposite and similar metrics between each other.
+If the mutual neighbor nodes don't support the same routing algorithms, the total set of metrics will be different.
+Because there is no specific synchronization between neighbors, even when mutual neighbors advertise the same metric items there is no guarantee or expectation that they will have the same values.
+It is an implementation detail for how to reconcile routing metrics between mutual neighbors (<em>e.g.</em> by averaging between neighbors' advertisements) when needed for input to routing algorithms.
+          </t>
+          <t>
+The common routing metrics are listed below and correspond with the CDDL of <xref target="fig-nbr-metrics"/>.
+These are also registered in an IANA registry defined in <xref target="sec-iana-local-topo"/>.
+          </t>
+          <dl>
+            <dt>Routing Type:</dt>
+            <dd>
+This pair uses key 0 and value type <tt>int16</tt> identifying a specific routing algorithm.
+The registry of SAND routing types is IANA-managed and defined in <xref target="sec-iana-local-topo"/>.
+            </dd>
+            <dt>Direction:</dt>
+            <dd>
+              <t>
+This pair uses key 1 and value type <tt>uint</tt> containing an enumerated value indicating the link direction associated with the metrics in the item.
+The value is one of the following:
+              </t>
+              <dl>
+                <dt>TRANSMIT (1):</dt>
+                <dd>This means the metrics are associated with traffic from this node to the parent peer.</dd>
+                <dt>RECEIVE (2):</dt>
+                <dd>This means the metrics are associated with traffic to this node from the parent peer.</dd>
+              </dl>
+            </dd>
+            <dt>Validity Schedule:</dt>
+            <dd>
+              <t>
+This pair uses key 2 and value type <tt>schedule</tt> as defined in <xref target="fig-msg-schedule"/>.
+Each time at which the schedule is valid indicates when communication is expected to be available (in the associated Direction).
+              </t>
+              <t>
+This is different than the resource schedule of the node itself, and represents availability of the shared network between the source node and this peer.
+              </t>
+            </dd>
+          </dl>
+          <figure anchor="fig-nbr-metrics">
+            <name>Routing Metrics Structure and Parameters CDDL</name>
+            <sourcecode type="cddl">
+nbr-metrics = nbr-metrics-base .within sand-generic-structure
+
+nbr-metrics-base = {
+    ; mandatory items
+    metrics-direction,
+    ; optional items
+    $$nbr-metrics-common-grp,
+    * priv16 => any,
+}
+
+metrics-direction = (
+    1: &amp;(
+        TRANSMIT: 1,
+        RECEIVE: 2,
+    )
+)
+
+nbr-metrics-common-grp //= (
+    ? nbr-schedule
+)
+
+nbr-schedule = (
     3: schedule
 )
-peer-rx-delay = (
+            </sourcecode>
+          </figure>
+          <section anchor="sec-msg-local-topo-metrics-sabr">
+            <name>SABR/CGR</name>
+            <t>
+This routing type captures metrics needed for input to the Schedule-Aware Bundle Routing (SABR) algorithm defined in <xref target="CCSDS-SABR"/>.
+            </t>
+            <aside>
+              <t>
+These parameters function, in a limited form, as a way to represent a short-time-horizon contact plan between the source node and the neighbor node.
+These metrics are not expected to be used for defining or distributing long-term plans which greatly exceed the Validity Duration of the containing SAND message.
+              </t>
+            </aside>
+          <t>
+The SABR routing metrics are listed below and correspond with the CDDL of <xref target="fig-nbr-metrics-sabr"/>.
+These are also registered in an IANA registry defined in <xref target="sec-iana-local-topo"/>.
+Metrics parameters with negative keys are delegated to an algorithm-specific registry.
+          </t>
+          <dl>
+            <dt>Maximum Data Rate:</dt>
+            <dd>
+This pair uses key -1 and value of <tt>unsigned-fraction</tt> indicating the expected maximum data rate of traffic in octets per second.
+This data rate is measured at the underlying link layer, not just the throughput of BP PDUs.
+            </dd>
+            <dt>Delay:</dt>
+            <dd>
+This pair uses key -2 and value of <tt>time-duration</tt> indicating the expected one-way light time (OWLT) of traffic in milliseconds.
+This delay is measured between the two BP nodes so it is more than just the free-space propagation delay, it also includes any expected underlay, CLA, and BPA processing time.
+            </dd>
+            <dt>Bit Error Rate:</dt>
+            <dd>
+This pair uses key -3 and value of <tt>unsigned-fraction</tt> indicating the expected bit error rate (BER) of traffic as a ratio.
+This BER is measured at the underlying link layer and includes errors which are caught by underlayer checksums (<em>e.g.</em>, where the CL segment/frame is lost).
+            </dd>
+          </dl>
+          <figure anchor="fig-nbr-metrics-sabr">
+            <name>SABR Routing Metrics CDDL</name>
+            <sourcecode type="cddl">
+
+;    ? nbr-rx-delay,
+;    ? nbr-tx-delay,
+;    ? nbr-rx-datarate,
+;    ? nbr-tx-datarate,
+;    ? nbr-rx-ber,
+;    ? nbr-tx-ber,
+
+nbr-rx-delay = (
     4: time-duration
 )
-peer-tx-delay = (
+nbr-tx-delay = (
     5: time-duration
 )
 ; Maximum data rate in bytes-per-second
-peer-rx-datarate = (
+nbr-rx-datarate = (
     6: unsigned-fraction
 )
-peer-tx-datarate = (
+nbr-tx-datarate = (
     7: unsigned-fraction
 )
 ; Estimated BER as a ratio
-peer-rx-ber = (
+nbr-rx-ber = (
     8: unsigned-fraction
 )
-peer-tx-ber = (
+nbr-tx-ber = (
     9: unsigned-fraction
 )
 
@@ -1575,8 +1764,21 @@ unsigned-fraction = [
     exp: (-20 .. 20) .within int,
     mantissa: uint,
 ]
-          </sourcecode>
-        </figure>
+            </sourcecode>
+          </figure>
+          <t>
+For conciseness of encoding, the <tt>unsigned-fraction</tt> values <bcp14>SHOULD</bcp14> limit the mantissa to less than 8 bits.
+This limits the precision of encoded values but because these are all rough estimates that should be sufficient for contact planning purposes.
+          </t>
+          <t>
+There is no required combination of RX and TX parameters for any peer.
+Because these might be estimated from traffic or some kind of underlying discovery protocol (<em>e.g.</em>, DLEP) it is possible to obtain estimates for some subset of these but not all of them.
+          </t>
+          <t>
+For both RX and TX Data Rate values, the rate is averaged over the entire valid time, so it is actually average-of-maximum rate.
+Another way to think of it is that the sum-total valid time duration multiplied by the data rate value will yield a total data volume that is transferable from (or to) the peer within the validity duration.
+          </t>
+          </section>
         </section>
       </section>
       <section anchor="sec-msg-router">
@@ -1600,9 +1802,9 @@ The absence of this pair <bcp14>SHALL</bcp14> be interpreted as a willingness of
 This pair uses key -2 and value of <tt>uint</tt> representing a willingness to route (see later definition) for bundles with a non-singleton destination EID.
 The absence of this pair <bcp14>SHALL</bcp14> be interpreted as a willingness of zero (not willing).
           </dd>
-          <dt>Routeable Endpoints:</dt>
+          <dt>Attached Networks:</dt>
           <dd>
-This pair uses key -3 and value of <tt>bstr</tt> containing an encoded <tt>eid-pattern</tt> from <xref target="I-D.ietf-dtn-eid-pattern"/>.
+This pair uses key -3 and value of <tt>bstr</tt> embedding an EID Pattern as defined in <xref section="4" target="I-D.ietf-dtn-eid-pattern"/>.
 The value contains the set of endpoints not participating in SAND but for which the source node is willing to route.
 The value <bcp14>MAY</bcp14> be an any-scheme pattern or contain an any-SSP pattern.
           </dd>
@@ -1612,8 +1814,12 @@ Each willingness value is an integer in the inclusive range from 0 through 6, wh
 In the absence of additional configuration, a node which is willing to route <bcp14>SHALL</bcp14> have a default willingness of 3 and include the associated message item.
         </t>
         <t>
-The presence of a Routeable Endpoints pattern allows a participating router to expose node information from a stub network setting "behind" the router.
+The presence of an Attached Networks pattern allows a participating router to expose node information from a stub network setting "behind" the router.
 All of these endpoints <bcp14>SHALL</bcp14> be treated as having persistent and reliable connectivity to the router sending the message.
+It also allows the router to advertise that it is acting as a BP gateway by using the pattern "*:**", but care needs to be taken for which underlayer networks the gateway advertisement is made.
+Only a stub network should see the gateway advertisement.
+        </t>
+        <t>
 <cref>More TBD</cref>
         </t>
         <figure anchor="fig-msg-router">
@@ -1636,7 +1842,7 @@ will-route-multipoint = (
 will-route = (0 .. 6) .within uint
 
 routeable-endpoints = (
-    -3: embed-eid-pattern, ; From I-D.ietf-dtn-eid-pattern
+    -3: embed-eid-pattern, ; From [I-D.ietf-dtn-eid-pattern]
 )
           </sourcecode>
         </figure>
@@ -1644,7 +1850,9 @@ routeable-endpoints = (
       <section anchor="sec-msg-endpoint">
         <name>Endpoint Advertisement</name>
         <t>
-<cref>TBD</cref>
+The Endpoint Advertisement message contains information about the endpoints registered on the sending node at the time of the message formation.
+This information does not include information about the registration state (active or passive, as defined in <xref section="3.1" target="RFC9171"/>).
+When creating Endpoint Advertisement messages, the source node <bcp14>MAY</bcp14> filter advertised endpoints to prevent visibility of particular endpoints to particular underlayer networks or destination nodes.
         </t>
         <t>
 The Endpoint Advertisement message <bcp14>SHALL</bcp14> be identified by message type 7.
@@ -1655,7 +1863,8 @@ The message parameters are listed below and correspond with the CDDL of <xref ta
           <dd>
 This pair uses key -1 and value of an array containing <tt>endpoint-defn</tt> items defined later in this section.
 Each Endpoint List <bcp14>SHALL</bcp14> contain at least one item.
-Each Endpoint List item <bcp14>SHALL</bcp14> have a unique Service ID parameter.
+Each Endpoint List item <bcp14>SHALL</bcp14> have a unique EID Pattern parameter.
+There <bcp14>SHALL NOT</bcp14> be any intersection between EID Pattern parameters of multiple items.
           </dd>
         </dl>
         <t>
@@ -1676,79 +1885,54 @@ endpoint-list = (
 )
           </sourcecode>
         </figure>
-        <t>
+        <section>
+          <name>Endpoint Definition</name>
+          <t>
 Because different endpoints (and their applications) are likely to have varying parameter sets, each endpoint definition is encoded as a CBOR map following the same conventions of SAND Message structure.
-There are several common endpoint parameters related to validity schedule and information about security policy.
-        </t>
-        <t>
+Because a node is expected to have a possibly large number of endpoints registered with similar advertised parameters, each endpoint definition is organized around an EID Pattern rather than a single EID.
+There are common endpoint parameters related to security policy.
+          </t>
+          <t>
 The common endpoint parameters are listed below and correspond with the CDDL of <xref target="fig-endpoint-params-common"/>.
 These are also registered in the IANA registry defined in <xref target="sec-iana-endpoint-param"/>.
 Endpoint parameters with negative keys are reserved for private or experimental use.
-        </t>
-        <dl>
-          <dt>Service ID:</dt>
-          <dd>
-            <t>
-This pair uses key 1 and a value specific to the scheme of the Source EID of the SAND Bundle containing this message.
-Possible Service ID values are defined in <xref target="sec-iana-service-id"/>.
-            </t>
-            <t>
-The initial types for current schemes being: IPN service numbers as <tt>uint</tt> values and DTN service demux as <tt>tstr</tt> values.
-            </t>
-          </dd>
-          <dt>Well-Known Service Number:</dt>
-          <dd>
-This pair uses key 2 and value of a <tt>uint</tt> item corresponding to one of the registered values from the "'ipn' Scheme URI Well-known Service Numbers for BPv7" registry within <xref target="IANA-URI"/>.
-If this parameter is absent and the Service ID itself is an IPN service number it <bcp14>SHALL</bcp14> be looked up as a Well-known Service Number.
-          </dd>
-          <dt>Application State:</dt>
-          <dd>
-This pair uses key 3 and value of a <tt>schedule</tt> item as defined in <xref target="fig-msg-schedule"/>.
-Each time at which the schedule is valid indicates when an application is expected to be operating on the endpoint.
-          </dd>
-          <dt>Payload Security Required:</dt>
-          <dd>
-            <t>
+          </t>
+          <dl>
+            <dt>EID Pattern:</dt>
+            <dd>
+This pair uses key 0 and a value of a <tt>bstr</tt> embedding an EID Pattern as defined in <xref section="4" target="I-D.ietf-dtn-eid-pattern"/>.
+Each of the other items in the parent definition applies to all EIDs matched by this pattern.
+For singleton endpoints, the node-identifying portion of the pattern <bcp14>SHALL</bcp14> agree with the message source node.
+            </dd>
+            <dt>Payload Security Required:</dt>
+            <dd>
+              <t>
 This pair uses key 5 and value of <tt>uint</tt> containing flags indicating which aspects of payload security are required for communicating with this endpoint.
 If this parameter is absent there is no information about the required policy.
-            </t>
-            <t>
+              </t>
+              <t>
 The security flag at bit 0 indicates that the payload <bcp14>SHALL</bcp14> be a target of a BIB that the node can accept.
 The security flag at bit 1 indicates that the payload <bcp14>SHALL</bcp14> be a target of a BCB that the node can accept.
 The security flag at bit 1 indicates that the any accepted security block <bcp14>SHALL</bcp14> bind to the primary block as AAD.
-            </t>
-          </dd>
-        </dl>
-        <figure anchor="fig-endpoint-params-common">
-          <name>Endpoint Definition and Common Parameters CDDL</name>
-          <sourcecode type="cddl">
-; Service ID is interpreted within the Source EID scheme
+              </t>
+            </dd>
+          </dl>
+          <figure anchor="fig-endpoint-params-common">
+            <name>Endpoint Definition and Common Parameters CDDL</name>
+            <sourcecode type="cddl">
 endpoint-defn = endpoint-base .within sand-generic-structure
 endpoint-base = {
-    0: $service-id,
+    0: embed-eid-pattern, ; From [I-D.ietf-dtn-eid-pattern]
     $$endpoint-common-grp,
-    * priv16 => any,
+    * priv16 =&gt; any,
 }
 
-; DTN service demux (path with no preceding slash)
-$service-id /= tstr
-; IPN or IMC service number
-$service-id /= uint
-
 $$endpoint-common-grp //= (
-    ? ipn-well-known
-    ? endpoint-schedule,
     ? endpoint-sec-require,
 )
 
-ipn-well-known = (
-    2: uint
-)
-; An schedule for this endpoint validity
-endpoint-schedule = (
-    3: schedule
-)
-; A hint about the security need, if any, for this endpoint
+; A hint about the security need, if any, for payloads
+; delivered to the associated endpoints
 endpoint-sec-require = (
     5: uint .bits endpoint-sec-flags
 )
@@ -1757,18 +1941,19 @@ endpoint-sec-flags = &amp;(
     need-bcb: 1,
     bind-primary: 2,
 )
-          </sourcecode>
-        </figure>
-        <section>
-          <name>SAND Singleton Endpoint</name>
-          <t>
-Each participating node <bcp14>SHOULD</bcp14> register a singleton endpoint for the SAND application itself.
+            </sourcecode>
+          </figure>
+          <section>
+            <name>SAND Singleton Endpoint</name>
+            <t>
+Each participating node <bcp14>SHOULD</bcp14> register and advertise a singleton endpoint for the SAND application itself.
 This allows SAND Bundles to be transported with payload confidentiality to specific peer nodes.
 The endpoint <bcp14>SHOULD</bcp14> use the well-known service number from <xref target="sec-iana-well-known-ipn"/> when the Node ID uses the IPN scheme.
-          </t>
-          <t>
-The Endpoint advertisement for the SAND singleton endpoint <bcp14>SHALL</bcp14> contain at least a Payload Security Required value.
-          </t>
+            </t>
+            <t>
+An advertisement for the SAND singleton endpoint <bcp14>SHALL</bcp14> contain at least a Payload Security Required value.
+            </t>
+          </section>
         </section>
       </section>
     </section>
@@ -1792,14 +1977,14 @@ This message set consists of the following:
 The node <bcp14>SHALL</bcp14> include a Data Solicitation message if the time since the last Data Solicitation on that interface has exceeded an implementation-defined threshold.
             </t>
             <t>
-For a new enrollment, a node <bcp14>SHOULD</bcp14> solicit all of the following: Identity Advertisement, Resource Advertisement, Interface Advertisement, Convergence Layer Advertisement, Local Topology Advertisement.
+For a new enrollment, a node <bcp14>SHOULD</bcp14> solicit all of the following: Credential Advertisement, Resource Advertisement, Interface Advertisement, Convergence Layer Advertisement, Local Topology Advertisement.
 For link state change, a node <bcp14>SHOULD</bcp14> solicit at least Local Topology Advertisement.
             </t>
           </dd>
-          <dt>Identity Advertisement:</dt>
+          <dt>Credential Advertisement:</dt>
           <dd>
-For a new enrollment, the node <bcp14>SHALL</bcp14> include an Identity Advertisement message containing certificates which the node considers safe to advertise on that interface and its network.
-For a link state change, the node <bcp14>SHOULD</bcp14> include an Identity Advertisement message if the time since the last Identity Advertisement on that interface has exceeded an implementation-defined threshold.
+For a new enrollment, the node <bcp14>SHALL</bcp14> include an Credential Advertisement message containing certificates which the node considers safe to advertise on that interface and its network.
+For a link state change, the node <bcp14>SHOULD</bcp14> include an Credential Advertisement message if the time since the last Credential Advertisement on that interface has exceeded an implementation-defined threshold.
           </dd>
           <dt>Interface Advertisement:</dt>
           <dd>
@@ -1880,7 +2065,7 @@ This protocol uses the "congestion avoidance" strategy by having implementations
 For BP nodes enrolling in a network for the first time, with proper authorization to do so, other participating nodes will not be able to authenticate SAND Bundles per the requirements of <xref target="sec-transport-security"/> without having associated end-entity certificates available.
         </t>
         <t>
-A participating node <bcp14>SHOULD</bcp14> have the ability for an application to inspect the payload of a bundle as part of BPSec processing in order to extract necessary certificates from <xref format="title" target="sec-msg-identity"/> messages.
+A participating node <bcp14>SHOULD</bcp14> have the ability for an application to inspect the payload of a bundle as part of BPSec processing in order to extract necessary certificates from <xref format="title" target="sec-msg-credential"/> messages.
 If that is not possible, a source node <bcp14>SHOULD</bcp14> include necessary certificates within any BIB needed to satisfy requirements of <xref target="sec-transport-security"/>.
 Determination of this need is a network administration matter outside the scope of this document.
         </t>
@@ -1965,11 +2150,11 @@ Within the URI Schemes registry group of <xref target="IANA-URI"/>, the registry
           </tbody>
         </table>
       </section>
-      <section anchor="sec-iana-msg-param">
-        <name>SAND Message Parameter Keys</name>
-        <t>EDITOR NOTE: registry to-be-created upon publication of this specification.</t>
+      <section anchor="sec-iana-msg">
+        <name>SAND Message Registries</name>
+        <t>EDITOR NOTE: registries to-be-created upon publication of this specification.</t>
         <t>
-IANA will create, under the "Bundle Protocol" registry group <xref target="IANA-BPSAND"/>, a registry titled "SAND Message Parameter Keys" and initialize it with the contents of <xref target="tab-iana-msg-param"/>.
+IANA will create, under the "Bundle Protocol Secure Advertisement and Neighborhood Discovery (SAND)" registry group <xref target="IANA-BPSAND"/>, a registry titled "SAND Message Common Parameter Keys" and initialize it with the contents of <xref target="tab-iana-msg-param-common"/>.
 The registration procedure is Specification Required.
         </t>
         <t>
@@ -1978,7 +2163,7 @@ Specifications of new common parameters need to define the code point (an <tt>in
         <t>
 Expert(s) are encouraged to be biased towards approving registrations unless they are abusive, frivolous, or actively harmful (not merely aesthetically displeasing, or architecturally dubious).
         </t>
-        <table align="center" anchor="tab-iana-msg-param">
+        <table align="center" anchor="tab-iana-msg-param-common">
           <name>SAND Message Common Parameter Keys</name>
           <thead>
             <tr>
@@ -1989,8 +2174,13 @@ Expert(s) are encouraged to be biased towards approving registrations unless the
           </thead>
           <tbody>
             <tr>
-              <td>-32768 to -1</td>
-              <td>reserved for type-specific parameters</td>
+              <td>-32768 to -32513</td>
+              <td>Reserved for private and experimental type-specific parameters</td>
+              <td>[This specification]</td>
+            </tr>
+            <tr>
+              <td>-32512 to -1</td>
+              <td>delegated to the SAND Message Type-Specific Parameter Keys registry</td>
               <td>[This specification]</td>
             </tr>
             <tr>
@@ -2020,17 +2210,13 @@ Expert(s) are encouraged to be biased towards approving registrations unless the
             </tr>
             <tr>
               <td>32512 to 32767</td>
-              <td>Private/Experimental Use</td>
+              <td>Reserved for private and experimental common parameters</td>
               <td>[This specification]</td>
             </tr>
           </tbody>
         </table>
-      </section>
-      <section anchor="sec-iana-msg-type">
-        <name>SAND Message Types</name>
-        <t>EDITOR NOTE: registry to-be-created upon publication of this specification.</t>
         <t>
-IANA will create, under the "Bundle Protocol" registry group <xref target="IANA-BPSAND"/>, a registry titled "SAND Message Types" and initialize it with the contents of <xref target="tab-iana-msg-type"/>.
+IANA will create, under the "Bundle Protocol Secure Advertisement and Neighborhood Discovery (SAND)" registry group <xref target="IANA-BPSAND"/>, a registry titled "SAND Message Types" and initialize it with the contents of <xref target="tab-iana-msg-type"/>.
 For positive code points the registration procedure is Specification Required.
 Negative code points are reserved for use on private networks for functions not published to the IANA.
         </t>
@@ -2068,8 +2254,13 @@ Expert(s) are encouraged to be biased towards approving registrations unless the
             </tr>
             <tr>
               <td>2</td>
-              <td>Identity Advertisement</td>
-              <td><xref target="sec-msg-identity"/> of [This specification]</td>
+              <td>Credential Advertisement</td>
+              <td><xref target="sec-msg-credential"/> of [This specification]</td>
+            </tr>
+            <tr>
+              <td>8</td>
+              <td>Underlayer Advertisement</td>
+              <td><xref target="sec-msg-underlayer"/> of [This specification]</td>
             </tr>
             <tr>
               <td>3</td>
@@ -2097,18 +2288,124 @@ Expert(s) are encouraged to be biased towards approving registrations unless the
               <td><xref target="sec-msg-endpoint"/> of [This specification]</td>
             </tr>
             <tr>
-              <td>8 to 32767</td>
+              <td>9 to 32767</td>
               <td>unassigned</td>
               <td/>
             </tr>
           </tbody>
         </table>
-      </section>
-      <section anchor="sec-iana-cl-param">
-        <name>SAND CL Parameter Keys</name>
-        <t>EDITOR NOTE: registry to-be-created upon publication of this specification.</t>
         <t>
-IANA will create, under the "Bundle Protocol" registry group <xref target="IANA-BPSAND"/>, a registry titled "SAND CL Parameter Keys" and initialize it with the contents of <xref target="tab-iana-cl-param"/>.
+IANA will create, under the "Bundle Protocol Secure Advertisement and Neighborhood Discovery (SAND)" registry group <xref target="IANA-BPSAND"/>, a registry titled "SAND Message Type-Specific Parameter Keys" and initialize it with the contents of <xref target="tab-iana-msg-param-types"/>.
+The registration procedure is Specification Required.
+        </t>
+        <t>
+Specifications of new common parameters need to define the associated message type, code point (an <tt>int16</tt> integer), and the CBOR form and meaning of the associated value.
+        </t>
+        <table align="center" anchor="tab-iana-msg-param-types">
+          <name>SAND Message Type-Specific Parameter Keys</name>
+          <thead>
+            <tr>
+              <th>Message Type</th>
+              <th>Code</th>
+              <th>Name</th>
+              <th>Reference</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr><td colspan="4">Data Solicitation</td></tr>
+            <tr>
+              <td>1</td>
+              <td>-1</td>
+              <td>Message Type List</td>
+              <td><xref target="sec-msg-solicit"/> of [This specification]</td>
+            </tr>
+            <tr><td colspan="4">Credential Advertisement</td></tr>
+            <tr>
+              <td>2</td>
+              <td>-1</td>
+              <td>X509 Bag</td>
+              <td><xref target="sec-msg-credential"/> of [This specification]</td>
+            </tr>
+            <tr>
+              <td>2</td>
+              <td>-2</td>
+              <td>C509 Bag</td>
+              <td><xref target="sec-msg-credential"/> of [This specification]</td>
+            </tr>
+            <tr><td colspan="4">Underlayer Advertisement</td></tr>
+            <tr>
+              <td>8</td>
+              <td>-1</td>
+              <td>Validity Schedule</td>
+              <td><xref target="sec-msg-underlayer"/> of [This specification]</td>
+            </tr>
+            <tr>
+              <td>8</td>
+              <td>-2</td>
+              <td>DNS Name List</td>
+              <td><xref target="sec-msg-underlayer"/> of [This specification]</td>
+            </tr>
+            <tr>
+              <td>8</td>
+              <td>-3</td>
+              <td>IP Address List</td>
+              <td><xref target="sec-msg-underlayer"/> of [This specification]</td>
+            </tr>
+            <tr>
+              <td>8</td>
+              <td>-4</td>
+              <td>Link MTU</td>
+              <td><xref target="sec-msg-underlayer"/> of [This specification]</td>
+            </tr>
+            <tr><td colspan="4">Convergence Layer Advertisement</td></tr>
+            <tr>
+              <td>3</td>
+              <td>-1</td>
+              <td>Convergence Layer List</td>
+              <td><xref target="sec-msg-cl"/> of [This specification]</td>
+            </tr>
+            <tr><td colspan="4">Resource Advertisement</td></tr>
+            <tr>
+              <td>4</td>
+              <td>-1</td>
+              <td>Operating State</td>
+              <td><xref target="sec-msg-resource"/> of [This specification]</td>
+            </tr>
+            <tr><td colspan="4">Local Topology Advertisement</td></tr>
+            <tr>
+              <td>5</td>
+              <td>-1</td>
+              <td>Neighbor List</td>
+              <td><xref target="sec-msg-local-topo"/> of [This specification]</td>
+            </tr>
+            <tr><td colspan="4">Router Advertisement</td></tr>
+            <tr>
+              <td>6</td>
+              <td>-1</td>
+              <td>Willingness TBD</td>
+              <td><xref target="sec-msg-router"/> of [This specification]</td>
+            </tr>
+            <tr>
+              <td>6</td>
+              <td>-3</td>
+              <td>Attached Networks</td>
+              <td><xref target="sec-msg-router"/> of [This specification]</td>
+            </tr>
+            <tr><td colspan="4">Endpoint Advertisement</td></tr>
+            <tr>
+              <td>7</td>
+              <td>-1</td>
+              <td>Endpoint List</td>
+              <td><xref target="sec-msg-endpoint"/> of [This specification]</td>
+            </tr>
+          </tbody>
+        </table>
+      </section>
+      <section anchor="sec-iana-cl">
+        <name>SAND Convergence Layer Registries</name>
+        <t>EDITOR NOTE: registries to-be-created upon publication of this specification.</t>
+        <t>
+IANA will create, under the "Bundle Protocol Secure Advertisement and Neighborhood Discovery (SAND)" registry group <xref target="IANA-BPSAND"/>, a registry titled "SAND CL Common Parameter Keys" and initialize it with the contents of <xref target="tab-iana-cl-param"/>.
 The registration procedure is Specification Required.
         </t>
         <t>
@@ -2128,39 +2425,39 @@ Expert(s) are encouraged to be biased towards approving registrations unless the
           </thead>
           <tbody>
             <tr>
-              <td>-32768 to -1</td>
-              <td>reserved for type-specific parameters</td>
+              <td>-32768 to -32513</td>
+              <td>reserved for private and experimental type-specific parameters</td>
+              <td>[This specification]</td>
+            </tr>
+            <tr>
+              <td>-32512 to -1</td>
+              <td>delegated to SAND CL Type-Specific Parameter Keys registry</td>
               <td>[This specification]</td>
             </tr>
             <tr>
               <td>0</td>
               <td>CL Type</td>
-              <td><xref target="sec-msg-cl"/> of [This specification]</td>
-            </tr>
-            <tr>
-              <td>2</td>
-              <td>DNS Name List</td>
-              <td><xref target="sec-msg-cl"/> of [This specification]</td>
+              <td><xref target="sec-msg-cl-inst"/> of [This specification]</td>
             </tr>
             <tr>
               <td>3</td>
-              <td>IP Address List</td>
-              <td><xref target="sec-msg-cl"/> of [This specification]</td>
+              <td>Bind Address List</td>
+              <td><xref target="sec-msg-cl-inst"/> of [This specification]</td>
             </tr>
             <tr>
               <td>4</td>
-              <td>Port Number</td>
-              <td><xref target="sec-msg-cl"/> of [This specification]</td>
+              <td>Bind Port Number</td>
+              <td><xref target="sec-msg-cl-inst"/> of [This specification]</td>
             </tr>
             <tr>
               <td>5</td>
               <td>Transport Security Required</td>
-              <td><xref target="sec-msg-cl"/> of [This specification]</td>
+              <td><xref target="sec-msg-cl-inst"/> of [This specification]</td>
             </tr>
             <tr>
               <td>6</td>
               <td>Role</td>
-              <td><xref target="sec-msg-cl"/> of [This specification]</td>
+              <td><xref target="sec-msg-cl-inst"/> of [This specification]</td>
             </tr>
             <tr>
               <td>7 to 32511</td>
@@ -2169,17 +2466,13 @@ Expert(s) are encouraged to be biased towards approving registrations unless the
             </tr>
             <tr>
               <td>32512 to 32767</td>
-              <td>Private/Experimental Use</td>
+              <td>reserved for private and experimental common parameters</td>
               <td>[This specification]</td>
             </tr>
           </tbody>
         </table>
-      </section>
-      <section anchor="sec-iana-cl-type">
-        <name>SAND CL Types</name>
-        <t>EDITOR NOTE: registry to-be-created upon publication of this specification.</t>
         <t>
-IANA will create, under the "Bundle Protocol" registry group <xref target="IANA-BPSAND"/>, a registry titled "SAND CL Types" and initialize it with the contents of <xref target="tab-iana-cl-type"/>.
+IANA will create, under the "Bundle Protocol Secure Advertisement and Neighborhood Discovery (SAND)" registry group <xref target="IANA-BPSAND"/>, a registry titled "SAND CL Types" and initialize it with the contents of <xref target="tab-iana-cl-type"/>.
 For positive code points the registration procedure is Specification Required.
 Negative code points are reserved for use on private networks for functions not published to the IANA.
         </t>
@@ -2222,8 +2515,8 @@ Expert(s) are encouraged to be biased towards approving registrations unless the
             </tr>
             <tr>
               <td>3</td>
-              <td>LTPCL</td>
-              <td><xref target="sec-cl-ltpcl"/> of [This specification]</td>
+              <td>CCSDS LTPCL Over UDP</td>
+              <td><xref target="sec-cl-ltpcl-udp"/> of [This specification]</td>
             </tr>
             <tr>
               <td>4 to 32765</td>
@@ -2242,12 +2535,71 @@ Expert(s) are encouraged to be biased towards approving registrations unless the
             </tr>
           </tbody>
         </table>
-      </section>
-      <section anchor="sec-iana-peer-param">
-        <name>SAND Peer Parameter Keys</name>
-        <t>EDITOR NOTE: registry to-be-created upon publication of this specification.</t>
         <t>
-IANA will create, under the "Bundle Protocol" registry group <xref target="IANA-BPSAND"/>, a registry titled "SAND Peer Parameter Keys" and initialize it with the contents of <xref target="tab-iana-peer-param"/>.
+IANA will create, under the "Bundle Protocol Secure Advertisement and Neighborhood Discovery (SAND)" registry group <xref target="IANA-BPSAND"/>, a registry titled "SAND CL Type-Specific Parameter Keys" and initialize it with the contents of <xref target="tab-iana-cl-param-types"/>.
+The registration procedure is Specification Required.
+        </t>
+        <t>
+Specifications of new common parameters need to define the associated CL type, code point (an <tt>int16</tt> integer), and the CBOR form and meaning of the associated value.
+        </t>
+        <table align="center" anchor="tab-iana-cl-param-types">
+          <name>SAND CL Type-Specific Parameter Keys</name>
+          <thead>
+            <tr>
+              <th>CL Type</th>
+              <th>Code</th>
+              <th>Name</th>
+              <th>Reference</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr><td colspan="4">TCPCLv4</td></tr>
+            <tr>
+              <td>1</td>
+              <td>-1</td>
+              <td>Message Type Support</td>
+              <td><xref target="sec-cl-tcpclv4"/> of [This specification]</td>
+            </tr>
+            <tr>
+              <td>1</td>
+              <td>-2</td>
+              <td>Session Extension Type Support</td>
+              <td><xref target="sec-cl-tcpclv4"/> of [This specification]</td>
+            </tr>
+            <tr>
+              <td>1</td>
+              <td>-3</td>
+              <td>Transfer Extension Type Support</td>
+              <td><xref target="sec-cl-tcpclv4"/> of [This specification]</td>
+            </tr>
+            <tr><td colspan="4">UDPCLv2</td></tr>
+            <tr>
+              <td>2</td>
+              <td>-1</td>
+              <td>Extension Support</td>
+              <td><xref target="sec-cl-udpclv2"/> of [This specification]</td>
+            </tr>
+            <tr><td colspan="4">LTP Over UDP</td></tr>
+            <tr>
+              <td>3</td>
+              <td>-1</td>
+              <td>Engine ID</td>
+              <td><xref target="sec-cl-ltpcl-udp"/> of [This specification]</td>
+            </tr>
+            <tr>
+              <td>3</td>
+              <td>-2</td>
+              <td>Extension Support</td>
+              <td><xref target="sec-cl-ltpcl-udp"/> of [This specification]</td>
+            </tr>
+          </tbody>
+        </table>
+      </section>
+      <section anchor="sec-iana-local-topo">
+        <name>SAND Local Topology Registries</name>
+        <t>EDITOR NOTE: registries to-be-created upon publication of this specification.</t>
+        <t>
+IANA will create, under the "Bundle Protocol Secure Advertisement and Neighborhood Discovery (SAND)" registry group <xref target="IANA-BPSAND"/>, a registry titled "SAND Neighbor Parameter Keys" and initialize it with the contents of <xref target="tab-iana-nbr-param"/>.
 The registration procedure is Specification Required.
         </t>
         <t>
@@ -2257,8 +2609,9 @@ Specifications need to define how those CBOR parameters are used by a node to re
         <t>
 Expert(s) are encouraged to be biased towards approving registrations unless they are abusive, frivolous, or actively harmful (not merely aesthetically displeasing, or architecturally dubious).
         </t>
-        <table align="center" anchor="tab-iana-peer-param">
-          <name>SAND Peer Parameter Keys</name>
+        <t><cref>Update this table and others in the section</cref></t>
+        <table align="center" anchor="tab-iana-nbr-param">
+          <name>SAND Neighbor Parameter Keys</name>
           <thead>
             <tr>
               <th>Code</th>
@@ -2275,52 +2628,128 @@ Expert(s) are encouraged to be biased towards approving registrations unless the
             <tr>
               <td>0</td>
               <td>Node ID</td>
-              <td><xref target="sec-msg-local-topo"/> of [This specification]</td>
+              <td><xref target="sec-msg-local-topo-nbr"/> of [This specification]</td>
+            </tr>
+            <tr>
+              <td>1</td>
+              <td>MPR Selection</td>
+              <td><xref target="sec-msg-local-topo-nbr"/> of [This specification]</td>
             </tr>
             <tr>
               <td>2</td>
               <td>Reachability</td>
-              <td><xref target="sec-msg-local-topo"/> of [This specification]</td>
+              <td><xref target="sec-msg-local-topo-nbr"/> of [This specification]</td>
             </tr>
             <tr>
               <td>3</td>
+              <td>Routing Metrics</td>
+              <td><xref target="sec-msg-local-topo-nbr"/> of [This specification]</td>
+            </tr>
+          </tbody>
+        </table>
+        <table align="center" anchor="tab-iana-nbr-metrics">
+          <name>SAND Rouging Metrics Parameter Keys</name>
+          <thead>
+            <tr>
+              <th>Code</th>
+              <th>Name</th>
+              <th>Reference</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr>
+              <td>-32768 to -32513</td>
+              <td>reserved for private and experimental type-specific parameters</td>
+              <td>[This specification]</td>
+            </tr>
+            <tr>
+              <td>-32512 to -1</td>
+              <td>delegated to SAND Routing Metrics Type-Specific Parameter Keys registry</td>
+              <td>[This specification]</td>
+            </tr>
+            <tr>
+              <td>0</td>
+              <td>Routing Type</td>
+              <td><xref target="sec-msg-local-topo-metrics"/> of [This specification]</td>
+            </tr>
+            <tr>
+              <td>1</td>
+              <td>Direction</td>
+              <td><xref target="sec-msg-local-topo-metrics"/> of [This specification]</td>
+            </tr>
+            <tr>
+              <td>2</td>
               <td>Validity Schedule</td>
-              <td><xref target="sec-msg-local-topo"/> of [This specification]</td>
+              <td><xref target="sec-msg-local-topo-metrics"/> of [This specification]</td>
             </tr>
             <tr>
-              <td>4</td>
-              <td>RX Delay</td>
-              <td><xref target="sec-msg-local-topo"/> of [This specification]</td>
-            </tr>
-            <tr>
-              <td>5</td>
-              <td>TX Delay</td>
-              <td><xref target="sec-msg-local-topo"/> of [This specification]</td>
-            </tr>
-            <tr>
-              <td>6</td>
-              <td>RX Data Rate</td>
-              <td><xref target="sec-msg-local-topo"/> of [This specification]</td>
-            </tr>
-            <tr>
-              <td>7</td>
-              <td>TX Data Rate</td>
-              <td><xref target="sec-msg-local-topo"/> of [This specification]</td>
-            </tr>
-            <tr>
-              <td>8</td>
-              <td>RX Bit Error Rate</td>
-              <td><xref target="sec-msg-local-topo"/> of [This specification]</td>
-            </tr>
-            <tr>
-              <td>9</td>
-              <td>TX Bit Error Rate</td>
-              <td><xref target="sec-msg-local-topo"/> of [This specification]</td>
-            </tr>
-            <tr>
-              <td>8 to 32767</td>
+              <td>3 to 32767</td>
               <td>unassigned</td>
               <td></td>
+            </tr>
+          </tbody>
+        </table>
+        <table align="center" anchor="tab-iana-nbr-algo">
+          <name>SAND Routing Types</name>
+          <thead>
+            <tr>
+              <th>Code</th>
+              <th>Name</th>
+              <th>Reference</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr>
+              <td>-32768 to -1</td>
+              <td>Private/Experimental Use</td>
+              <td>[This specification]</td>
+            </tr>
+            <tr>
+              <td>0</td>
+              <td>Reserved</td>
+              <td>[This specification]</td>
+            </tr>
+            <tr>
+              <td>1</td>
+              <td>SABR</td>
+              <td><xref target="sec-msg-local-topo-metrics-sabr"/> of [This specification]</td>
+            </tr>
+            <tr>
+              <td>2 to 32767</td>
+              <td>unassigned</td>
+              <td></td>
+            </tr>
+          </tbody>
+        </table>
+        <table align="center" anchor="tab-iana-nbr-metrics-types">
+          <name>SAND Routing Metrics Type-Specific Parameter Keys</name>
+          <thead>
+            <tr>
+              <th>Routing Type</th>
+              <th>Code</th>
+              <th>Name</th>
+              <th>Reference</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr><td colspan="4">SABR</td></tr>
+            <tr>
+              <td>1</td>
+              <td>-1</td>
+              <td>Maximum Data Rate</td>
+              <td><xref target="sec-msg-local-topo-metrics-sabr"/> of [This specification]</td>
+            </tr>
+            <tr>
+              <td>1</td>
+              <td>-2</td>
+              <td>Delay</td>
+              <td><xref target="sec-msg-local-topo-metrics-sabr"/> of [This specification]</td>
+            </tr>
+            <tr>
+              <td>1</td>
+              <td>-3</td>
+              <td>Bit Error Rate</td>
+              <td><xref target="sec-msg-local-topo-metrics-sabr"/> of [This specification]</td>
             </tr>
           </tbody>
         </table>
@@ -2329,7 +2758,7 @@ Expert(s) are encouraged to be biased towards approving registrations unless the
         <name>SAND Endpoint Parameter Keys</name>
         <t>EDITOR NOTE: registry to-be-created upon publication of this specification.</t>
         <t>
-IANA will create, under the "Bundle Protocol" registry group <xref target="IANA-BPSAND"/>, a registry titled "SAND Endpoint Parameter Keys" and initialize it with the contents of <xref target="tab-iana-endpoint-param"/>.
+IANA will create, under the "Bundle Protocol Secure Advertisement and Neighborhood Discovery (SAND)" registry group <xref target="IANA-BPSAND"/>, a registry titled "SAND Endpoint Parameter Keys" and initialize it with the contents of <xref target="tab-iana-endpoint-param"/>.
 The registration procedure is Specification Required.
         </t>
         <t>
@@ -2356,17 +2785,7 @@ Expert(s) are encouraged to be biased towards approving registrations unless the
             </tr>
             <tr>
               <td>0</td>
-              <td>Service ID</td>
-              <td><xref target="sec-msg-endpoint"/> of [This specification]</td>
-            </tr>
-            <tr>
-              <td>2</td>
-              <td>Well-Known Service Number</td>
-              <td><xref target="sec-msg-endpoint"/> of [This specification]</td>
-            </tr>
-            <tr>
-              <td>3</td>
-              <td>Application State</td>
+              <td>EID Pattern</td>
               <td><xref target="sec-msg-endpoint"/> of [This specification]</td>
             </tr>
             <tr>
@@ -2382,60 +2801,6 @@ Expert(s) are encouraged to be biased towards approving registrations unless the
           </tbody>
         </table>
       </section>
-      <section anchor="sec-iana-service-id">
-        <name>SAND Endpoint Service Schemes</name>
-        <t>EDITOR NOTE: registry to-be-created upon publication of this specification.</t>
-        <t>
-IANA will create, under the "Bundle Protocol" registry group <xref target="IANA-BPSAND"/>, a registry titled "SAND Endpoint Service Schemes" and initialize it with the contents of <xref target="tab-iana-service-id"/>.
-The registration procedure is Standards Action, which is identical to the procedure for the "Bundle Protocol URI Scheme Types" registry.
-Reserved values from that registry also apply to this registry and should be kept in-sync by IANA.
-        </t>
-        <t>
-Specifications of new service identifiers need to define how each EID-scheme-specific service identifier is encoded and how it relates to service EIDs on the source node.
-        </t>
-        <table align="center" anchor="tab-iana-service-id">
-          <name>SAND Endpoint Service Schemes</name>
-          <thead>
-            <tr>
-              <th>EID Scheme Value</th>
-              <th>Description</th>
-              <th>Reference</th>
-            </tr>
-          </thead>
-          <tbody>
-            <tr>
-              <td>0</td>
-              <td>reserved</td>
-              <td><xref target="RFC9171"/></td>
-            </tr>
-            <tr>
-              <td>1</td>
-              <td>dtn scheme service demux</td>
-              <td><xref target="sec-msg-endpoint"/> of [This specification]</td>
-            </tr>
-            <tr>
-              <td>2</td>
-              <td>ipn scheme service number</td>
-              <td><xref target="sec-msg-endpoint"/> of [This specification]</td>
-            </tr>
-            <tr>
-              <td>3 to 254</td>
-              <td>unassigned</td>
-              <td></td>
-            </tr>
-            <tr>
-              <td>255 to 65535</td>
-              <td>reserved</td>
-              <td><xref target="RFC9171"/></td>
-            </tr>
-            <tr>
-              <td>&gt;65535</td>
-              <td>reserved for private use</td>
-              <td><xref target="RFC9171"/></td>
-            </tr>
-          </tbody>
-        </table>
-      </section>
     </section>
   </middle>
   <back>
@@ -2443,9 +2808,27 @@ Specifications of new service identifiers need to define how each EID-scheme-spe
       <name>References</name>
       <references>
         <name>Normative References</name>
+        <reference anchor="IANA-BP" target="https://www.iana.org/assignments/bundle/">
+          <front>
+            <title>Bundle Protocol</title>
+            <author>
+              <organization>IANA</organization>
+            </author>
+            <date/>
+          </front>
+        </reference>
         <reference anchor="IANA-BPSAND" target="https://www.iana.org/assignments/bp-sand/">
           <front>
             <title>Bundle Protocol (BP) Secure Advertisement and Neighborhood Discovery (SAND)</title>
+            <author>
+              <organization>IANA</organization>
+            </author>
+            <date/>
+          </front>
+        </reference>
+        <reference anchor="IANA-LTP" target="https://www.iana.org/assignments/ltp-parameters/">
+          <front>
+            <title>Licklider Transmission Protocol (LTP) Parameters</title>
             <author>
               <organization>IANA</organization>
             </author>
@@ -2461,14 +2844,24 @@ Specifications of new service identifiers need to define how each EID-scheme-spe
             <date/>
           </front>
         </reference>
-        <reference anchor="CCSDS-BPv7" target="https://public.ccsds.org/Pubs/734x2b2.pdf">
+        <reference anchor="CCSDS-BPv7" target="https://public.ccsds.org/Pubs/734x20o1.pdf">
           <front>
             <title>CCSDS Bundle Protocol Specification (DRAFT)</title>
-            <seriesInfo name="CCSDS" value="734.2-B-2"/>
+            <seriesInfo name="CCSDS" value="734.20-O-1"/>
             <author>
               <organization>Consultative Committee for Space Data Systems</organization>
             </author>
-            <!-- <date month="April" year="2024"/> -->
+            <date month="April" year="2025"/>
+          </front>
+        </reference>
+        <reference anchor="CCSDS-SABR" target="https://public.ccsds.org/Pubs/734x3b1.pdf">
+          <front>
+            <title>Schedule-Aware Bundle Routing</title>
+            <seriesInfo name="CCSDS" value="734.3-B-1"/>
+            <author>
+              <organization>Consultative Committee for Space Data Systems</organization>
+            </author>
+            <date month="July" year="2019"/>
           </front>
         </reference>
         <xi:include href="https://xml2rfc.tools.ietf.org/public/rfc/bibxml/reference.RFC.791.xml"/>
@@ -2499,6 +2892,7 @@ Specifications of new service identifiers need to define how each EID-scheme-spe
         <xi:include href="https://xml2rfc.tools.ietf.org/public/rfc/bibxml/reference.RFC.4838.xml"/>
         <xi:include href="https://xml2rfc.tools.ietf.org/public/rfc/bibxml/reference.RFC.4861.xml"/>
         <xi:include href="https://xml2rfc.tools.ietf.org/public/rfc/bibxml/reference.RFC.5280.xml"/>
+        <xi:include href="https://xml2rfc.tools.ietf.org/public/rfc/bibxml/reference.RFC.5326.xml"/>
         <xi:include href="https://xml2rfc.tools.ietf.org/public/rfc/bibxml/reference.RFC.5444.xml"/>
         <xi:include href="https://xml2rfc.tools.ietf.org/public/rfc/bibxml/reference.RFC.6130.xml"/>
         <xi:include href="https://xml2rfc.tools.ietf.org/public/rfc/bibxml/reference.RFC.7942.xml"/>
