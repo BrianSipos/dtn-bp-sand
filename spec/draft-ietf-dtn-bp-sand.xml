@@ -2844,14 +2844,14 @@ Expert(s) are encouraged to be biased towards approving registrations unless the
             <date/>
           </front>
         </reference>
-        <reference anchor="CCSDS-BPv7" target="https://public.ccsds.org/Pubs/734x2b2.pdf">
+        <reference anchor="CCSDS-BPv7" target="https://public.ccsds.org/Pubs/734x20o1.pdf">
           <front>
             <title>CCSDS Bundle Protocol Specification (DRAFT)</title>
-            <seriesInfo name="CCSDS" value="734.2-B-2"/>
+            <seriesInfo name="CCSDS" value="734.20-O-1"/>
             <author>
               <organization>Consultative Committee for Space Data Systems</organization>
             </author>
-            <!-- <date month="April" year="2024"/> -->
+            <date month="April" year="2025"/>
           </front>
         </reference>
         <reference anchor="CCSDS-SABR" target="https://public.ccsds.org/Pubs/734x3b1.pdf">
