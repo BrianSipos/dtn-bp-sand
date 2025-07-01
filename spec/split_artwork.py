@@ -1,3 +1,4 @@
+#!/usr/bin/env python3
 ''' Split artwork from an RFC XML file and feed them to a command.
 '''
 import os

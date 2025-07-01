@@ -170,7 +170,7 @@ Each type of data can be associated with a desired update time interval to ensur
         <dt>Convergence Layer instances:</dt>
         <dd>Defined in <xref target="sec-msg-cl"/> to contain CL types and parameters needed to communicate with the node through specific underlayer networks.</dd>
         <dt>Node resource forecast:</dt>
-        <dd>Contains power-state and other forecasts for the node..</dd>
+        <dd>Contains operating state and other forecasts for the node..</dd>
         <dt>Local (1-hop) topology:</dt>
         <dd>Contains 1-hop neighbors seen by the node.</dd>
         <dt>Routing willingness:</dt>
@@ -232,10 +232,10 @@ The information in this table are general to the node as a whole and not for any
               <td>This is the full time horizon for resource schedules in this information base.</td>
             </tr>
             <tr>
-              <td>Power Schedule</td>
+              <td>Operating Schedule</td>
               <td>
-This represents a time-varying power state of the local node (as either "on" or "off") within the validity interval.
-A power schedule which indicates "always on" is a valid default.
+This represents a time-varying operating state of the local node (as either "on" or "off") within the validity interval.
+An operating schedule which indicates "always on" is a valid default.
               </td>
             </tr>
           </tbody>
@@ -454,9 +454,9 @@ Multiple sources of information are aggregated together into this table.
               <td><cref>TBD</cref></td>
             </tr>
             <tr>
-              <td>Power Schedule</td>
+              <td>Operating Schedule</td>
               <td>
-This represents a time-varying power state of the node (as either "on" or "off") as reported in <xref format="title" target="sec-msg-resource"/> messages.</td>
+This represents a time-varying operating state of the node (as either "on" or "off") as reported in <xref format="title" target="sec-msg-resource"/> messages.</td>
             </tr>
           </tbody>
         </table>
@@ -1471,7 +1471,7 @@ $cl-recv /= {
       <section anchor="sec-msg-resource">
         <name>Resource Advertisement</name>
         <t>
-The Resource Advertisement message is used to indicates the node's resource forecast (power state and storage) for some near time horizon.
+The Resource Advertisement message is used to indicates the node's resource forecast (operating state and storage) for some near time horizon.
 This corresponds to a node-scope schedule of <xref section="2.3.1" target="I-D.ietf-tvr-requirements"/> and these resource relate to all of the CLs exposed in the <xref format="title" target="sec-msg-cl"/> message from the same node.
 Per the definitions in <xref target="sec-msg"/>, each schedule applies within the Validity Duration of the message.
         </t>
@@ -1483,10 +1483,10 @@ The Resource Advertisement message <bcp14>SHALL</bcp14> be identified by message
 The message parameters are listed below and correspond with the CDDL of <xref target="fig-msg-resource"/>.
         </t>
         <dl>
-          <dt>Power State:</dt>
+          <dt>Operating State:</dt>
           <dd>
 This pair uses key -1 and value of a <tt>schedule</tt> item as defined in <xref target="fig-msg-schedule"/>.
-Each time at which the schedule is valid indicates when the node is forecast to be powered-on.
+Each time at which the schedule is valid indicates when the node is forecast to be operating.
           </dd>
         </dl>
         <figure anchor="fig-msg-resource">
@@ -1496,9 +1496,9 @@ $sand-msg /= resource-msg
 resource-msg = {
     msg-base&lt;4&gt;,
     $$msg-common-grp,
-    ? power-state,
+    ? operating-state,
 }
-power-state = (
+operating-state = (
     -1: schedule,
 )
 ; More TBD
@@ -1804,7 +1804,7 @@ The absence of this pair <bcp14>SHALL</bcp14> be interpreted as a willingness of
           </dd>
           <dt>Attached Networks:</dt>
           <dd>
-This pair uses key -3 and value of <tt>bstr</tt> containing an encoded EID Pattern from <xref target="I-D.ietf-dtn-eid-pattern"/>.
+This pair uses key -3 and value of <tt>bstr</tt> embedding an EID Pattern as defined in <xref section="4" target="I-D.ietf-dtn-eid-pattern"/>.
 The value contains the set of endpoints not participating in SAND but for which the source node is willing to route.
 The value <bcp14>MAY</bcp14> be an any-scheme pattern or contain an any-SSP pattern.
           </dd>
@@ -1850,7 +1850,9 @@ routeable-endpoints = (
       <section anchor="sec-msg-endpoint">
         <name>Endpoint Advertisement</name>
         <t>
-          <cref>TBD</cref>
+The Endpoint Advertisement message contains information about the endpoints registered on the sending node at the time of the message formation.
+This information does not include information about the registration state (active or passive, as defined in <xref section="3.1" target="RFC9171"/>).
+When creating Endpoint Advertisement messages, the source node <bcp14>MAY</bcp14> filter advertised endpoints to prevent visibility of particular endpoints to particular underlayer networks or destination nodes.
         </t>
         <t>
 The Endpoint Advertisement message <bcp14>SHALL</bcp14> be identified by message type 7.
@@ -1861,7 +1863,8 @@ The message parameters are listed below and correspond with the CDDL of <xref ta
           <dd>
 This pair uses key -1 and value of an array containing <tt>endpoint-defn</tt> items defined later in this section.
 Each Endpoint List <bcp14>SHALL</bcp14> contain at least one item.
-Each Endpoint List item <bcp14>SHALL</bcp14> have a unique Service ID parameter.
+Each Endpoint List item <bcp14>SHALL</bcp14> have a unique EID Pattern parameter.
+There <bcp14>SHALL NOT</bcp14> be any intersection between EID Pattern parameters of multiple items.
           </dd>
         </dl>
         <t>
@@ -1894,25 +1897,10 @@ These are also registered in the IANA registry defined in <xref target="sec-iana
 Endpoint parameters with negative keys are reserved for private or experimental use.
           </t>
           <dl>
-            <dt>Service ID:</dt>
+            <dt>EID Pattern:</dt>
             <dd>
-              <t>
-This pair uses key 1 and a value specific to the scheme of the Source EID of the SAND Bundle containing this message.
-Possible Service ID values are defined in <xref target="sec-iana-service-id"/>.
-              </t>
-              <t>
-The initial types for current schemes being: IPN service numbers as <tt>uint</tt> values and DTN service demux as <tt>tstr</tt> values.
-              </t>
-            </dd>
-            <dt>Well-Known Service Number:</dt>
-            <dd>
-This pair uses key 2 and value of a <tt>uint</tt> item corresponding to one of the registered values from the "'ipn' Scheme URI Well-known Service Numbers for BPv7" registry within <xref target="IANA-URI"/>.
-If this parameter is absent and the Service ID itself is an IPN service number it <bcp14>SHALL</bcp14> be looked up as a Well-known Service Number.
-            </dd>
-            <dt>Application State:</dt>
-            <dd>
-This pair uses key 3 and value of a <tt>schedule</tt> item as defined in <xref target="fig-msg-schedule"/>.
-Each time at which the schedule is valid indicates when an application is expected to be operating on the endpoint.
+This pair uses key 0 and a value of a <tt>bstr</tt> embedding an EID Pattern as defined in <xref section="4" target="I-D.ietf-dtn-eid-pattern"/>.
+For singleton endpoints, the node-identifying portion of the pattern <bcp14>SHALL</bcp14> agree with the message source node.
             </dd>
             <dt>Payload Security Required:</dt>
             <dd>
@@ -1933,30 +1921,17 @@ The security flag at bit 1 indicates that the any accepted security block <bcp14
 ; Service ID is interpreted within the Source EID scheme
 endpoint-defn = endpoint-base .within sand-generic-structure
 endpoint-base = {
-    0: $service-id,
+    0: embed-eid-pattern, ; From [I-D.ietf-dtn-eid-pattern]
     $$endpoint-common-grp,
     * priv16 =&gt; any,
 }
 
-; DTN service demux (path with no preceding slash)
-$service-id /= tstr
-; IPN or IMC service number
-$service-id /= uint
-
 $$endpoint-common-grp //= (
-    ? ipn-well-known
-    ? endpoint-schedule,
     ? endpoint-sec-require,
 )
 
-ipn-well-known = (
-    2: uint
-)
-; An schedule for this endpoint validity
-endpoint-schedule = (
-    3: schedule
-)
-; A hint about the security need, if any, for this endpoint
+; A hint about the security need, if any, for payloads
+; delivered to the associated endpoints
 endpoint-sec-require = (
     5: uint .bits endpoint-sec-flags
 )
@@ -1970,12 +1945,12 @@ endpoint-sec-flags = &amp;(
           <section>
             <name>SAND Singleton Endpoint</name>
             <t>
-Each participating node <bcp14>SHOULD</bcp14> register a singleton endpoint for the SAND application itself.
+Each participating node <bcp14>SHOULD</bcp14> register and advertise a singleton endpoint for the SAND application itself.
 This allows SAND Bundles to be transported with payload confidentiality to specific peer nodes.
 The endpoint <bcp14>SHOULD</bcp14> use the well-known service number from <xref target="sec-iana-well-known-ipn"/> when the Node ID uses the IPN scheme.
             </t>
             <t>
-The Endpoint advertisement for the SAND singleton endpoint <bcp14>SHALL</bcp14> contain at least a Payload Security Required value.
+An advertisement for the SAND singleton endpoint <bcp14>SHALL</bcp14> contain at least a Payload Security Required value.
             </t>
           </section>
         </section>
@@ -2392,7 +2367,7 @@ Specifications of new common parameters need to define the associated message ty
             <tr>
               <td>4</td>
               <td>-1</td>
-              <td>Power State</td>
+              <td>Operating State</td>
               <td><xref target="sec-msg-resource"/> of [This specification]</td>
             </tr>
             <tr><td colspan="4">Local Topology Advertisement</td></tr>
@@ -2809,17 +2784,7 @@ Expert(s) are encouraged to be biased towards approving registrations unless the
             </tr>
             <tr>
               <td>0</td>
-              <td>Service ID</td>
-              <td><xref target="sec-msg-endpoint"/> of [This specification]</td>
-            </tr>
-            <tr>
-              <td>2</td>
-              <td>Well-Known Service Number</td>
-              <td><xref target="sec-msg-endpoint"/> of [This specification]</td>
-            </tr>
-            <tr>
-              <td>3</td>
-              <td>Application State</td>
+              <td>EID Pattern</td>
               <td><xref target="sec-msg-endpoint"/> of [This specification]</td>
             </tr>
             <tr>
@@ -2831,60 +2796,6 @@ Expert(s) are encouraged to be biased towards approving registrations unless the
               <td>6 to 32767</td>
               <td>unassigned</td>
               <td></td>
-            </tr>
-          </tbody>
-        </table>
-      </section>
-      <section anchor="sec-iana-service-id">
-        <name>SAND Endpoint Service Schemes</name>
-        <t>EDITOR NOTE: registry to-be-created upon publication of this specification.</t>
-        <t>
-IANA will create, under the "Bundle Protocol Secure Advertisement and Neighborhood Discovery (SAND)" registry group <xref target="IANA-BPSAND"/>, a registry titled "SAND Endpoint Service Schemes" and initialize it with the contents of <xref target="tab-iana-service-id"/>.
-The registration procedure is Standards Action, which is identical to the procedure for the "Bundle Protocol URI Scheme Types" registry.
-Reserved values from that registry also apply to this registry and should be kept in-sync by IANA.
-        </t>
-        <t>
-Specifications of new service identifiers need to define how each EID-scheme-specific service identifier is encoded and how it relates to service EIDs on the source node.
-        </t>
-        <table align="center" anchor="tab-iana-service-id">
-          <name>SAND Endpoint Service Schemes</name>
-          <thead>
-            <tr>
-              <th>EID Scheme Value</th>
-              <th>Description</th>
-              <th>Reference</th>
-            </tr>
-          </thead>
-          <tbody>
-            <tr>
-              <td>0</td>
-              <td>reserved</td>
-              <td><xref target="RFC9171"/></td>
-            </tr>
-            <tr>
-              <td>1</td>
-              <td>dtn scheme service demux</td>
-              <td><xref target="sec-msg-endpoint"/> of [This specification]</td>
-            </tr>
-            <tr>
-              <td>2</td>
-              <td>ipn scheme service number</td>
-              <td><xref target="sec-msg-endpoint"/> of [This specification]</td>
-            </tr>
-            <tr>
-              <td>3 to 254</td>
-              <td>unassigned</td>
-              <td></td>
-            </tr>
-            <tr>
-              <td>255 to 65535</td>
-              <td>reserved</td>
-              <td><xref target="RFC9171"/></td>
-            </tr>
-            <tr>
-              <td>&gt;65535</td>
-              <td>reserved for private use</td>
-              <td><xref target="RFC9171"/></td>
             </tr>
           </tbody>
         </table>

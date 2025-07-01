@@ -1,5 +1,7 @@
 # Editor files
 *~
+.project
+.cproject
 
 # Byte-compiled / optimized / DLL files
 __pycache__/
