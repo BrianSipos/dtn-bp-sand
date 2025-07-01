@@ -1019,7 +1019,8 @@ Each bag <bcp14>SHOULD</bcp14> contain intermediate CA certificates up to, but n
           </dd>
         </dl>
         <t>
-Each Credential Advertisement <bcp14>SHALL</bcp14> contain an at least one actual end-entity credential identifying the sending node.
+Each Credential Advertisement <bcp14>SHALL</bcp14> contain an at least one end-entity credential identifying the sending node.
+A Credential Advertisement <bcp14>SHALL NOT</bcp14> contain any end-entity credential that does not identify the sending node.
         </t>
         <t>
 The Credential Advertisement message is populated in-part using the data identified in <xref target="tab-info-local-identity-ee"/>, part of the Local Node Information Base described in <xref target="local-info-bases"/>.
@@ -1032,15 +1033,14 @@ cred-msg = {
     msg-base&lt;2&gt;,
     $$msg-common-grp,
     ? cred-x5bag,
-;     ? cred-c5bag,
+    ? cred-c5bag,
 }
 cred-x5bag = (
     -1: COSE_X509  ; From [RFC 9360]
 )
-; Commenting out pending C509 CDDL consistency updates
-; cred-c5bag = (
-;     -2: COSE_C509  ; From I-D.ietf-cose-cbor-encoded-cert
-; )
+cred-c5bag = (
+    -2: COSE_C509  ; From [I-D.ietf-cose-cbor-encoded-cert]
+)
           </sourcecode>
         </figure>
       </section>
