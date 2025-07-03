@@ -2579,7 +2579,7 @@ Specifications of new common parameters need to define the associated CL type, c
               <td>Extension Support</td>
               <td><xref target="sec-cl-udpclv2"/> of [This specification]</td>
             </tr>
-            <tr><td colspan="4">LTP Over UDP</td></tr>
+            <tr><td colspan="4">CCSDS LTPCL Over UDP</td></tr>
             <tr>
               <td>3</td>
               <td>-1</td>
@@ -2846,7 +2846,7 @@ Expert(s) are encouraged to be biased towards approving registrations unless the
         </reference>
         <reference anchor="CCSDS-BPv7" target="https://public.ccsds.org/Pubs/734x20o1.pdf">
           <front>
-            <title>CCSDS Bundle Protocol Specification (DRAFT)</title>
+            <title>CCSDS Bundle Protocol Specification</title>
             <seriesInfo name="CCSDS" value="734.20-O-1"/>
             <author>
               <organization>Consultative Committee for Space Data Systems</organization>
