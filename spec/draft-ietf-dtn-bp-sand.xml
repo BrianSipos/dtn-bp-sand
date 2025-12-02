@@ -450,10 +450,6 @@ Multiple sources of information are aggregated together into this table.
               <td>This is the SAND Singleton EID for the node.</td>
             </tr>
             <tr>
-              <td>MPR Selection</td>
-              <td><cref>TBD</cref></td>
-            </tr>
-            <tr>
               <td>Operating Schedule</td>
               <td>
 This represents a time-varying operating state of the node (as either "on" or "off") as reported in <xref format="title" target="sec-msg-resource"/> messages.</td>
@@ -904,9 +900,11 @@ The remaining pairs with negative keys <bcp14>SHALL</bcp14> be interpreted accor
         <sourcecode type="cddl">
 sand-msg = $sand-msg .within sand-generic-structure
 
-; Generic for messages, where `val` is the Message Type value
+; Generic for messages
 msg-base&lt;val&gt; = (
+    ; Value from "SAND Message Types" registry
     0: val .within int16,
+    $$msg-common-grp
 )
 $$msg-common-grp //= (
     ? ref-time,
@@ -974,7 +972,6 @@ The Data Solicitation message <bcp14>SHALL NOT</bcp14> be used to request a Data
 $sand-msg /= solicit-msg
 solicit-msg = {
     msg-base&lt;1&gt;,
-    $$msg-common-grp,
     solicit-types,
 }
 solicit-types = (
@@ -1031,7 +1028,6 @@ The Credential Advertisement message is populated in-part using the data identif
 $sand-msg /= cred-msg
 cred-msg = {
     msg-base&lt;2&gt;,
-    $$msg-common-grp,
     ? cred-x5bag,
     ? cred-c5bag,
 }
@@ -1102,7 +1098,6 @@ If this parameter is absent then other means of configuring or estimating link o
 $sand-msg /= uln-msg
 uln-msg = {
     msg-base&lt;8&gt;,
-    $$msg-common-grp,
     ? uln-schedule,
     ? uln-dns-name-list,
     ? uln-ip-addr-list,
@@ -1177,7 +1172,6 @@ Advertising CL instances which are not reachable by receiving SAND participants 
 $sand-msg /= cl-msg
 cl-msg = {
     msg-base&lt;3&gt;,
-    $$msg-common-grp,
     cl-list,
 }
 cl-list = (
@@ -1245,9 +1239,11 @@ Even when acting in the active role only, the CL <bcp14>MAY</bcp14> still be bou
             <sourcecode type="cddl">
 cl-recv = $cl-recv .within sand-generic-structure
 
-; Generic for CLs, where `val` is the CL Type value
+; Generic for CLs
 cl-base&lt;val&gt; = (
+    ; Value from "SAND CL Types" registry
     0: val .within int16,
+    $$cl-common-grp
 )
 $$cl-common-grp //= (
     ? cl-bind-addr-list,
@@ -1325,7 +1321,6 @@ All nodes <bcp14>SHALL</bcp14> include the minimum support defined in <xref targ
             <sourcecode type="cddl">
 $cl-recv /= {
     cl-base&lt;1&gt;,
-    $$cl-common-grp,
     ? tcpcl-msg-support,
     ? tcpcl-sessext-support,
     ? tcpcl-xferext-support
@@ -1373,7 +1368,6 @@ This information is equivalent to the contents of <xref section="3.5.1" target="
             <sourcecode type="cddl">
 $cl-recv /= {
     cl-base&lt;2&gt;,
-    $$cl-common-grp,
     ? udpcl-ext-support,
 }
 
@@ -1416,7 +1410,6 @@ There is no required minimum support defined in <xref target="RFC5326"/>.
             <sourcecode type="cddl">
 $cl-recv /= {
     cl-base&lt;2&gt;,
-    $$cl-common-grp,
     ? ltp-engine-id,
     ? ltp-ext-support,
 }
@@ -1445,7 +1438,6 @@ The TCPCL version 3 does not specify a transport-layer security mechanism.
             <sourcecode type="cddl">
 $cl-recv /= {
     cl-base&lt;32766&gt;,
-    $$cl-common-grp,
 }
             </sourcecode>
           </figure>
@@ -1461,7 +1453,6 @@ This CL type <bcp14>SHALL</bcp14> be identified by code point 32767.
             <sourcecode type="cddl">
 $cl-recv /= {
     cl-base&lt;32767&gt;,
-    $$cl-common-grp,
 }
             </sourcecode>
           </figure>
@@ -1495,7 +1486,6 @@ Each time at which the schedule is valid indicates when the node is forecast to 
 $sand-msg /= resource-msg
 resource-msg = {
     msg-base&lt;4&gt;,
-    $$msg-common-grp,
     ? operating-state,
 }
 operating-state = (
@@ -1537,11 +1527,10 @@ Each Local Topology Advertisement <bcp14>SHALL</bcp14> contain a Neighbor List.
 $sand-msg /= localtopo-msg
 localtopo-msg = {
     msg-base&lt;5&gt;,
-    $$msg-common-grp,
-    locotopo-nbr-list,
+    localtopo-nbr-list,
 }
-locotopo-nbr-list = (
-    -1: [1* locotopo-nbr]
+localtopo-nbr-list = (
+    -1: [1* localtopo-nbr]
 )
           </sourcecode>
         </figure>
@@ -1560,14 +1549,10 @@ Neighbor parameters with negative keys are reserved for private or experimental 
             <dd>
 This pair uses key 0 and value of <tt>eid</tt> from <xref target="RFC9171"/> representing the unique SAND Singleton EID for the neighbor node.
             </dd>
-            <dt>MPR Selection:</dt>
-            <dd>
-This pair uses key 1 and value of <cref>TBD</cref> representing the choice of this node as an MPR for the source node.
-            </dd>
             <dt>Reachability:</dt>
             <dd>
               <t>
-This pair uses key 2 and value type <tt>uint</tt> containing an enumerated value indicating the status of communication with the neighbor.
+This pair uses key 1 and value type <tt>uint</tt> containing an enumerated value indicating the status of communication with the neighbor.
 The value is one of the following:
             </t>
               <dl>
@@ -1581,7 +1566,7 @@ The value is one of the following:
             </dd>
             <dt>Routing Metrics List:</dt>
             <dd>
-This pair uses key 3 and value type of an array of <xref format="title" target="sec-msg-local-topo-metrics"/> related to the neighbor node.
+This pair uses key 2 and value type of an array of <xref format="title" target="sec-msg-local-topo-metrics"/> related to the neighbor node.
 Each Routing Metrics List <bcp14>SHALL</bcp14> contain at least one item.
 Each Routing Metrics List item <bcp14>SHALL</bcp14> have a unique combination of Routing Type, Direction, and Validity Schedule parameters.
             </dd>
@@ -1589,9 +1574,9 @@ Each Routing Metrics List item <bcp14>SHALL</bcp14> have a unique combination of
           <figure anchor="fig-nbr-param">
             <name>Peer Structure and Parameters CDDL</name>
             <sourcecode type="cddl">
-locotopo-nbr = locotopo-nbr-base .within sand-generic-structure
+localtopo-nbr = localtopo-nbr-base .within sand-generic-structure
 
-locotopo-nbr-base = {
+localtopo-nbr-base = {
     ; mandatory items
     nbr-nodeid,
     nbr-comm-status,
@@ -1668,15 +1653,16 @@ This is different than the resource schedule of the node itself, and represents 
           <figure anchor="fig-nbr-metrics">
             <name>Routing Metrics Structure and Parameters CDDL</name>
             <sourcecode type="cddl">
-nbr-metrics = nbr-metrics-base .within sand-generic-structure
+nbr-metrics = $nbr-metrics .within sand-generic-structure
 
-nbr-metrics-base = {
-    ; mandatory items
+; Generic for metrics
+nbr-metrics-base&lt;val&gt; = (
+    ; Value from "SAND Routing Types" registry
+    0: val .within int16,
     metrics-direction,
-    ; optional items
     $$nbr-metrics-common-grp,
     * priv16 => any,
-}
+)
 
 metrics-direction = (
     1: &amp;(
@@ -1685,10 +1671,9 @@ metrics-direction = (
     )
 )
 
-nbr-metrics-common-grp //= (
+$$nbr-metrics-common-grp //= (
     ? nbr-schedule
 )
-
 nbr-schedule = (
     3: schedule
 )
@@ -1730,33 +1715,24 @@ This BER is measured at the underlying link layer and includes errors which are 
           <figure anchor="fig-nbr-metrics-sabr">
             <name>SABR Routing Metrics CDDL</name>
             <sourcecode type="cddl">
+$nbr-metrics /= {
+   nbr-metrics-base&lt;0&gt;,
+   ? nbr-rtm-datarate,
+   ? nbr-rtm-delay,
+   ? nbr-rtm-ber
+}
 
-;    ? nbr-rx-delay,
-;    ? nbr-tx-delay,
-;    ? nbr-rx-datarate,
-;    ? nbr-tx-datarate,
-;    ? nbr-rx-ber,
-;    ? nbr-tx-ber,
-
-nbr-rx-delay = (
-    4: time-duration
-)
-nbr-tx-delay = (
-    5: time-duration
-)
 ; Maximum data rate in bytes-per-second
-nbr-rx-datarate = (
-    6: unsigned-fraction
+nbr-rtm-datarate = (
+    -1: unsigned-fraction
 )
-nbr-tx-datarate = (
-    7: unsigned-fraction
+; One-way delay
+nbr-rtm-delay = (
+    -2: time-duration
 )
 ; Estimated BER as a ratio
-nbr-rx-ber = (
-    8: unsigned-fraction
-)
-nbr-tx-ber = (
-    9: unsigned-fraction
+nbr-rtm-ber = (
+    -3: unsigned-fraction
 )
 
 ; Same structure as tag #4 "decimal fraction" but limited in domain
@@ -1828,7 +1804,6 @@ Only a stub network should see the gateway advertisement.
 $sand-msg /= router-msg
 router-msg = {
     msg-base&lt;6&gt;,
-    $$msg-common-grp,
     ? will-route-singleton,
     ? will-route-multipoint,
     ? routeable-endpoints,
@@ -1877,7 +1852,6 @@ Each item of the Endpoint List <bcp14>SHOULD</bcp14> be reachable as a bundle de
 $sand-msg /= endpoint-msg
 endpoint-msg = {
     msg-base&lt;7&gt;,
-    $$msg-common-grp,
     endpoint-list,
 }
 endpoint-list = (
@@ -2632,16 +2606,11 @@ Expert(s) are encouraged to be biased towards approving registrations unless the
             </tr>
             <tr>
               <td>1</td>
-              <td>MPR Selection</td>
-              <td><xref target="sec-msg-local-topo-nbr"/> of [This specification]</td>
-            </tr>
-            <tr>
-              <td>2</td>
               <td>Reachability</td>
               <td><xref target="sec-msg-local-topo-nbr"/> of [This specification]</td>
             </tr>
             <tr>
-              <td>3</td>
+              <td>2</td>
               <td>Routing Metrics</td>
               <td><xref target="sec-msg-local-topo-nbr"/> of [This specification]</td>
             </tr>
