@@ -1656,7 +1656,7 @@ This is different than the resource schedule of the node itself, and represents 
 nbr-metrics = $nbr-metrics .within sand-generic-structure
 
 ; Generic for metrics
-nbr-rtm-base&lt;val&gt; = (
+nbr-metrics-base&lt;val&gt; = (
     ; Value from "SAND Routing Types" registry
     0: val .within int16,
     metrics-direction,
@@ -1716,9 +1716,9 @@ This BER is measured at the underlying link layer and includes errors which are 
             <name>SABR Routing Metrics CDDL</name>
             <sourcecode type="cddl">
 $nbr-metrics /= {
-   nbr-rtm-base&lt;0&gt;,
-   ? nbr-rtm-delay,
+   nbr-metrics-base&lt;0&gt;,
    ? nbr-rtm-datarate,
+   ? nbr-rtm-delay,
    ? nbr-rtm-ber
 }
 
