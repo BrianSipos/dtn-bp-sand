@@ -346,7 +346,7 @@ The Identity information of <xref target="tab-info-local-identity-ee"/> is a log
             </tr>
             <tr>
               <td>Encoded Certificate</td>
-              <td>This is the DER-encoded X509 or encoded C509 certificate contents.</td>
+              <td>This is the DER-encoded X509 certificate contents.</td>
             </tr>
           </tbody>
         </table>
@@ -372,7 +372,7 @@ The trust anchor information of <xref target="tab-info-local-identity-ca"/> is a
             </tr>
             <tr>
               <td>Encoded Certificate</td>
-              <td>This is the DER-encoded X509 or encoded C509 certificate contents.</td>
+              <td>This is the DER-encoded X509 certificate contents.</td>
             </tr>
           </tbody>
         </table>
@@ -629,7 +629,7 @@ The Peer Certificate Information <bcp14>SHALL</bcp14> be de-duplicated from the 
             </tr>
             <tr>
               <td>Encoded Certificate</td>
-              <td>This is the DER-encoded X509 or encoded C509 certificate contents.</td>
+              <td>This is the DER-encoded X509 certificate contents.</td>
             </tr>
           </tbody>
         </table>
@@ -1008,12 +1008,6 @@ This pair uses key -1 and value type <tt>COSE_X509</tt> defined in <xref target=
 Each bag <bcp14>MAY</bcp14> contain multiple end-entity certificates identifying the source node with different validity time or different extension items.
 Each bag <bcp14>SHOULD</bcp14> contain intermediate CA certificates up to, but not including, the root CA needed to verify all end-entity certificates.
           </dd>
-          <dt>C509 Bag:</dt>
-          <dd>
-This pair uses key -2 and value type <tt>COSE_C509</tt> defined in <xref target="I-D.ietf-cose-cbor-encoded-cert"/> to convey C509 certificates as an unordered "bag".
-Each bag <bcp14>MAY</bcp14> contain multiple end-entity certificates identifying the source node with different validity time or different extension items.
-Each bag <bcp14>SHOULD</bcp14> contain intermediate CA certificates up to, but not including, the root CA needed to verify all end-entity certificates.
-          </dd>
         </dl>
         <t>
 Each Credential Advertisement <bcp14>SHALL</bcp14> contain an at least one end-entity credential identifying the sending node.
@@ -1029,13 +1023,9 @@ $sand-msg /= cred-msg
 cred-msg = {
     msg-base&lt;2&gt;,
     ? cred-x5bag,
-    ? cred-c5bag,
 }
 cred-x5bag = (
     -1: COSE_X509  ; From [RFC 9360]
-)
-cred-c5bag = (
-    -2: COSE_C509  ; From [I-D.ietf-cose-cbor-encoded-cert]
 )
           </sourcecode>
         </figure>
@@ -2300,12 +2290,6 @@ Specifications of new common parameters need to define the associated message ty
               <td>X509 Bag</td>
               <td><xref target="sec-msg-credential"/> of [This specification]</td>
             </tr>
-            <tr>
-              <td>2</td>
-              <td>-2</td>
-              <td>C509 Bag</td>
-              <td><xref target="sec-msg-credential"/> of [This specification]</td>
-            </tr>
             <tr><td colspan="4">Underlayer Advertisement</td></tr>
             <tr>
               <td>8</td>
@@ -2847,7 +2831,6 @@ Expert(s) are encouraged to be biased towards approving registrations unless the
         <xi:include href="https://xml2rfc.tools.ietf.org/public/rfc/bibxml/reference.RFC.9172.xml"/>
         <xi:include href="https://xml2rfc.tools.ietf.org/public/rfc/bibxml/reference.RFC.9174.xml"/>
         <xi:include href="https://xml2rfc.tools.ietf.org/public/rfc/bibxml/reference.RFC.9360.xml"/>
-        <xi:include href="https://xml2rfc.tools.ietf.org/public/rfc/bibxml3/reference.I-D.ietf-cose-cbor-encoded-cert.xml"/>
         <xi:include href="https://xml2rfc.tools.ietf.org/public/rfc/bibxml3/reference.I-D.ietf-dtn-bpsec-cose.xml"/>
         <xi:include href="https://xml2rfc.tools.ietf.org/public/rfc/bibxml3/reference.I-D.ietf-dtn-udpcl.xml"/>
         <xi:include href="https://xml2rfc.tools.ietf.org/public/rfc/bibxml3/reference.I-D.ietf-dtn-eid-pattern.xml"/>
