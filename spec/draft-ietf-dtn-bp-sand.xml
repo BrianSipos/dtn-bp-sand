@@ -165,8 +165,8 @@ Each type of data can be associated with a desired update time interval to ensur
       <dl>
         <dt>Security credentials:</dt>
         <dd>Defined in <xref target="sec-msg-credential"/> to contain credentials (<em>e.g.</em>, PKIX certificates) associated with the node's identities which are used for signing/key-agreement/encryption.</dd>
-        <dt>Underlayer interfaces:</dt>
-        <dd>Defined in <xref target="sec-msg-underlayer"/> to contain information about what underlayer networks (and endpoints) are available on the node.</dd>
+        <dt>Underlayer networks:</dt>
+        <dd>Defined in <xref target="sec-msg-uln"/> to contain information about what underlayer networks (and termination points) are available on the node.</dd>
         <dt>Convergence Layer instances:</dt>
         <dd>Defined in <xref target="sec-msg-cl"/> to contain CL types and parameters needed to communicate with the node through specific underlayer networks.</dd>
         <dt>Node resource forecast:</dt>
@@ -216,7 +216,7 @@ It exists as input to SAND processing and messaging and is unaffected by the res
         </t>
         <t>
 The resource information of <xref target="tab-info-local-resource"/> is used to populate <xref format="title" target="sec-msg-resource"/> messages.
-The information in this table are general to the node as a whole and not for any specific interface, network, or CL.
+The information in this table are general to the node as a whole and not for any specific underlayer network, termination point, or CL.
         </t>
         <table align="center" anchor="tab-info-local-resource">
           <name>Local Resource Information</name>
@@ -241,11 +241,11 @@ An operating schedule which indicates "always on" is a valid default.
           </tbody>
         </table>
         <t>
-The underlayer information described in <xref target="tab-info-local-network"/> allows a participating node to define different profiles for different accessible networks (IP or otherwise).
-As defined in <xref target="sec-mode"/>, when assembling and sending SAND messages much of the data can be filtered-down based on what is accessible via an interface (among other possible additional filtering, see <xref target="sec-security-passive-leak"/>).
+The ULN information described in <xref target="tab-info-local-network"/> allows a participating node to define different profiles for different networks (IP or otherwise) accessible by the node through local termination points (consistent with IETF topology terminology <xref target="RFC8345"/>).
+As defined in <xref target="sec-mode"/>, when assembling and sending SAND messages much of the data can be filtered-down based on what is accessible via a termination point associated with the network-layer source of a SAND message (among other possible additional filtering, see <xref target="sec-security-passive-leak"/>).
         </t>
         <table align="center" anchor="tab-info-local-network">
-          <name>Local Interface Information Columns</name>
+          <name>Underlayer Network Information Columns</name>
           <thead>
             <tr>
               <th>Name</th>
@@ -254,13 +254,14 @@ As defined in <xref target="sec-mode"/>, when assembling and sending SAND messag
           </thead>
           <tbody>
             <tr>
-              <td>Interface ID</td>
-              <td>This is the operating-system-specific unique identifier for a network interface.</td>
+              <td>Termination Point Number</td>
+              <td>This is a locally-unique numeric identifier for a network interface.</td>
             </tr>
             <tr>
               <td>Accessible Network Set</td>
               <td>
-This is the set of IP addresses assigned to and associated IP subnetworks accessible to this node via the interface.
+This is the set of ULN names and addresses assigned to the termination point and associated subnetworks accessible to this node via the termination point.
+For IP underlayers, these are respectively DNS names, IP addresses, and CIDR-form of subnetwork definitions conforming to BCP 122 <xref target="RFC4632"/>.
               </td>
             </tr>
             <tr>
@@ -1030,63 +1031,100 @@ cred-x5bag = (
           </sourcecode>
         </figure>
       </section>
-      <section anchor="sec-msg-underlayer">
+      <section anchor="sec-msg-uln">
         <name>Underlayer Advertisement</name>
         <t>
-The Underlayer Advertisement message contains information about the ULN interface(s) on which a SAND Bundle has been sent, providing recipients information about communicating with the source node via the underlayer.
-When creating Underlayer Advertisement messages, the source node will populate it with parameters specific to the network on which the interface is an access point.
+The Underlayer Advertisement message contains information about the ULN termination points, providing recipients information about communicating with the source node via the underlayer.
+Each Underlayer Advertisement message <bcp14>SHALL</bcp14> contain at least the termination point on which a SAND Bundle has been sent.
+Each Underlayer Advertisement message <bcp14>MAY</bcp14> contain any other termination points on the node.
+It is an implementation matter to choose which underlayer networks are advertised in a particular message.
         </t>
         <aside>
           <t>
 The well-known parameters defined in this document are focused on IP-based underlayer networks because this protocol is a product of the IETF.
-Other ULN technologies can be supported by SAND to advertise other forms of network addresses and/or protocol identifiers by either registering well-known type-specific parameters or using the private use range of type-specific parameters.
+Other ULN technologies can be supported by SAND to advertise other forms of network names, addresses, and/or protocol identifiers by either registering well-known type-specific parameters or using the private use range of type-specific parameters.
           </t>
         </aside>
         <t>
-Each Underlayer Advertisement message SHALL be transported with a Hop Limit of 1.
+Each Underlayer Advertisement message <bcp14>SHALL</bcp14> be transported with a Hop Limit of 1.
 Only 1-hop neighbors are capable of using underlayer network parameters so there is no need to forward this to any other nodes in the network.
         </t>
         <t>
 The Underlayer Advertisement message <bcp14>SHALL</bcp14> be identified by message type 8.
-The message parameters are listed below and correspond with the CDDL of <xref target="fig-msg-underlayer"/>.
+The message parameters are listed below and correspond with the CDDL of <xref target="fig-msg-uln"/>.
         </t>
         <dl>
-          <dt>Validity Schedule:</dt>
+          <dt>Termination Point List:</dt>
           <dd>
-This pair uses key -1 and value type <tt>schedule</tt> as defined in <xref target="fig-msg-schedule"/>.
-Each time at which the schedule is valid indicates when the interface or link is expected to be usable.
-If this parameter is absent the interface <bcp14>SHALL</bcp14> be treated as always valid (within the validity schedule of the node itself, see <xref target="sec-msg-resource"/>).
-          </dd>
-          <dt>DNS Name List:</dt>
-          <dd>
-This pair uses key -2 and value type <tt>tstr</tt> or array of <tt>tstr</tt> from DNS names in accordance with <xref target="RFC1034"/>.
-If this parameter is absent the node <bcp14>SHALL</bcp14> be treated as not having a DNS name on the underlay network.
-          </dd>
-          <dt>IP Address List:</dt>
-          <dd>
-            <t>
-This pair uses key -3 and value of a single <tt>bstr</tt> or array of <tt>bstr</tt> from IPv4 or IPv6 addresses encoded as four-byte or 16-byte sequences respectively (consistent with untagged values of <xref target="RFC9164"/>).
-If this parameter is absent the node <bcp14>SHALL</bcp14> be treated as having only the IP address from which the containing bundle was sent, if it was received through an IP-based CL.
-            </t>
-            <t>
-This address list <bcp14>MAY</bcp14> contain link-local addresses if the sender has an expectation that CLs will be usable over the associated IP endpoint.
-            </t>
-          </dd>
-          <dt>Link MTU:</dt>
-          <dd>
-This pair uses key -4 and value indicating the link MTU, as seen by the interface of the source node, in units of octets.
-This value <bcp14>SHOULD</bcp14> adhere to the lower limit of 68 octets for IPv4 <xref target="RFC791"/> or 1280 for IPv6 <xref target="RFC8200"/>.
-Other ULN technologies will still have an MTU value but with a different lower bound.
-If this parameter is absent then other means of configuring or estimating link or path MTU are needed.
+This pair uses key -1 and value type of an array containing <xref format="title" target="sec-msg-uln-tp"/> items defined later in this section.
+Each Termination Point List <bcp14>SHALL</bcp14> contain at least one item.
           </dd>
         </dl>
         <t>
+Each Underlayer Advertisement <bcp14>SHALL</bcp14> contain a Convergence Layer List.
+Each item of the Termination Point List <bcp14>SHOULD</bcp14> be reachable via the interface over which the enveloping message is sent.
+Advertising CL instances which are not reachable by receiving SAND participants is simply a waste of advertising resources and possibly by resources on other participants trying to determine reachability.
         </t>
-        <figure anchor="fig-msg-underlayer">
+        <figure anchor="fig-msg-uln">
           <name>Underlayer Advertisement Message CDDL</name>
           <sourcecode type="cddl">
 $sand-msg /= uln-msg
 uln-msg = {
+    msg-base&lt;8&gt;,
+    uln-tp-list,
+}
+uln-tp-list = (
+    -1: [1* uln-tp]
+)
+          </sourcecode>
+        </figure>
+        <section anchor="sec-msg-uln-tp">
+          <name>Termination Point</name>
+          <t>
+Each different underlayer network termination point (TP) is likely to have varying parameter sets, with items corresponding to parameters specific to a termination point and its associated network technology.
+Each TP is encoded as a CBOR map following the same conventions of SAND Message structure.
+There are several common TP parameters related to network- and transport-layer: a DNS name or IPv4/IPv6 address used to communicate with the node, and information common to links using that termination point.
+          </t>
+          <t>
+The Termination Point common parameters are listed below and correspond with the CDDL of <xref target="fig-msg-uln-tp"/>.
+These are also registered in the IANA registry defined in <xref target="sec-iana-uln"/>.
+          </t>
+          <dl>
+            <dt>Validity Schedule:</dt>
+            <dd>
+This pair uses key -1 and value type <tt>schedule</tt> as defined in <xref target="fig-msg-schedule"/>.
+Each time at which the schedule is valid indicates when the interface or link is expected to be usable.
+If this parameter is absent the interface <bcp14>SHALL</bcp14> be treated as always valid (within the validity schedule of the node itself, see <xref target="sec-msg-resource"/>).
+            </dd>
+            <dt>DNS Name List:</dt>
+            <dd>
+This pair uses key -2 and value type <tt>tstr</tt> or array of <tt>tstr</tt> from DNS names in accordance with <xref target="RFC1034"/>.
+If this parameter is absent the node <bcp14>SHALL</bcp14> be treated as not having a DNS name on the underlay network.
+            </dd>
+            <dt>IP Address List:</dt>
+            <dd>
+              <t>
+This pair uses key -3 and value of a single <tt>bstr</tt> or array of <tt>bstr</tt> from IPv4 or IPv6 addresses encoded as four-byte or 16-byte sequences respectively (consistent with untagged values of <xref target="RFC9164"/>).
+If this parameter is absent the node <bcp14>SHALL</bcp14> be treated as having only the IP address from which the containing bundle was sent, if it was received through an IP-based CL.
+              </t>
+              <t>
+This address list <bcp14>MAY</bcp14> contain link-local addresses if the sender has an expectation that CLs will be usable over the associated IP endpoint.
+              </t>
+            </dd>
+            <dt>Link MTU:</dt>
+            <dd>
+This pair uses key -4 and value indicating the link MTU, as seen by the interface of the source node, in units of octets.
+This value <bcp14>SHOULD</bcp14> adhere to the lower limit of 68 octets for IPv4 <xref target="RFC791"/> or 1280 for IPv6 <xref target="RFC8200"/>.
+Other ULN technologies will still have an MTU value but with a different lower bound.
+If this parameter is absent then other means of configuring or estimating link or path MTU are needed.
+            </dd>
+          </dl>
+          <t>
+          </t>
+          <figure anchor="fig-msg-uln-tp">
+            <name>Termination Point Structure CDDL</name>
+            <sourcecode type="cddl">
+uln-tp = {
     msg-base&lt;8&gt;,
     ? uln-schedule,
     ? uln-dns-name-list,
@@ -1126,8 +1164,9 @@ uln-mtu = (
     -4: mtu-size
 )
 mtu-size = uint .gt 0
-          </sourcecode>
-        </figure>
+            </sourcecode>
+          </figure>
+        </section>
       </section>
       <section anchor="sec-msg-cl">
         <name>Convergence Layer Advertisement</name>
@@ -1537,7 +1576,7 @@ Neighbor parameters with negative keys are reserved for private or experimental 
           <dl>
             <dt>Node ID:</dt>
             <dd>
-This pair uses key 0 and value of <tt>eid</tt> from <xref target="RFC9171"/> representing the unique SAND Singleton EID for the neighbor node.
+This pair uses key 0 and value of <tt>embed-eid-structure</tt> from <xref section="4" target="I-D.ietf-dtn-eid-pattern"/> representing the unique SAND Singleton EID for the neighbor node.
             </dd>
             <dt>Reachability:</dt>
             <dd>
@@ -2224,7 +2263,7 @@ Expert(s) are encouraged to be biased towards approving registrations unless the
             <tr>
               <td>8</td>
               <td>Underlayer Advertisement</td>
-              <td><xref target="sec-msg-underlayer"/> of [This specification]</td>
+              <td><xref target="sec-msg-uln"/> of [This specification]</td>
             </tr>
             <tr>
               <td>3</td>
@@ -2295,25 +2334,25 @@ Specifications of new common parameters need to define the associated message ty
               <td>8</td>
               <td>-1</td>
               <td>Validity Schedule</td>
-              <td><xref target="sec-msg-underlayer"/> of [This specification]</td>
+              <td><xref target="sec-msg-uln"/> of [This specification]</td>
             </tr>
             <tr>
               <td>8</td>
               <td>-2</td>
               <td>DNS Name List</td>
-              <td><xref target="sec-msg-underlayer"/> of [This specification]</td>
+              <td><xref target="sec-msg-uln"/> of [This specification]</td>
             </tr>
             <tr>
               <td>8</td>
               <td>-3</td>
               <td>IP Address List</td>
-              <td><xref target="sec-msg-underlayer"/> of [This specification]</td>
+              <td><xref target="sec-msg-uln"/> of [This specification]</td>
             </tr>
             <tr>
               <td>8</td>
               <td>-4</td>
               <td>Link MTU</td>
-              <td><xref target="sec-msg-underlayer"/> of [This specification]</td>
+              <td><xref target="sec-msg-uln"/> of [This specification]</td>
             </tr>
             <tr><td colspan="4">Convergence Layer Advertisement</td></tr>
             <tr>
@@ -2358,6 +2397,10 @@ Specifications of new common parameters need to define the associated message ty
             </tr>
           </tbody>
         </table>
+      </section>
+      <section anchor="sec-iana-uln">
+        <name>SAND Underlayer Network Registries</name>
+        <t>EDITOR NOTE: registries to-be-created upon publication of this specification.</t>
       </section>
       <section anchor="sec-iana-cl">
         <name>SAND Convergence Layer Registries</name>
@@ -2841,6 +2884,7 @@ Expert(s) are encouraged to be biased towards approving registrations unless the
         <xi:include href="https://xml2rfc.tools.ietf.org/public/rfc/bibxml/reference.RFC.2131.xml"/>
         <xi:include href="https://xml2rfc.tools.ietf.org/public/rfc/bibxml/reference.RFC.3552.xml"/>
         <xi:include href="https://xml2rfc.tools.ietf.org/public/rfc/bibxml/reference.RFC.3971.xml"/>
+        <xi:include href="https://xml2rfc.tools.ietf.org/public/rfc/bibxml/reference.RFC.4632.xml"/>
         <xi:include href="https://xml2rfc.tools.ietf.org/public/rfc/bibxml/reference.RFC.4838.xml"/>
         <xi:include href="https://xml2rfc.tools.ietf.org/public/rfc/bibxml/reference.RFC.4861.xml"/>
         <xi:include href="https://xml2rfc.tools.ietf.org/public/rfc/bibxml/reference.RFC.5280.xml"/>
@@ -2852,6 +2896,7 @@ Expert(s) are encouraged to be biased towards approving registrations unless the
         <xi:include href="https://xml2rfc.tools.ietf.org/public/rfc/bibxml/reference.RFC.8152.xml"/>
         <xi:include href="https://xml2rfc.tools.ietf.org/public/rfc/bibxml/reference.RFC.8175.xml"/>
         <xi:include href="https://xml2rfc.tools.ietf.org/public/rfc/bibxml/reference.RFC.8305.xml"/>
+        <xi:include href="https://xml2rfc.tools.ietf.org/public/rfc/bibxml/reference.RFC.8345.xml"/>
         <xi:include href="https://xml2rfc.tools.ietf.org/public/rfc/bibxml/reference.RFC.9164.xml"/>
         <xi:include href="https://xml2rfc.tools.ietf.org/public/rfc/bibxml3/reference.I-D.ietf-tvr-requirements.xml"/>
         <xi:include href="https://xml2rfc.tools.ietf.org/public/rfc/bibxml3/reference.I-D.irtf-dtnrg-ipnd.xml"/>
