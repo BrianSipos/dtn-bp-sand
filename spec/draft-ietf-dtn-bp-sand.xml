@@ -1577,7 +1577,7 @@ localtopo-nbr-base = {
 }
 
 nbr-nodeid = (
-    0: eid ; From [RFC 9171]
+    0: embed-eid-structure ; From [I-D.ietf-dtn-eid-pattern]
 )
 
 nbr-comm-status = (
