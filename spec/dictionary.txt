@@ -41,6 +41,7 @@ COSE
 CRC
 CRLs
 cryptographic
+CSID
 datagram
 Datagram
 datagrams
