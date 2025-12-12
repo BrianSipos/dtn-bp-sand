@@ -1,7 +1,3 @@
-SABR
-PDU
-PDUs
-CGR
 AAD
 acceptors
 Ack
@@ -29,7 +25,9 @@ CBOR
 CCSDS
 cddl
 CDDL
+CGR
 checksums
+CIDR
 ciphersuite
 CLA
 ClientHello
@@ -43,6 +41,7 @@ COSE
 CRC
 CRLs
 cryptographic
+CSID
 datagram
 Datagram
 datagrams
@@ -117,6 +116,8 @@ parameterization
 Parameterization
 parameterizations
 PCH
+PDU
+PDUs
 peerset
 pipelining
 Pipelining
@@ -138,9 +139,11 @@ Retransmit
 retransmitted
 RKF
 Routeable
+SABR
 SSL
 SSP
 STARTTLS
+subnetwork
 subnetworks
 substate
 superset
@@ -150,6 +153,7 @@ TCPCL
 TCPCLv
 teardown
 TLS
+TP
 tstr
 UDP
 UDPCL
@@ -157,6 +161,7 @@ UDPCLv
 uint
 ULN
 underlayer
+underlayers
 unhandled
 unicast
 untagged
