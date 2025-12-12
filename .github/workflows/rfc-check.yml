@@ -4,15 +4,19 @@ on: [push]
 
 jobs:
   build:
+    permissions:
+      contents: read
     runs-on: ubuntu-24.04
     steps:
       - uses: actions/checkout@v4
+      - name: Install Rust
+        uses: actions-rust-lang/setup-rust-toolchain@v1
       - name: dependencies
         run: |
-          sudo apt-get install -y cmake python3 python3-pip python3-setuptools python3-wheel ruby xmlstarlet aspell cargo
+          sudo apt-get install -y cmake python3 python3-pip python3-setuptools python3-wheel ruby xmlstarlet aspell
           sudo pip3 install xml2rfc abnf
           sudo gem install cbor-diag
-          sudo cargo install --root /usr/local --locked cddl@0.9.4
+          cargo install --locked cddl@0.10.1
       - name: xml2rfc
         run: |
           cmake -S . -B build -DCMAKE_INSTALL_DOCDIR=$PWD/build/install
