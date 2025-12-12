@@ -836,19 +836,19 @@ This convention also applies to subordinate maps within SAND messages.
         <name>SAND Generic Structure CDDL</name>
         <sourcecode type="cddl">
 sand-generic-structure = {
-    * label =&gt; value,
+    * sand-label =&gt; sand-value,
 }
 ; Generic map label
-label = int16
+sand-label = int16
 ; Generic map value
-value = any
+sand-value = any
 
 ; Signed integer that fits in 16-bit two's complement form
 int16 = (-32768 .. 32767) .within int
 ; Positive part of int16 for common values
-comm16 = uint .le 32767
+comm16 = 0 .. 32767
 ; Negative part of int16 for private values
-priv16 = nint .ge -32768
+priv16 = -32768 .. -1
         </sourcecode>
       </figure>
       <t>
@@ -905,20 +905,16 @@ sand-msg = $sand-msg .within sand-generic-structure
 msg-base&lt;val&gt; = (
     ; Value from "SAND Message Types" registry
     0: val .within int16,
-    $$msg-common-grp
+    * $$msg-common-grp
 )
+
 $$msg-common-grp //= (
-    ? ref-time,
-    ? msg-validity,
-    ? msg-interval,
-)
-ref-time = (
     2: dtn-time,
 )
-msg-validity = (
+$$msg-common-grp //= (
     3: time-duration,
 )
-msg-interval = (
+$$msg-common-grp //= (
     4: time-duration,
 )
 
@@ -1283,27 +1279,22 @@ cl-recv = $cl-recv .within sand-generic-structure
 cl-base&lt;val&gt; = (
     ; Value from "SAND CL Types" registry
     0: val .within int16,
-    $$cl-common-grp
-)
-$$cl-common-grp //= (
-    ? cl-bind-addr-list,
-    ? cl-bind-port,
-    ? cl-transport-sec-require,
-    ? cl-role,
+    * $$cl-common-grp
 )
 
-cl-bind-addr-list = (
-    3: ip-addr-ctr,
+$$cl-common-grp //= (
+    3: ip-addr-ctr
 )
-cl-bind-port = (
+; Bind port number
+$$cl-common-grp //= (
     4: 1 .. 0xFFFF
 )
 ; A hint about the security need, if any, for this CL
-cl-transport-sec-require = (
+$$cl-common-grp //= (
     5: bool
 )
 ; Indicate whether the entity can operate in CL-defined roles
-cl-role = (
+$$cl-common-grp //= (
     6: uint .bits cl-role-flags
 )
 cl-role-flags = &amp;(
@@ -1630,7 +1621,7 @@ localtopo-nbr-base = {
     nbr-comm-status,
     nbr-metrics-list,
     ; optional items
-    $$nbr-common-grp,
+    * $$nbr-common-grp,
     * priv16 => any,
 }
 
@@ -1714,7 +1705,7 @@ nbr-metrics-base&lt;val&gt; = (
     ; Value from "SAND Routing Types" registry
     0: val .within int16,
     metrics-direction,
-    $$nbr-metrics-common-grp,
+    * $$nbr-metrics-common-grp,
     * priv16 => any,
 )
 
@@ -1726,13 +1717,9 @@ metrics-direction = (
 )
 
 $$nbr-metrics-common-grp //= (
-    ? nbr-schedule,
-    ? nbr-tp-id,
-)
-nbr-schedule = (
     2: schedule
 )
-nbr-tp-id = (
+$$nbr-metrics-common-grp //= (
     3: uln-tp-id-value
 )
             </sourcecode>
@@ -1955,17 +1942,13 @@ The security flag at bit 1 indicates that the any accepted security block <bcp14
 endpoint-defn = endpoint-base .within sand-generic-structure
 endpoint-base = {
     0: embed-eid-pattern, ; From [I-D.ietf-dtn-eid-pattern]
-    $$endpoint-common-grp,
+    * $$endpoint-common-grp,
     * priv16 =&gt; any,
 }
 
-$$endpoint-common-grp //= (
-    ? endpoint-sec-require,
-)
-
 ; A hint about the security need, if any, for payloads
 ; delivered to the associated endpoints
-endpoint-sec-require = (
+$$endpoint-common-grp //= (
     5: uint .bits endpoint-sec-flags
 )
 endpoint-sec-flags = &amp;(
