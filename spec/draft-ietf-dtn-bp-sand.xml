@@ -118,7 +118,7 @@ The entire CDDL structure can be extracted from the XML version of this document
         </t>
         <sourcecode>'//sourcecode[@type="cddl"]'</sourcecode>
         <t>
-The following initial fragment defines the top-level symbols of this document's CDDL.
+The following initial fragment defines the top-level rules of this document's CDDL.
         </t>
         <sourcecode type="cddl">
 start = sand-adu-seq / sand-msg
