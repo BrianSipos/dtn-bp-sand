@@ -1,4 +1,8 @@
 <?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE rfc [
+ <!ENTITY nbsp    "&#160;">
+ <!ENTITY zwsp   "&#8203;">
+]>
 <rfc xmlns:xi="http://www.w3.org/2001/XInclude" category="std" consensus="true" docName="draft-ietf-dtn-bp-sand-01" ipr="trust200902" submissionType="IETF" tocDepth="4" tocInclude="true" version="3" xml:lang="en">
   <front>
     <title abbrev="BP SAND">
@@ -30,7 +34,8 @@
     <abstract>
       <t>
 This document defines the Secure Advertisement and Neighborhood Discovery (SAND) protocol for Bundle Protocol version 7 (BPv7) within a delay-tolerant network (DTN).
-This protocol defines a general purpose advertisement mechanism with an initial set of data types able to be advertised by participating nodes in a BPv7 network.
+This protocol defines a general purpose advertisement mechanism with an initial set of message and data types able to be advertised by participating nodes in a BPv7 network.
+The focus of this document is for advertisement to topological neighbors about local neighborhoods but can be expanded upon in the future through extension points.
       </t>
     </abstract>
   </front>
@@ -52,13 +57,13 @@ This means long one-way light-time (OWLT) delays between neighbors, expected tim
 More detailed descriptions of the challenges of DTNs can be found in "Delay-Tolerant Network Architecture" <xref target="RFC4838"/>.
       </t>
       <t>
-Earlier research into discovery within a BP network led to development of the draft experimental IP Neighbor Discovery (IPND) protocol of <xref target="I-D.irtf-dtnrg-ipnd"/>, but that protocol is intimately tied to its use of UDP datagram "beacons" and necessary use of an IP underlay network.
+Earlier research into discovery within a BP network led to development of the draft experimental IP Neighbor Discovery (IPND) protocol <xref target="I-D.irtf-dtnrg-ipnd"/>, but that protocol is intimately tied to its use of UDP datagram "beacons" and necessary use of an IP underlay network.
 It also would require allocation of well-known UDP port number and IP multicast addresses or pre-configuration of those parameters across network nodes, but no such allocations were ever made.
       </t>
       <t>
 To mitigate the need for manual parameter discovery and configuration, an online neighborhood discovery protocol can be used, and such a protocol is defined in this document.
 The Secure Advertisement and Neighborhood Discovery (SAND) protocol operates at and above the BP-layer, as shown in <xref target="fig-dtn-ip-stack"/>, which insulates it from strict dependence on any specific CL for its message transport and allows the use of BPSec for message security.
-The full protocol stack of this document uses the UDPCL of <xref target="I-D.ietf-dtn-udpcl"/> as a zero-configuration default for its any-source multicast (ASM) capabilities but SAND could be, and is expected to be, used over other CLs to include unicast transports which might be informed by lower-layer discovery protocols (see <xref target="sec-protocol-discovery"/>).
+The full protocol stack of this document uses the UDP Convergence Layer (UDPCL) version 2 <xref target="I-D.ietf-dtn-udpcl"/> as a zero-configuration default for its any-source multicast (ASM) capabilities but SAND could be, and is expected to be, used over other CLs to include unicast transports which might be informed by lower-layer discovery protocols (see <xref target="sec-protocol-discovery"/>).
       </t>
       <figure anchor="fig-dtn-ip-stack">
         <name>The Locations of SAND and BP above the Internet Protocol Stack</name>
@@ -88,7 +93,7 @@ This document does not address:
         </t>
         <ul spacing="normal">
           <li>
-The format of protocol data units of the Bundle Protocol, as those are defined elsewhere in <xref target="RFC9171"/>.
+The format of protocol data units of the Bundle Protocol, as those are defined elsewhere <xref target="RFC9171"/>.
 This includes the concept of bundle fragmentation or bundle encapsulation.
           </li>
           <li>
@@ -110,7 +115,7 @@ Uses of Bundle Protocol Security (BPSec) in which authentication of the Source N
       <section>
         <name>Use of CDDL</name>
         <t>
-This document defines CBOR structure using the Concise Data Definition Language (CDDL) of <xref target="RFC8610"/>.
+This document defines CBOR structure using the Concise Data Definition Language (CDDL) <xref target="RFC8610"/>.
 The entire CDDL structure can be extracted from the XML version of this document using the XPath expression:
         </t>
         <sourcecode>'//sourcecode[@type="cddl"]'</sourcecode>
@@ -194,11 +199,11 @@ Where the NHDP is concerned with IP routers discovering reachable IP routes, the
         </t>
         <t>
 A node participating in the SAND protocol is expected to use lower-layer discovery mechanisms as necessary to enroll in a local network, obtain network-layer address(es) and parameters, and possibly discover network-layer neighbor nodes and routers.
-This might involve the use of IPv4 Internet Router Discovery Protocol (IRDP) <xref target="RFC1256"/> or IPv6 Secure Neighbor Discovery Protocol (SEND) <xref target="RFC3971"/> <xref target="RFC4861"/> to determine IP neighbors, the Dynamic Host Configuration Protocol (DHCP) <xref target="RFC2131"/> to assign addresses and network-level parameters, or the Dynamic Link Exchange Protocol (DLEP) <xref target="RFC8175"/> to discover connectivity and specific IP neighbor nodes.
+This might involve the use of IPv4 Internet Router Discovery Protocol (IRDP) <xref target="RFC1256"/> or IPv6 Secure Neighbor Discovery Protocol (SEND) <xref target="RFC3971"/> <xref target="RFC4861"/> to determine IP neighbors, the Dynamic Host Configuration Protocol (DHCP) <xref target="RFC2131"/> <xref target="RFC8415"/> to assign addresses and network-level parameters, or the Dynamic Link Exchange Protocol (DLEP) <xref target="RFC8175"/> to discover connectivity and specific IP neighbor nodes.
         </t>
         <t>
-The robust and delay-tolerant protocol in this document is also compatible with the DNS-Based Service Discovery (DNS-SD) of BP routers by edge nodes as defined in <xref target="I-D.sipos-dtn-edge-zeroconf"/>.
-The SAND can be used to enroll an edge router in a network and synchronize routing information across a variety of network and link types, while DNS-SD is used within IP stub underlay networks (or enclaves) at the edges of the BP network.
+The robust and delay-tolerant protocol in this document is also compatible with the DNS-Based Service Discovery (DNS-SD) of BP routers by edge nodes <xref target="I-D.sipos-dtn-edge-zeroconf"/>.
+The SAND can be used to enroll an edge router in a BP network and synchronize routing information across a variety of network and link types, while DNS-SD is used within IP stub underlay networks (or enclaves) at the edges of the BP network.
         </t>
       </section>
     </section>
@@ -255,7 +260,10 @@ As defined in <xref target="sec-mode"/>, when assembling and sending SAND messag
           <tbody>
             <tr>
               <td>Termination Point Index</td>
-              <td>This is a locally-unique numeric identifier for a network interface.</td>
+              <td>
+This is a locally-unique numeric identifier for a network interface or equivalent termination point.
+Whether or not this index corresponds some way to other identifiers is an implementation matter and does not affect this protocol.
+              </td>
             </tr>
             <tr>
               <td>Accessible Network Set</td>
@@ -267,7 +275,7 @@ For IP underlayers, these are respectively DNS names, IP addresses, and CIDR-for
             <tr>
               <td>Link MTU</td>
               <td>
-This is the configured or discovered maximum transmission unit (MTU) of the first-hop network link from the interface.
+This is the configured or discovered maximum transmission unit (MTU) of the first-hop network link for the underlayer.
 Because this is a link MTU it excludes any network packet header overhead and is network-protocol-independent.
 This also represents a maximum outgoing size and not necessarily the maximum incoming size.
 This is not necessarily the same as a path MTU between any peers on this network, and a path MTU can be directional.
@@ -299,13 +307,13 @@ Because SAND uses the DTN time epoch and encoded form, SAND timer configuration 
             <tr>
               <td>Minimum Time Interval</td>
               <td>default and per-message-type</td>
-              <td>This represents the shortest time interval between sending messages of the same type on a particular interface or to a specific singleton destination.</td>
+              <td>This represents the shortest time interval between sending messages of the same type on a particular ULN or to a specific singleton destination.</td>
             </tr>
             <tr>
               <td>Maximum Time Interval</td>
               <td>default and per-message-type</td>
               <td>
-This represents the longest time interval between sending messages of the same type on a particular interface or to a specific singleton destination.
+This represents the longest time interval between sending messages of the same type on a particular ULN or to a specific singleton destination.
 This is used as a timeout for <xref format="title" target="sec-mode-periodic"/> messaging.
 The Maximum Time Interval <bcp14>MUST</bcp14> be longer than the Minimum Time Interval by some factor.
               </td>
@@ -382,9 +390,12 @@ The convergence layer information of <xref target="tab-info-local-cl"/> is a log
 Even in cases where a CL establishes persistent sessions which might be bound to a specific endpoint address or network, the CL instance as a whole can operate simultaneous sessions across many networks.
         </t>
         <t>
-When used as a source for sending <xref format="title" target="sec-msg-cl"/> messages the advertised CL List is expected to be, but not required to be, filtered-down based on the interface/network on which the message will be sent.
-Besides being filtered-out for a specific network, a CL entry <bcp14>SHALL NOT</bcp14> be represented differently across different interfaces.
-<cref>TBD How to signal removal of a CL instance consistently across interfaces?</cref>
+When used as a source for sending <xref format="title" target="sec-msg-cl"/> messages the advertised CL List is expected to be, but not required to be, filtered-down based on the termination point and/or network on which the message will be sent.
+Besides being filtered-out for a specific network, a CL instance <bcp14>SHALL NOT</bcp14> be represented differently across different termination points.
+        </t>
+        <t>
+The effective removal of a CL instance is to store and advertise the same combination of CL Type and Termination Point Index but include no Bind Addresses or other parameters.
+This will cause the CL instance to no longer be associated with its previous parameters and thus unusable by neighbors.
         </t>
         <table align="center" anchor="tab-info-local-cl">
           <name>Local Convergence Layer Information Columns</name>
@@ -398,6 +409,10 @@ Besides being filtered-out for a specific network, a CL entry <bcp14>SHALL NOT</
             <tr>
               <td>CL Type</td>
               <td>This is the type of CL being represented, which need not be unique when there are multiple instances of a CL operating on a single node (with different parameters presumably).</td>
+            </tr>
+            <tr>
+              <td>Termination Point Index</td>
+              <td>An index which corresponds to one of the underlayer network entries of <xref target="tab-info-local-network"/> and distinguishes different instances of a CL type.</td>
             </tr>
             <tr>
               <td>Bind IP Addresses</td>
@@ -430,8 +445,8 @@ A single CL instance can be capable of both roles.
         <name>Neighbor Information Bases</name>
         <t>
 An information base for 1-hop neighbor existence and intrinsic properties is managed separately from other information bases which represent relationships between nodes.
-Neighbor information can be received from any number of interfaces and is aggregated together into these information bases.
-In some cases the original received interface is kept and in others it is discarded in order to have a single record representing the neighbor node.
+Neighbor information can be received from any number of ULNs and is aggregated together into these information bases.
+In some cases the original received termination point properties are significant and kept, and in others they are discarded in order to have a single record representing the entire neighbor node separate from its ULNs.
         </t>
         <t>
 The neighbor node information of <xref target="tab-info-neighbor-node"/> is a logical table of immediate neighbors of this node.
@@ -458,7 +473,7 @@ This represents a time-varying operating state of the node (as either "on" or "o
           </tbody>
         </table>
         <t>
-An information base for 1-hop neighbor reachability in <xref target="tab-info-neighbor-reachable"/> is a logical table relating 1-hop neighbor nodes from <xref target="tab-info-neighbor-node"/> to specific local interfaces from <xref target="tab-info-local-network"/> on which the node is reachable or on which messages have been received.
+An information base for 1-hop neighbor reachability in <xref target="tab-info-neighbor-reachable"/> is a logical table relating 1-hop neighbor nodes from <xref target="tab-info-neighbor-node"/> to a specific ULN termination point from <xref target="tab-info-local-network"/> on which the node is reachable or on which messages have been received.
 Due to having multiple-network connectivity, it is possible to have multiple records identifying the same 1-hop Neighbor but each will have their own set of path metrics for a specific network.
         </t>
         <table align="center" anchor="tab-info-neighbor-reachable">
@@ -471,28 +486,28 @@ Due to having multiple-network connectivity, it is possible to have multiple rec
           </thead>
           <tbody>
             <tr>
-              <td>Node ID</td>
+              <td>Neighbor Node ID</td>
               <td>This is a cross-reference to the unique identifier from <xref target="tab-info-neighbor-node"/>.</td>
             </tr>
             <tr>
-              <td>Interface ID</td>
-              <td>This is a cross-reference to the unique identifier from <xref target="tab-info-local-network"/>, the local network interface which has seen messages from the node.</td>
+              <td>Local Termination Point Index</td>
+              <td>This is a cross-reference to the unique index from <xref target="tab-info-local-network"/>, the local termination point which has seen messages from the node. Any neighbor index for its corresponding reachable termination point(s) is independent of this index.</td>
             </tr>
             <tr>
               <td>Latest Timestamps</td>
-              <td>This is the latest bundle creation timestamp (<xref section="4.2.7" target="RFC9171"/>) for each <xref target="sec-iana-msg">SAND Message Type</xref> received from the neighbor on this interface, which is used to filter-out old, out-of-order messages in <xref target="sec-transport-latest"/>.</td>
+              <td>This is the latest bundle creation timestamp (<xref section="4.2.7" target="RFC9171"/>) for each <xref target="sec-iana-msg">SAND Message Type</xref> received from the neighbor on this termination point, which is used to filter-out old, out-of-order messages in <xref target="sec-transport-latest"/>.</td>
             </tr>
             <tr>
               <td>DNS Name Set</td>
-              <td>This is the set of DNS Names assigned to the neighbor node and accessible on the associated network.</td>
+              <td>This is the set of DNS Names assigned to the neighbor node and accessible on the associated ULN.</td>
             </tr>
             <tr>
               <td>IP Address Set</td>
-              <td>This is the set of IP addresses assigned to the neighbor node and accessible on the associated network.</td>
+              <td>This is the set of IP addresses assigned to the neighbor node and accessible on the associated ULN.</td>
             </tr>
             <tr>
               <td>Link MTU</td>
-              <td>This is the configured or discovered MTU of the first-hop link for the neighbor on the associated network. Similar to the local interface Link MTU, the actual Path MTU to and from this peer might be reduced from any one-hop Link MTU and might be directional.</td>
+              <td>This is the configured or discovered MTU of the first-hop link for the neighbor on the associated ULN. Similar to the local interface Link MTU, the actual Path MTU to and from this peer might be reduced from any one-hop Link MTU and might be directional.</td>
             </tr>
             <tr>
               <td>Reachability</td>
@@ -518,16 +533,20 @@ Due to having multiple-network connectivity, it is possible to have multiple rec
           </thead>
           <tbody>
             <tr>
-              <td>Node ID</td>
+              <td>Neighbor Node ID</td>
               <td>This is the SAND Singleton EID for the node.</td>
             </tr>
             <tr>
-              <td>Interface ID</td>
-              <td>This is a cross-reference to the unique identifier from <xref target="tab-info-local-network"/>, the local network interface which has seen messages from the node.</td>
+              <td>Local Termination Point Index</td>
+              <td>This is a cross-reference to the unique index from <xref target="tab-info-local-network"/>, the local termination point which has seen messages from the node.</td>
+            </tr>
+            <tr>
+              <td>Neighbor Termination Point Index</td>
+              <td>This is the neighbor-provided index for its termination point corresponding to this CL instance.</td>
             </tr>
             <tr>
               <td>CL Type</td>
-              <td>This is the type of CL being represented, which need not be unique when there are multiple instances of a CL operating on a single node-and-underlayer.</td>
+              <td>This is the type of CL being represented, which need not be unique when there are multiple instances of a CL operating on a neighbor node-and-ULN.</td>
             </tr>
             <tr>
               <td>CL Parameters</td>
@@ -690,7 +709,7 @@ This is a more strict requirement than BPv7 itself because SAND processing handl
           </li>
           <li>
 A SAND Bundle <bcp14>SHALL</bcp14> be secured using BPSec blocks as defined in <xref target="sec-transport-security"/> in accordance with <xref target="RFC9172"/>.
-This document does not allow for an insecure use of SAND, although prototype implementations might use insecure transport as an intermediate step to full SAND compliance.
+This document does not allow for an insecure use of SAND, although prototype implementations might use insecure transport as an intermediate step to full SAND conformance.
           </li>
           <li>
 The payload block of a SAND Bundle <bcp14>SHALL</bcp14> contain a CBOR sequence of items.
@@ -780,22 +799,23 @@ Ignoring a superseded message <bcp14>SHALL NOT</bcp14> be considered a failure o
         <name>Default Convergence Layer</name>
         <t>
 Part of the ability of the SAND to be a <em>discovery</em> protocol is the need for initial authenticated messaging without any pre-configuration of any participating node.
-This is accomplished by using the UDPCL with an IP multicast destination, either IPv4 or IPv6 or both as needed on each interface.
+This is accomplished by using the UDPCL with an IP multicast destination, either IPv4 or IPv6 or both as needed on each IP-based ULN termination point.
         </t>
         <t>
-All SAND-participating nodes <bcp14>SHALL</bcp14> listen for UDPCL packets on default port 4556, defined in <xref section="6.2" target="I-D.ietf-dtn-udpcl"/>, and by joining IP multicast group(s) defined in <xref section="6.1" target="I-D.ietf-dtn-udpcl"/> on all interfaces over which the entity is participating in discovery.
+All SAND-participating nodes <bcp14>SHALL</bcp14> listen for UDPCL packets on default port 4556, defined in <xref section="6.2" target="I-D.ietf-dtn-udpcl"/>, and by joining IP multicast group(s) defined in <xref section="6.1" target="I-D.ietf-dtn-udpcl"/> on all local termination points over which the entity is participating in discovery.
 Nodes <bcp14>MAY</bcp14> listen for UDPCL packets destined for other (unicast) addresses and/or on other ports as needed.
         </t>
         <t>
 When sending SAND Bundles, participating nodes <bcp14>SHALL</bcp14> use this default convergence layer in accordance with the modes defined in <xref target="sec-mode"/>, one of which uses the above multicast configuration.
-Because an IP multicast destination is used, the advertising node will need to condition certain UDP and IP parameters based on a specific network interface to send from.
+Because an IP multicast destination is used, the advertising node will need to condition certain UDP and IP parameters based on a specific ULN termination point to send from.
+The means by which an entity does this is implementation specific.
         </t>
         <t>
-To send bundles using the UDPCL on a specific interface:
+To send bundles using the UDPCL on a specific local termination point:
         </t>
         <ul>
           <li>
-An implementation-defined Redundancy Factor <bcp14>SHALL</bcp14> be used based on the specific interface.
+An implementation-defined Redundancy Factor <bcp14>SHALL</bcp14> be used based on the specific ULN or termination point.
           </li>
           <li>The default UDP port 4556 <bcp14>SHALL</bcp14> be used as its destination.</li>
           <li>The default UDP port 4556 <bcp14>SHOULD</bcp14> be used as its source.</li>
@@ -1001,7 +1021,7 @@ The message parameters are listed below and correspond with the CDDL of <xref ta
         <dl>
           <dt>X509 Bag:</dt>
           <dd>
-This pair uses key -1 and value type <tt>COSE_X509</tt> defined in <xref target="RFC9360"/> to convey PKIX certificates as an unordered "bag".
+This pair uses key -1 and value type <tt>COSE_X509</tt> for COSE <xref target="RFC9360"/> to convey PKIX certificates as an unordered "bag".
 Each bag <bcp14>MAY</bcp14> contain multiple end-entity certificates identifying the advertising node with different validity time or different extension items.
 Each bag <bcp14>SHOULD</bcp14> contain intermediate CA certificates up to, but not including, the root CA needed to verify all end-entity certificates.
           </dd>
@@ -1058,7 +1078,7 @@ Each Termination Point List <bcp14>SHALL</bcp14> contain at least one item.
         </dl>
         <t>
 Each Underlayer Advertisement <bcp14>SHALL</bcp14> contain a Convergence Layer List.
-Each item of the Termination Point List <bcp14>SHOULD</bcp14> be reachable via the interface over which the enveloping message is sent.
+Each item of the Termination Point List <bcp14>SHOULD</bcp14> be reachable via the ULN over which the enveloping message is sent.
 Advertising CL instances which are not reachable by receiving SAND participants is simply a waste of advertising resources and possibly by resources on other participants trying to determine reachability.
         </t>
         <figure anchor="fig-msg-uln">
@@ -1086,7 +1106,7 @@ The Termination Point common parameters are listed below and correspond with the
 These are also registered in the IANA registry defined in <xref target="sec-iana-uln"/>.
           </t>
           <dl>
-            <dt>Termination Point Index</dt>
+            <dt>Termination Point Index:</dt>
             <dd>
 This pair uses key 0 and value type <tt>uint</tt>.
 This index uniquely identifies the termination point within the advertising node, and allows correlating changes to its properties across time.
@@ -1095,7 +1115,7 @@ This index uniquely identifies the termination point within the advertising node
             <dd>
 This pair uses key 1 and value type <tt>schedule</tt> as defined in <xref target="fig-msg-schedule"/>.
 Each time at which the schedule is valid indicates when the termination point () is expected to be usable.
-If this parameter is absent the interface <bcp14>SHALL</bcp14> be treated as always valid (within the validity schedule of the node itself, see <xref target="sec-msg-resource"/>).
+If this parameter is absent the termination point <bcp14>SHALL</bcp14> be treated as always valid (within the validity schedule of the node itself, see <xref target="sec-msg-resource"/>).
             </dd>
             <dt>DNS Name List:</dt>
             <dd>
@@ -1105,7 +1125,7 @@ If this parameter is absent the node <bcp14>SHALL</bcp14> be treated as not havi
             <dt>IP Address List:</dt>
             <dd>
               <t>
-This pair uses key 3 and value of a single <tt>bstr</tt> or array of <tt>bstr</tt> from IPv4 or IPv6 addresses encoded as four-byte or 16-byte sequences respectively (consistent with untagged values of <xref target="RFC9164"/>).
+This pair uses key 3 and value of a single <tt>bstr</tt> or array of <tt>bstr</tt> from IPv4 or IPv6 addresses encoded as four-byte or 16-byte sequences respectively (consistent with the types <tt>ipv4-address</tt> and <tt>ipv6-address</tt> from <xref section="5" target="RFC9164"/>).
 If this parameter is absent the node <bcp14>SHALL</bcp14> be treated as not having an IP address on the termination point.
               </t>
               <t>
@@ -1127,16 +1147,16 @@ If this parameter is absent then other means of configuring or estimating link o
             <sourcecode type="cddl">
 uln-tp = {
     msg-base&lt;8&gt;,
-    uln-tp-id,
+    uln-tp-ix,
     ? uln-schedule,
     ? uln-dns-name-list,
     ? uln-ip-addr-list,
     ? uln-mtu,
 }
-uln-tp-id = (
-    0: uln-tp-id-value
+uln-tp-ix = (
+    0: uln-tp-ix-value
 )
-uln-tp-id-value = uint
+uln-tp-ix-value = uint
 
 uln-schedule = (
     1: schedule,
@@ -1178,7 +1198,7 @@ mtu-size = uint .gt 0
       <section anchor="sec-msg-cl">
         <name>Convergence Layer Advertisement</name>
         <t>
-The Convergence Layer Advertisement message indicates the CLA instances available on the advertising node interface sending the message, including both active and passive roles where applicable, and any parameters necessary for peers to make use of those instances.
+The Convergence Layer Advertisement message indicates the CLA instances available on the termination point of the advertising node sending the message, including both active and passive roles where applicable, and any parameters necessary for peers to make use of those instances.
 Each instance can also have an associated validity schedule.
         </t>
         <t>
@@ -1199,7 +1219,7 @@ A Convergence Layer List item <bcp14>MAY</bcp14> have a non-unique CL Type param
         </dl>
         <t>
 Each Convergence Layer Advertisement <bcp14>SHALL</bcp14> contain a Convergence Layer List.
-Each item of the Convergence Layer List <bcp14>SHOULD</bcp14> be reachable via the interface over which the enveloping message is sent.
+Each item of the Convergence Layer List <bcp14>SHOULD</bcp14> be reachable via the ULN and termination point over which the enveloping message is sent.
 Advertising CL instances which are not reachable by receiving SAND participants is simply a waste of advertising resources and possibly by resources on other participants trying to determine reachability.
         </t>
         <figure anchor="fig-msg-cl">
@@ -1237,9 +1257,14 @@ These are also registered in the IANA registry defined in <xref target="sec-iana
 This pair uses key 0 and value of <tt>int16</tt> identifying the type of CL being defined.
 Possible CL Type values are defined <xref target="sec-iana-cl"/> where, similar to message types, positive values are for well-known CL types and negative values are for private or experimental types.
             </dd>
+            <dt>Termination Point Index:</dt>
+            <dd>
+This pair uses key 1 and value of <tt>uint</tt>.
+This index correlates to a Termination Point entry from the <xref format="title" target="sec-msg-uln"/> from the same advertising node.
+            </dd>
             <dt>Bind Address List:</dt>
             <dd>
-This pair uses key 3 and value of a single <tt>bstr</tt> or array of <tt>bstr</tt> from IPv4 or IPv6 addresses encoded as four-byte or 16-byte sequences respectively (consistent with untagged values of <xref target="RFC9164"/>).
+This pair uses key 3 and value of a single <tt>bstr</tt> or array of <tt>bstr</tt> from IPv4 or IPv6 addresses encoded as four-byte or 16-byte sequences respectively (consistent with the types <tt>ipv4-address</tt> and <tt>ipv6-address</tt> from <xref section="5" target="RFC9164"/>).
 Each address represents a destination to which the CL is bound in order to receive traffic.
 If this parameter is absent, the CL <bcp14>SHALL</bcp14> bet treated as if it was bound to the "any endpoint" IPv4 <em>and</em> IPv6 addresses (<tt>0.0.0.0</tt> and <tt>::</tt> respectively).
 If a node has either IPv4 or IPv6 addresses assigned but is not listening on the associated address family, this list <bcp14>SHALL</bcp14> contain the associated "any destination" bind address on which it is listening.
@@ -1279,7 +1304,11 @@ cl-recv = $cl-recv .within sand-generic-structure
 cl-base&lt;val&gt; = (
     ; Value from "SAND CL Types" registry
     0: val .within int16,
+    cl-tp-ix,
     * $$cl-common-grp
+)
+cl-tp-ix = (
+    1: uln-tp-ix-value
 )
 
 $$cl-common-grp //= (
@@ -1315,7 +1344,7 @@ See <xref target="RFC8305"/> for detailed discussion of one possible algorithm f
         <section anchor="sec-cl-tcpclv4">
           <name>TCPCLv4</name>
           <t>
-This CL type specifically refers to the TCPCL version 4 of <xref target="RFC9174"/>.
+This CL type specifically refers to the TCP Convergence Layer (TCPCL) version 4 <xref target="RFC9174"/>.
 This CL type <bcp14>SHALL</bcp14> be identified by code point 1.
           </t>
           <t>
@@ -1332,19 +1361,19 @@ These are also registered in the IANA registry defined in <xref target="sec-iana
             <dd>
 This pair uses key -1 and value type of an array of TCPCL message type code points indicating which types the advertising node supports.
 Well-known code points are managed in the "Bundle Protocol TCP Convergence-Layer Version 4 Message Types" registry of <xref target="IANA-BP"/>.
-All nodes <bcp14>SHALL</bcp14> include the minimum support defined in <xref target="RFC9174"/> as types 0x01 through 0x07 inclusive.
+All nodes <bcp14>SHALL</bcp14> include the minimum support for types 0x01 through 0x07 inclusive.
             </dd>
             <dt>Session Extension Type Support:</dt>
             <dd>
 This pair uses key -2 and value type of an array of TCPCL session extension type code points indicating which types the advertising node supports.
 Well-known code points are managed in the "Bundle Protocol TCP Convergence-Layer Version 4 Session Extension Types" registry of <xref target="IANA-BP"/>.
-There is no required minimum support defined in <xref target="RFC9174"/>.
+There is no required minimum session extension support defined for TCPCL.
             </dd>
             <dt>Transfer Extension Type Support:</dt>
             <dd>
 This pair uses key -3 and value type of an array of TCPCL transfer extension type code points indicating which types the advertising node supports.
 Well-known code points are managed in the "Bundle Protocol TCP Convergence-Layer Version 4 Transfer Extension Types" registry of <xref target="IANA-BP"/>.
-All nodes <bcp14>SHALL</bcp14> include the minimum support defined in <xref target="RFC9174"/> as type 0x01.
+All nodes <bcp14>SHALL</bcp14> include the minimum transfer extension support for TCPCL as type 0x01.
             </dd>
           </dl>
           <figure anchor="fig-cl-tcpclv4">
@@ -1411,17 +1440,17 @@ udpcl-ext-support = (
         <section anchor="sec-cl-ltpcl-udp">
           <name>LTPCL Over UDP</name>
           <t>
-While there is no IETF specification for transporting BPv7 bundles over the Licklider Transport Protocol (LTP) of <xref target="RFC5326"/>, the CCSDS profile of BPv7 includes a specification for this in Appendix <cref>TBD</cref> of <xref target="CCSDS-BPv7"/> using Client Service ID (CSID) value 5.
+While there is no IETF specification for transporting BPv7 bundles over the Licklider Transport Protocol (LTP) <xref target="RFC5326"/>, the Consultative Committee for Space Data Systems (CCSDS) profile of BPv7 includes a specification for this in Appendix&nbsp;<cref>TBD</cref> of <xref target="CCSDS-BPv7"/> using Client Service ID (CSID) value 5.
 Additionally the LTP-over-UDP binding is defined in <xref section="3.3" target="RFC7122"/>.
 This CL type <bcp14>SHALL</bcp14> be identified by code point 3.
           </t>
           <t>
 There is also a CCSDS experimental BPv7 specification which has allocated LTP CSID value 4 for aggregating BP PDUs.
-The use of LTP CSID 4 to transport one or more BP PDUs as defined in Appendix B2.1.4 of <xref target="CCSDS-BPv7-OB"/> <bcp14>SHALL</bcp14> be identified by code point 252.
+The use of LTP CSID 4 to transport one or more BP PDUs as defined in Appendix&nbsp;B2.1.4 of <xref target="CCSDS-BPv7-OB"/> <bcp14>SHALL</bcp14> be identified by code point 252.
           </t>
           <t>
 While there is no concrete specification for transporting BPv7 bundles over LTP using other LTP CSID values <xref target="IANA-LTP"/> <xref target="SANA-LTP"/>, this specification makes an allocation to allow a node to advertise that it is using other combinations of protocols.
-The use of LTP CSID 1 to transport single BP PDUs as defined for BPv6 in Appendix B3 of <xref target="CCSDS-BPv6"/> <bcp14>SHALL</bcp14> be identified by code point 253.
+The use of LTP CSID 1 to transport single BP PDUs as defined for BPv6 in Appendix&nbsp;B3 of <xref target="CCSDS-BPv6"/> <bcp14>SHALL</bcp14> be identified by code point 253.
           </t>
           <t>
 If the Port Number parameter is absent, the default LTP port 1113 <bcp14>SHALL</bcp14> be used.
@@ -1441,7 +1470,7 @@ Knowing the Engine ID of a peer before initiating or responding to LTP sessions 
             <dd>
 This pair uses key -2 and value type of an array of LTP extension tag code points indicating which tags the advertising node supports.
 Well-known code points are managed in the "LTP Extension Tags" registry of <xref target="IANA-LTP"/>.
-There is no required minimum support defined in <xref target="RFC5326"/>.
+There is no required minimum extension support defined for LTP.
             </dd>
           </dl>
           <figure anchor="fig-cl-ltpcl-udp">
@@ -1484,7 +1513,7 @@ $cl-recv /= {
         <section anchor="sec-cl-udpcl-7122">
           <name>RFC 7122 UDPCL</name>
           <t>
-While there is no concrete specification for transporting BPv7 bundles over the UDPCL as defined in <xref target="RFC7122"/>, this specification makes an allocation to allow a node to express that it is using this combination of protocols.
+While there is no concrete specification for transporting BPv7 bundles over the experimental UDPCL <xref target="RFC7122"/>, this specification makes an allocation to allow a node to express that it is using this combination of protocols.
 This CL type <bcp14>SHALL</bcp14> be identified by code point 255.
           </t>
           <figure anchor="fig-cl-udpcl-7122">
@@ -1626,9 +1655,9 @@ localtopo-nbr-base = {
 }
 
 nbr-nodeid = (
-    0: embed-eid-structure ; From [I-D.ietf-dtn-eid-pattern]
+    ; Type from [I-D.ietf-dtn-eid-pattern]
+    0: embed-eid-structure
 )
-
 nbr-comm-status = (
     1: &amp;(
         HEARD: 1,
@@ -1665,6 +1694,12 @@ These are also registered in an IANA registry defined in <xref target="sec-iana-
 This pair uses key 0 and value type <tt>int16</tt> identifying a specific routing algorithm.
 The registry of SAND routing types is IANA-managed and defined in <xref target="sec-iana-local-topo"/>.
             </dd>
+            <dt>Termination Point Index:</dt>
+            <dd>
+This pair uses key 3 and value type <tt>uint</tt> identifying a specific termination point index (local to the advertising node) with which these metrics are associated.
+This can correlate with other Termination Point Index values expressed through <xref format="title" target="sec-msg-uln"/> messages.
+Including these index values on metrics allows a node to express having multiple paths to reach a 1-hop neighbor, each with different metrics.
+            </dd>
             <dt>Direction:</dt>
             <dd>
               <t>
@@ -1672,10 +1707,10 @@ This pair uses key 1 and value type <tt>uint</tt> containing an enumerated value
 The value is one of the following:
               </t>
               <dl>
-                <dt>TRANSMIT (1):</dt>
-                <dd>This means the metrics are associated with traffic from this node to the parent peer.</dd>
-                <dt>RECEIVE (2):</dt>
-                <dd>This means the metrics are associated with traffic to this node from the parent peer.</dd>
+                <dt>TRANSMIT:</dt>
+                <dd>This value 1 means the metrics are associated with traffic from the advertising node to the parent peer node.</dd>
+                <dt>RECEIVE:</dt>
+                <dd>This value 2 means the metrics are associated with traffic to the advertising node from the parent peer node.</dd>
               </dl>
             </dd>
             <dt>Validity Schedule:</dt>
@@ -1688,12 +1723,6 @@ Each time at which the schedule is valid indicates when communication is expecte
 This is different than the resource schedule of the node itself, and represents availability of the shared network between the advertising node and this peer.
               </t>
             </dd>
-            <dt>Termination Point Index</dt>
-            <dd>
-This pair uses key 3 and value type <tt>uint</tt> identifying a specific termination point index (local to the advertising node) with which these metrics are associated.
-This can correlate with other Termination Point Index values expressed through <xref format="title" target="sec-msg-uln"/> messages.
-Including these index values on metrics allows a node to express having multiple paths to reach a 1-hop neighbor, each with different metrics.
-            </dd>
           </dl>
           <figure anchor="fig-nbr-metrics">
             <name>Routing Metrics Structure and Parameters CDDL</name>
@@ -1704,11 +1733,14 @@ nbr-metrics = $nbr-metrics .within sand-generic-structure
 nbr-metrics-base&lt;val&gt; = (
     ; Value from "SAND Routing Types" registry
     0: val .within int16,
+    metrics-tp-ix,
     metrics-direction,
     * $$nbr-metrics-common-grp,
     * priv16 => any,
 )
-
+metrics-tp-ix = (
+    3: uln-tp-ix-value
+)
 metrics-direction = (
     1: &amp;(
         TRANSMIT: 1,
@@ -1719,15 +1751,12 @@ metrics-direction = (
 $$nbr-metrics-common-grp //= (
     2: schedule
 )
-$$nbr-metrics-common-grp //= (
-    3: uln-tp-id-value
-)
             </sourcecode>
           </figure>
           <section anchor="sec-msg-local-topo-metrics-sabr">
             <name>SABR/CGR</name>
             <t>
-This routing type captures metrics needed for input to the Schedule-Aware Bundle Routing (SABR) algorithm defined in <xref target="CCSDS-SABR"/>.
+This routing type captures metrics needed for input to the Schedule-Aware Bundle Routing (SABR) algorithm <xref target="CCSDS-SABR"/> defined by CCSDS.
             </t>
             <aside>
               <t>
@@ -1989,29 +2018,29 @@ This message set consists of the following:
           <dt>Data Solicitation:</dt>
           <dd>
             <t>
-The node <bcp14>SHALL</bcp14> include a Data Solicitation message if the time since the last Data Solicitation on that interface has exceeded an implementation-defined threshold.
+The node <bcp14>SHALL</bcp14> include a Data Solicitation message if the time since the last Data Solicitation on that termination point has exceeded an implementation-defined threshold.
             </t>
             <t>
-For a new enrollment, a node <bcp14>SHOULD</bcp14> solicit all of the following: Credential Advertisement, Resource Advertisement, Interface Advertisement, Convergence Layer Advertisement, Local Topology Advertisement.
+For a new enrollment, a node <bcp14>SHOULD</bcp14> solicit all of the following: Credential Advertisement, Resource Advertisement, Underlayer Advertisement, Convergence Layer Advertisement, Local Topology Advertisement.
 For link state change, a node <bcp14>SHOULD</bcp14> solicit at least Local Topology Advertisement.
             </t>
           </dd>
           <dt>Credential Advertisement:</dt>
           <dd>
-For a new enrollment, the node <bcp14>SHALL</bcp14> include an Credential Advertisement message containing certificates which the node considers safe to advertise on that interface and its network.
-For a link state change, the node <bcp14>SHOULD</bcp14> include an Credential Advertisement message if the time since the last Credential Advertisement on that interface has exceeded an implementation-defined threshold.
+For a new enrollment, the node <bcp14>SHALL</bcp14> include an Credential Advertisement message containing certificates which the node considers safe to advertise on that termination point and its network.
+For a link state change, the node <bcp14>SHOULD</bcp14> include an Credential Advertisement message if the time since the last Credential Advertisement on that termination point has exceeded an implementation-defined threshold.
           </dd>
-          <dt>Interface Advertisement:</dt>
+          <dt>Underlayer Advertisement:</dt>
           <dd>
-The node <bcp14>SHALL</bcp14> include an Interface Advertisement containing parameters which apply to that interface.
+The node <bcp14>SHALL</bcp14> include an Underlayer Advertisement containing parameters which apply to that termination point.
           </dd>
           <dt>Convergence Layer Advertisement:</dt>
           <dd>
-The node <bcp14>SHALL</bcp14> include a Convergence Layer Advertisement message containing CLs which apply to that interface.
+The node <bcp14>SHALL</bcp14> include a Convergence Layer Advertisement message containing CLs which apply to that termination point.
           </dd>
           <dt>Local Topology Advertisement:</dt>
           <dd>
-The node <bcp14>SHOULD</bcp14> include a Local Topology Advertisement message containing peers which the node considers safe to advertise on that interface and its network.
+The node <bcp14>SHOULD</bcp14> include a Local Topology Advertisement message containing peers which the node considers safe to advertise on that termination point and its network.
           </dd>
         </dl>
       </section>
@@ -2039,18 +2068,27 @@ This section separates security considerations into threat categories based on g
       <section anchor="sec-security-passive-leak">
         <name>Threat: Passive Leak of Data</name>
         <t>
-Because this protocol is involved in enrollment of a node into a BP network, the initial group messaging from a participating node necessarily has a plaintext payload.
+Because this protocol is involved in enrollment of a node into a BP network, any initial zero-configuration <xref target="sec-mode-group-hello">group messaging</xref> from a participating node necessarily has a plaintext payload.
         </t>
         <t>
 One avoidance of passive leaking is for the advertising node to filter-out sensitive data from its initial messages.
-This could include not disclosing certain IP addresses assigned to interfaces, certain CL instances, or certain 1-hop neighbors from advertisement messages.
+This could include not disclosing certain DNS names or IP addresses assigned to termination points, certain CL instances, or certain 1-hop neighbors from advertisement messages.
 It could also include not disclosing certificates from CAs or with key purposes which are sensitive.
-Because the initial group messaging is interface-specific, the filtering-out of data does not need to be symmetric across all interfaces on which the node is participating in SAND.
+Because the initial group messaging is termination point-specific, the filtering-out of data does not need to be symmetric across all termination points on which the node is participating in SAND.
         </t>
         <t>
-Another possible mitigation is to avoid group messaging entirely on an interface and rely on lower-layer network peer discovery to identify potential participants and then attempt to use UDPCL with DTLS to establish secure transport with the peer.
+Another possible mitigation is to avoid group messaging entirely on a termination point and rely on lower-layer network peer discovery to identify potential participants and then attempt to use UDPCL with DTLS (or some underlayer-specific equivalent) to establish secure transport with the peer.
 While more secure from eavesdroppers, this method is more time- and resource-consuming than group messaging.
 This method also assumes that transport-layer security is even possible while in some environments only BP-layer security is viable.
+        </t>
+      </section>
+      <section anchor="sec-security-replay">
+        <name>Threat: SAND Bundle Replay</name>
+        <t>
+Regardless of whether the SAND messages are kept confidential (using BPSec or lower-layer security) there is a possibility for an on-path attacker to record and replay SAND bundles.
+        </t>
+        <t>
+Because this specification defines rules for superseding messages in <xref target="sec-transport-latest"/> and there is already an expectation that redundant transmissions can happen normally in the <xref format="title" target="sec-transport-cl"/>, the only bad effect of SAND bundle replay is to waste network resources on the path(s) to the bundle destinations.
         </t>
       </section>
       <section>
@@ -2062,7 +2100,7 @@ The denial-of-service could be limited to an individual node, or could affect al
         <t>
 Because there is a <xref format="title" target="sec-msg-solicit"/> mechanism it is possible to attempt an amplification attack by soliciting many types of data, with corresponding large bundle size, using a small request bundle.
 A mitigation of this kind of attack is to treat solicitation requests in the context of minimum and maximum update intervals.
-Rather than causing a set of advertisements directly, the solicitation is treated as an update timer reset limited accordingly.
+Rather than causing a set of advertisements directly, the solicitation is treated as an update timer reset and is limited according to that timer interval.
         </t>
         <t>
 A participating node may, intentionally or not, use singleton or group messaging to overwhelm a link or network, requiring the receiving node to process the data.
@@ -2070,8 +2108,8 @@ This kind of attack applies to BP Agents generally and is not specific to SAND m
 The victim node can block bundles from network peers which are thought to be incorrectly behaving within network.
         </t>
         <t>
-Because the <xref format="title" target="sec-transport-cl"/> uses UDP transport, the recommended configurations of this document result in behaviors which conform to the limitations of <xref target="RFC8085"/>, specifically Section 4.
-This protocol uses the "congestion avoidance" strategy by having implementations choose appropriate timer intervals for minimum SAND updates and, when applicable, for UDPCL redundant transmission <xref section="3.3.1" target="I-D.ietf-dtn-udpcl"/>.
+Because the <xref format="title" target="sec-transport-cl"/> uses UDP transport, the recommended configurations of this document result in behaviors which conform to the limitations of "UDP Usage Guidelines" BCP 145, specifically <xref section="4" target="RFC8085"/>.
+This protocol uses the "congestion avoidance" strategy by having implementations choose appropriate timer intervals for minimum SAND updates and, when applicable, for UDPCL redundant transmission explained in <xref section="3.3.1" target="I-D.ietf-dtn-udpcl"/>.
         </t>
       </section>
       <section anchor="sec-security-identity">
@@ -2089,7 +2127,7 @@ Determination of this need is a network administration matter outside the scope 
         <name>Messaging Without Authentication</name>
         <t>
 In environments where PKI is not available for the BP-layer, the SAND could be operated without the requirements of <xref target="sec-transport-security"/> but doing so is outside the scope of this document.
-Even in cases where there is network-layer or link-layer security, specifically source authentication with proof-of-possession, having an authorized lower-layer identity does not convey to unlimited BP-layer authorization.
+Even in cases where there is network-layer or link-layer security, specifically source authentication with proof-of-possession, having an authorized lower-layer identity does not imply unlimited BP-layer authorization.
 Part of the purpose of BP-layer integrity protection is to prevent a misconfigured node from polluting topology information bases of BP routers.
         </t>
       </section>
@@ -2097,7 +2135,7 @@ Part of the purpose of BP-layer integrity protection is to prevent a misconfigur
     <section anchor="sec-iana">
       <name>IANA Considerations</name>
       <t>
-Registration procedures referred to in this section are defined in <xref target="RFC8126"/>.
+This section provides guidance to the Internet Assigned Numbers Authority (IANA) regarding registration of code points in existing registries and creation of new SAND registries in accordance with BCP 26 <xref target="RFC8126"/>.
       </t>
       <section anchor="sec-iana-well-known-imc">
         <name>Well-Known IMC Group and Service</name>
@@ -2499,6 +2537,11 @@ Expert(s) are encouraged to be biased towards approving registrations unless the
             <tr>
               <td>0</td>
               <td>CL Type</td>
+              <td><xref target="sec-msg-cl-inst"/> of [This specification]</td>
+            </tr>
+            <tr>
+              <td>1</td>
+              <td>Termination Point Index</td>
               <td><xref target="sec-msg-cl-inst"/> of [This specification]</td>
             </tr>
             <tr>
@@ -3025,6 +3068,7 @@ Expert(s) are encouraged to be biased towards approving registrations unless the
         <xi:include href="https://xml2rfc.tools.ietf.org/public/rfc/bibxml/reference.RFC.8175.xml"/>
         <xi:include href="https://xml2rfc.tools.ietf.org/public/rfc/bibxml/reference.RFC.8305.xml"/>
         <xi:include href="https://xml2rfc.tools.ietf.org/public/rfc/bibxml/reference.RFC.8345.xml"/>
+        <xi:include href="https://xml2rfc.tools.ietf.org/public/rfc/bibxml/reference.RFC.8415.xml"/>
         <xi:include href="https://xml2rfc.tools.ietf.org/public/rfc/bibxml/reference.RFC.9164.xml"/>
         <xi:include href="https://xml2rfc.tools.ietf.org/public/rfc/bibxml3/reference.I-D.ietf-tvr-requirements.xml"/>
         <xi:include href="https://xml2rfc.tools.ietf.org/public/rfc/bibxml3/reference.I-D.irtf-dtnrg-ipnd.xml"/>
