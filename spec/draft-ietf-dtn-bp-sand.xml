@@ -130,23 +130,42 @@ start = sand-adu-seq / sand-msg
 The key words "MUST", "MUST NOT", "REQUIRED", "SHALL", "SHALL NOT", "SHOULD", "SHOULD NOT", "RECOMMENDED", "NOT RECOMMENDED", "MAY", and "OPTIONAL" in this document are to be interpreted as described in BCP 14 <xref target="RFC2119"/> <xref target="RFC8174"/> when, and only when, they appear in all capitals, as shown here.
         </t>
         <t>
-Terminology used within the SAND protocol includes the following:
+This document re-uses the following terms from IETF network topology model <xref target="RFC8345"/>.
+        </t>
+        <dl>
+          <dt>Node:</dt>
+          <dd>This refers both to the concept of a BP node and more generally as a node in a network inventory or topology.</dd>
+          <dt>Termination Point:</dt>
+          <dd>This refers to a single stable, identified feature of a node to which underlayer names and/or addresses are assigned.</dd>
+          <dt>Link:</dt>
+          <dd>This term is used in the abstract sense to identify pairwise reachability between termination points of different nodes.</dd>
+          <dt>Inventory:</dt>
+          <dd>A collection of known nodes and their properties without regard for their reachability.</dd>
+          <dt>Topology:</dt>
+          <dd>A collection of nodes which includes information about reachability via termination points and links.</dd>
+          <dt>Supporting Network:</dt>
+          <dd>Within the SAND data model, an underlayer network is used in support of a BP network without regard to the specific technology of that underlayer. Each underlayer network will have its own topology which is managed separately from the BP network topology used by SAND.</dd>
+        </dl>
+        <t>
+Additional terminology used within the SAND protocol includes the following.
         </t>
         <dl>
           <dt>Advertising node:</dt>
           <dd>The BP node which is the source of a SAND Bundle containing SAND Messages.</dd>
           <dt>Participating node:</dt>
           <dd>A BP node which sources and/or delivers SAND Bundles.</dd>
+          <dt>Reference node:</dt>
+          <dd>A BP node which serves as the reference point for some local topology.</dd>
           <dt>Reachable:</dt>
           <dd>A one-way determination of whether a source node can transfer bundles to a destination node (via any number of BP hops using any combination of CLs).</dd>
           <dt>1-hop Reachable:</dt>
-          <dd>A one-way determination of whether a destination node is reachable via a single BP hop.</dd>
+          <dd>A one-way determination of whether a destination node is reachable from a reference node via a single BP hop.</dd>
           <dt>1-hop Neighbor:</dt>
-          <dd>A participating node for which this node is 1-hop reachable. The other node does not need to also be 1-hop reachable from this node to be a neighbor.</dd>
+          <dd>A participating node for which a reference node is 1-hop reachable. The other node does not need to also be 1-hop reachable from the reference node to be a neighbor.</dd>
           <dt>Mutual Neighbors:</dt>
           <dd>Two nodes which each identify the other as a 1-hop neighbor.</dd>
           <dt>2-hop Neighbor:</dt>
-          <dd>A participating node which is a 1-hop neighbor of a 1-hop neighbor of this node, but is not itself a 1-hop neighbor of this node.</dd>
+          <dd>A participating node which is a 1-hop neighbor of a 1-hop neighbor of a reference node, but is not itself a 1-hop neighbor of the reference node.</dd>
           <dt>Neighborhood:</dt>
           <dd>The collection of all 1-hop and 2-hop neighbors of a participating node.</dd>
         </dl>
@@ -244,7 +263,7 @@ An operating schedule which indicates "always on" is a valid default.
           </tbody>
         </table>
         <t>
-The ULN information described in <xref target="tab-info-local-network"/> allows a participating node to define different profiles for different networks (IP or otherwise) accessible by the node through local termination points (consistent with IETF topology terminology <xref target="RFC8345"/>).
+The ULN information described in <xref target="tab-info-local-network"/> allows a participating node to define different profiles for different networks (IP or otherwise) accessible by the node through local termination points.
 As defined in <xref target="sec-mode"/>, when assembling and sending SAND messages much of the data can be filtered-down based on what is accessible via a termination point associated with the network-layer source of a SAND message (among other possible additional filtering, see <xref target="sec-security-passive-leak"/>).
         </t>
         <table align="center" anchor="tab-info-local-network">
