@@ -283,6 +283,9 @@ Whether or not this index corresponds some way to other identifiers is an implem
               </td>
             </tr>
             <tr>
+              <td align="center" colspan="2">Properties below are based on the above unique key columns.</td>
+            </tr>
+            <tr>
               <td>Accessible Network Set</td>
               <td>
 This is the set of ULN names and addresses assigned to the termination point and associated subnetworks accessible to this node via the termination point.
@@ -363,6 +366,9 @@ The Identity information of <xref target="tab-info-local-identity-ee"/> is a log
               <td>This is the <tt>x5t</tt> or <tt>c5t</tt> thumbnail of the encoded certificate, used as a selector.</td>
             </tr>
             <tr>
+              <td align="center" colspan="2">Properties below are based on the above unique key columns.</td>
+            </tr>
+            <tr>
               <td>Key Usage</td>
               <td>This is the extracted Key Usage value, from <xref section="4.2.1.3" target="RFC5280"/>, used as a selector.</td>
             </tr>
@@ -391,6 +397,9 @@ The trust anchor information of <xref target="tab-info-local-identity-ca"/> is a
             <tr>
               <td>Subject Key Identifier</td>
               <td>This is the extracted Subject Key Identifier, from <xref section="4.2.1.2" target="RFC5280"/>, used as a selector.</td>
+            </tr>
+            <tr>
+              <td align="center" colspan="2">Properties below are based on the above unique key columns.</td>
             </tr>
             <tr>
               <td>Validity Time Interval</td>
@@ -430,6 +439,9 @@ This will cause the CL instance to no longer be associated with its previous par
             <tr>
               <td>Termination Point Index</td>
               <td>An index which corresponds to one of the underlayer network entries of <xref target="tab-info-local-network"/> and distinguishes different instances of a CL type.</td>
+            </tr>
+            <tr>
+              <td align="center" colspan="2">Properties below are based on the above unique key columns.</td>
             </tr>
             <tr>
               <td>Bind IP Addresses</td>
@@ -503,12 +515,19 @@ Due to having multiple-network connectivity, it is possible to have multiple rec
           </thead>
           <tbody>
             <tr>
+              <td>Local Termination Point Index</td>
+              <td>This is a cross-reference to the unique index from <xref target="tab-info-local-network"/>, the local termination point which has seen messages from the node.</td>
+            </tr>
+            <tr>
               <td>Neighbor Node ID</td>
               <td>This is a cross-reference to the unique identifier from <xref target="tab-info-neighbor-node"/>.</td>
             </tr>
             <tr>
-              <td>Local Termination Point Index</td>
-              <td>This is a cross-reference to the unique index from <xref target="tab-info-local-network"/>, the local termination point which has seen messages from the node. Any neighbor index for its corresponding reachable termination point(s) is independent of this index.</td>
+              <td>Neighbor Termination Point Index</td>
+              <td>This is the neighbor-provided index for its termination point corresponding to this record.</td>
+            </tr>
+            <tr>
+              <td align="center" colspan="2">Properties below are based on the above unique key columns.</td>
             </tr>
             <tr>
               <td>Latest Timestamps</td>
@@ -531,8 +550,8 @@ Due to having multiple-network connectivity, it is possible to have multiple rec
               <td>An indication of whether this neighbor has been only received from (HEARD), or if this node is present in that neighbor's own 1-hop neighbor list (SYMMETRIC), or if no messages have been received after some time (LOST).</td>
             </tr>
             <tr>
-              <td>Path Metrics</td>
-              <td>This is the set of network-level metrics for expected path delay, maximum data rate, and bit error rate in each direction.</td>
+              <td>Routing Metrics</td>
+              <td>This is the set of routing metrics for expected path delay, maximum data rate, and bit error rate in each direction between the two termination points.</td>
             </tr>
             <tr>
               <td>Timeout</td>
@@ -550,20 +569,26 @@ Due to having multiple-network connectivity, it is possible to have multiple rec
           </thead>
           <tbody>
             <tr>
-              <td>Neighbor Node ID</td>
-              <td>This is the SAND Singleton EID for the node.</td>
-            </tr>
-            <tr>
               <td>Local Termination Point Index</td>
               <td>This is a cross-reference to the unique index from <xref target="tab-info-local-network"/>, the local termination point which has seen messages from the node.</td>
             </tr>
             <tr>
+              <td>Neighbor Node ID</td>
+              <td>This is the SAND Singleton EID for the node.</td>
+            </tr>
+            <tr>
               <td>Neighbor Termination Point Index</td>
-              <td>This is the neighbor-provided index for its termination point corresponding to this CL instance.</td>
+              <td>This is the neighbor-provided index for its termination point corresponding to this record.</td>
+            </tr>
+            <tr>
+              <td align="center" colspan="2">Properties below are based on the above unique key columns.</td>
             </tr>
             <tr>
               <td>CL Type</td>
               <td>This is the type of CL being represented, which need not be unique when there are multiple instances of a CL operating on a neighbor node-and-ULN.</td>
+            </tr>
+            <tr>
+              <td align="center" colspan="2">Properties below are based on the above unique key columns.</td>
             </tr>
             <tr>
               <td>CL Parameters</td>
@@ -580,7 +605,7 @@ This category of information is about an individual node, or pairs of nodes, ind
         <t>
 An information base for 2-hop neighbors is limited to only those which have symmetric reachability between that node and one of the 1-hop neighbors from <xref target="tab-info-neighbor-node"/>.
 This information includes simplified path metrics between the 1-hop and 2-hop neighbors.
-Due to having multiple-network connectivity, it is possible to have multiple records identifying the same 2-hop Neighbor but each will have their own set of path metrics for a specific network.
+Due to having multiple-network connectivity, it is possible to have multiple records identifying the same 2-hop Neighbor but each will have their own set of path metrics for a specific pair of termination points.
         </t>
         <table align="center" anchor="tab-info-peer-node">
           <name>Peer Node Information Columns</name>
@@ -602,7 +627,8 @@ Due to having multiple-network connectivity, it is possible to have multiple rec
           </tbody>
         </table>
         <t>
-          <cref>TBD</cref>
+The network information base does not include any CL information because that is only needed for reaching 1-hop neighbors.
+Only coarse routing metrics are needed between peer nodes outside of 1-hop neighbors.
         </t>
         <table align="center" anchor="tab-info-peer-reachability">
           <name>Peer Reachability Information Columns</name>
@@ -618,12 +644,23 @@ Due to having multiple-network connectivity, it is possible to have multiple rec
               <td>This is a cross-reference to a unique identifier from <xref target="tab-info-peer-node"/>.</td>
             </tr>
             <tr>
+              <td>Left Termination Point Index</td>
+              <td>This is the index for the termination point of the left node corresponding to this record.</td>
+            </tr>
+            <tr>
               <td>Right Node ID</td>
               <td>This is a cross-reference to a unique identifier from <xref target="tab-info-peer-node"/>.</td>
             </tr>
             <tr>
-              <td>Path Metrics</td>
-              <td>This is the set of network-level path metrics between the left and right node.</td>
+              <td>Right Termination Point Index</td>
+              <td>This is the index for the termination point of the right node corresponding to this record.</td>
+            </tr>
+            <tr>
+              <td align="center" colspan="2">Properties below are based on the above unique key columns.</td>
+            </tr>
+            <tr>
+              <td>Routing Metrics</td>
+              <td>This is the set of routing metrics between the left and right node.</td>
             </tr>
           </tbody>
         </table>
@@ -655,6 +692,9 @@ The Peer Certificate Information <bcp14>SHALL</bcp14> be de-duplicated from the 
             <tr>
               <td>Subject Key Identifier</td>
               <td>This is the extracted Subject Key Identifier, from <xref section="4.2.1.2" target="RFC5280"/>, used as a selector.</td>
+            </tr>
+            <tr>
+              <td align="center" colspan="2">Properties below are based on the above unique key columns.</td>
             </tr>
             <tr>
               <td>Key Usage</td>
