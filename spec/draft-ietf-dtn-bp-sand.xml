@@ -1203,12 +1203,12 @@ If this parameter is absent then other means of configuring or estimating link o
             <name>Termination Point Structure CDDL</name>
             <sourcecode type="cddl">
 uln-tp = {
-    msg-base&lt;8&gt;,
     uln-tp-ix,
     ? uln-schedule,
     ? uln-dns-name-list,
     ? uln-ip-addr-list,
     ? uln-mtu,
+    * priv16 => any
 }
 uln-tp-ix = (
     0: uln-tp-ix-value
@@ -1793,7 +1793,6 @@ nbr-metrics-base&lt;val&gt; = (
     metrics-tp-ix,
     metrics-direction,
     * $$nbr-metrics-common-grp,
-    * priv16 => any,
 )
 metrics-tp-ix = (
     3: uln-tp-ix-value
