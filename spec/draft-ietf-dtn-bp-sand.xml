@@ -2149,10 +2149,11 @@ This protocol uses the "congestion avoidance" strategy by having implementations
         <name>Threat: Route Leaking and Hijacking</name>
         <t>
 The choice to advertise attached networks by a BP router (see <xref target="sec-msg-router"/>) is a separate concern from the choice of other participating nodes to authorize use (some or all of) those advertised networks for routing.
-This authorization-for-routing is also separate from the recording of recevied SAND data in information bases associated with the advertising node.
+This authorization-for-routing is also separate from the recording of received SAND data in information bases associated with the advertising node.
         </t>
         <t>
 Without proper authorization for routing use, the vulnerabilities associated with route leaking <xref target="RFC4593"/> and route hijacking <xref target="RFC7908"/> apply to the online use of SAND Router Advertisement.
+There is currently no equivalent to Resource Public Key Infrastructure (RPKI) <xref target="RFC6480"/> for authorizing BP routing.
         </t>
       </section>
       <section anchor="sec-security-identity">
@@ -3062,6 +3063,7 @@ Expert(s) are encouraged to be biased towards approving registrations unless the
         <xi:include href="https://xml2rfc.tools.ietf.org/public/rfc/bibxml/reference.RFC.5444.xml"/>
         <xi:include href="https://xml2rfc.tools.ietf.org/public/rfc/bibxml/reference.RFC.5706.xml"/>
         <xi:include href="https://xml2rfc.tools.ietf.org/public/rfc/bibxml/reference.RFC.6130.xml"/>
+        <xi:include href="https://xml2rfc.tools.ietf.org/public/rfc/bibxml/reference.RFC.6480.xml"/>
         <xi:include href="https://xml2rfc.tools.ietf.org/public/rfc/bibxml/reference.RFC.7908.xml"/>
         <xi:include href="https://xml2rfc.tools.ietf.org/public/rfc/bibxml/reference.RFC.7942.xml"/>
         <xi:include href="https://xml2rfc.tools.ietf.org/public/rfc/bibxml/reference.RFC.8085.xml"/>
