@@ -958,7 +958,7 @@ The initial message metadata are listed below and correspond with the CDDL of <x
         <dt anchor="item-ref-time">Reference Time:</dt>
         <dd>
           <t>
-This pair uses key 2 and vale type <tt>dtn-time</tt> indicating the absolute time of the start of validity of this message in the DTN time epoch (see <xref section="4.2.6" target="RFC9171"/>).
+This pair uses key 2 and value type <tt>dtn-time</tt> indicating the absolute time of the start of validity of this message in the DTN time epoch (see <xref section="4.2.6" target="RFC9171"/>).
 If no Reference Time is present, the message <bcp14>SHALL</bcp14> be treated as being valid from the containing bundle's Creation Timestamp.
 The Reference Time is also used as the epoch for any <tt>schedule</tt> structure in the same message, defined later in this section.
           </t>
@@ -970,7 +970,7 @@ Otherwise, this value <bcp14>SHALL</bcp14> be present to avoid any difference be
         <dt>Validity Duration:</dt>
         <dd>
           <t>
-This pair uses key 3 and vale type <tt>time-duration</tt> indicating the validity-time of the message contents in milliseconds.
+This pair uses key 3 and value type <tt>time-duration</tt> indicating the validity-time of the message contents in milliseconds.
 If no Validity Duration is present, the message <bcp14>SHALL</bcp14> be treated as being valid through the containing bundle's Lifetime.
 The Validity Duration <bcp14>SHALL</bcp14> be interpreted as starting at the <xref format="none" target="item-ref-time">Reference Time</xref> from the same message, if present, or the bundle's creation timestamp.
           </t>
@@ -981,7 +981,7 @@ Otherwise, this value <bcp14>SHALL</bcp14> be sourced from the Validity Duration
         </dd>
         <dt anchor="param-rep-intvl">Repetition Interval:</dt>
         <dd>
-This pair uses key 4 and vale type <tt>time-duration</tt> indicating the periodic interval of the message type in milliseconds.
+This pair uses key 4 and value type <tt>time-duration</tt> indicating the periodic interval of the message type in milliseconds.
 If no Repetition Interval is present, the message <bcp14>SHALL NOT</bcp14> be assumed to be sent at a fixed periodic interval.
         </dd>
       </dl>
@@ -1277,24 +1277,24 @@ These parameters are also in the IANA registry defined in <xref target="sec-iana
         <dl>
           <dt>CL Type:</dt>
           <dd>
-This pair uses key 0 and vale type <tt>int16</tt> identifying the type of CL being defined.
+This pair uses key 0 and value type <tt>int16</tt> identifying the type of CL being defined.
 Possible CL Type values are defined <xref target="sec-iana-cl"/> where, similar to message types, positive values are for well-known CL types and negative values are for private or experimental types.
           </dd>
           <dt>Termination Point Index:</dt>
           <dd>
-This pair uses key 1 and vale type <tt>uint</tt>.
+This pair uses key 1 and value type <tt>uint</tt>.
 This index correlates to a Termination Point entry from the <xref format="title" target="sec-msg-uln"/> from the same advertising node.
           </dd>
           <dt>Transport Security Required:</dt>
           <dd>
-This pair uses key 5 and vale type <tt>bool</tt> indicating whether transport security is required (when <tt>true</tt>) or prohibited (when <tt>false</tt>).
+This pair uses key 5 and value type <tt>bool</tt> indicating whether transport security is required (when <tt>true</tt>) or prohibited (when <tt>false</tt>).
 Details about how to interpret this common parameter are CL-type-specific.
 If this parameter is absent there is no information about the required policy.
           </dd>
           <dt>Roles:</dt>
           <dd>
             <t>
-This pair uses key 6 and vale type <tt>uint</tt> containing flags indicating which CL-specific roles the advertising node can act as.
+This pair uses key 6 and value type <tt>uint</tt> containing flags indicating which CL-specific roles the advertising node can act as.
 Details about how to interpret this common parameter are CL-type-specific.
             </t>
             <t>
@@ -1369,7 +1369,7 @@ If a node has either IPv4 or IPv6 addresses assigned but is not listening on the
             </dd>
             <dt>Bind Port Number:</dt>
             <dd>
-This pair uses key 4 and vale type <tt>uint</tt> indicating the transport-layer port number to which the CL is bound.
+This pair uses key 4 and value type <tt>uint</tt> indicating the transport-layer port number to which the CL is bound.
 If this parameter is absent the default (<em>i.e.</em>, IANA assigned) port number <bcp14>SHALL</bcp14> be used.
             </dd>
           </dl>
@@ -1637,7 +1637,7 @@ These parameters are also in the IANA registry defined in <xref target="sec-iana
         <dl>
           <dt>Node ID:</dt>
           <dd>
-This pair uses key 0 and vale type <tt>embed-eid-structure</tt> from <xref section="4" target="I-D.ietf-dtn-eid-pattern"/> representing the unique SAND Singleton EID for the neighbor node.
+This pair uses key 0 and value type <tt>embed-eid-structure</tt> from <xref section="4" target="I-D.ietf-dtn-eid-pattern"/> representing the unique SAND Singleton EID for the neighbor node.
           </dd>
           <dt>Reachability:</dt>
           <dd>
@@ -1796,17 +1796,17 @@ Metrics parameters with negative keys are delegated to an algorithm-specific reg
           <dl>
             <dt>Maximum Data Rate:</dt>
             <dd>
-This pair uses key -1 and vale type <tt>unsigned-fraction</tt> indicating the expected maximum data rate of traffic in octets per second.
+This pair uses key -1 and value type <tt>unsigned-fraction</tt> indicating the expected maximum data rate of traffic in octets per second.
 This data rate is measured at the underlying link layer, not just the throughput of BP PDUs.
             </dd>
             <dt>Delay:</dt>
             <dd>
-This pair uses key -2 and vale type <tt>time-duration</tt> indicating the expected one-way light time (OWLT) of traffic in milliseconds.
+This pair uses key -2 and value type <tt>time-duration</tt> indicating the expected one-way light time (OWLT) of traffic in milliseconds.
 This delay is measured between the two BP nodes so it is more than just the free-space propagation delay, it also includes any expected underlay, CLA, and BPA processing time.
             </dd>
             <dt>Bit Error Rate:</dt>
             <dd>
-This pair uses key -3 and vale type <tt>unsigned-fraction</tt> indicating the expected bit error rate (BER) of traffic as a ratio.
+This pair uses key -3 and value type <tt>unsigned-fraction</tt> indicating the expected bit error rate (BER) of traffic as a ratio.
 This BER is measured at the underlying link layer and includes errors which are caught by underlayer checksums (<em>e.g.</em>, where the CL segment/frame is lost).
             </dd>
           </dl>
@@ -1868,17 +1868,17 @@ The message parameters are listed below and correspond with the CDDL of <xref ta
         <dl>
           <dt>Willingness for Singleton:</dt>
           <dd>
-This pair uses key 1 and vale type <tt>uint</tt> representing a willingness to route (see later definition) for bundles with a singleton destination EID.
+This pair uses key 1 and value type <tt>uint</tt> representing a willingness to route (see later definition) for bundles with a singleton destination EID.
 The absence of this parameter <bcp14>SHALL</bcp14> be interpreted as a willingness of zero (not willing).
           </dd>
           <dt>Willingness for Multipoint:</dt>
           <dd>
-This pair uses key 2 and vale type <tt>uint</tt> representing a willingness to route (see later definition) for bundles with a non-singleton destination EID.
+This pair uses key 2 and value type <tt>uint</tt> representing a willingness to route (see later definition) for bundles with a non-singleton destination EID.
 The absence of this parameter <bcp14>SHALL</bcp14> be interpreted as a willingness of zero (not willing).
           </dd>
           <dt>Attached Networks:</dt>
           <dd>
-This pair uses key 3 and vale type <tt>bstr</tt> embedding an EID Pattern as defined in <xref section="4" target="I-D.ietf-dtn-eid-pattern"/>.
+This pair uses key 3 and value type <tt>bstr</tt> embedding an EID Pattern as defined in <xref section="4" target="I-D.ietf-dtn-eid-pattern"/>.
 The value contains the set of endpoints not participating in SAND but for which the advertising node is willing to route.
 The value <bcp14>MAY</bcp14> be an any-scheme pattern or contain an any-SSP pattern.
           </dd>
