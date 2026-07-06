@@ -2149,8 +2149,10 @@ This protocol uses the "congestion avoidance" strategy by having implementations
         <name>Threat: Route Leaking and Hijacking</name>
         <t>
 The choice to advertise attached networks by a BP router (see <xref target="sec-msg-router"/>) is a separate concern from the choice of other participating nodes to authorize use (some or all of) those advertised networks for routing.
-
-<xref target="RFC4593"/> <xref target="RFC7908"/>
+This authorization-for-routing is also separate from the recording of recevied SAND data in information bases associated with the advertising node.
+        </t>
+        <t>
+Without proper authorization for routing use, the vulnerabilities associated with route leaking <xref target="RFC4593"/> and route hijacking <xref target="RFC7908"/> apply to the online use of SAND Router Advertisement.
         </t>
       </section>
       <section anchor="sec-security-identity">
