@@ -140,6 +140,7 @@ Retransmit
 retransmitted
 RKF
 Routeable
+RPKI
 SABR
 SSL
 SSP
