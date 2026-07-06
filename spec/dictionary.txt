@@ -86,6 +86,7 @@ ipv
 IPv
 IRDP
 JHU
+jitter
 keepalive
 Keepalive
 Licklider
