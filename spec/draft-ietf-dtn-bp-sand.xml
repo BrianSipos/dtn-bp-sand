@@ -918,8 +918,9 @@ The registry of metadata parameters is IANA-managed and defined in <xref target=
         </li>
         <li>
 One or more maps of type-specific message data matching the <tt>sand-generic-map</tt> rule.
-All keys in a message data map <bcp14>SHALL</bcp14> be of type <tt>int16</tt> identifying the purpose of each map value.
-Each message type definition must include details about the labels in its associated message data map, including which values are required to be present.
+All keys in a message data map <bcp14>SHALL</bcp14> be of type <tt>int16</tt> identifying the purpose of each associated map value.
+Together each map key and value are referred to as a "parameter" in this document.
+Each message type definition must include details about the parameters in its associated data map, including what each map represents and which parameters are required to be present in a map.
         </li>
       </ol>
       <figure anchor="fig-msg-structure">
@@ -2345,7 +2346,7 @@ Specifications of new common parameters need to define the code point (an <tt>in
 Expert(s) are encouraged to be biased towards approving registrations unless they are abusive, frivolous, or actively harmful (not merely aesthetically displeasing, or architecturally dubious).
         </t>
         <table align="center" anchor="tab-iana-msg-meta">
-          <name>SAND Message Metadata Labels</name>
+          <name>SAND Message Metadata Parameters</name>
           <thead>
             <tr>
               <th>Code</th>
