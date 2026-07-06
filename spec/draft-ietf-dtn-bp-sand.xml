@@ -990,16 +990,14 @@ If no Repetition Interval is present, the message <bcp14>SHALL NOT</bcp14> be as
         <sourcecode type="cddl"><![CDATA[
 ; Generic for a specific message type
 ; The type-id is from "SAND Message Types" registry
-; The item-grp defines type-specific labels
-sand-msg-gen<type-id, item-grp> = [
+; The data-map defines type-specific labels
+sand-msg-gen<type-id, data-map> = [
     msg-type: type-id
     msg-meta: {
         * $$msg-meta-grp,
         * priv16 => any
     },
-    + msg-data: {
-        * item-grp
-    }
+    + msg-data: data-map
 ]
 
 $$msg-meta-grp //= (
@@ -1062,7 +1060,7 @@ Any solicitation of a Data Solicitation message type <bcp14>SHALL</bcp14> be ign
         <figure anchor="fig-msg-solicit">
           <name>Data Solicitation Message CDDL</name>
           <sourcecode type="cddl"><![CDATA[
-$sand-msg /= sand-msg-gen<1, $$solicit-grp>
+$sand-msg /= sand-msg-gen<1, {+ $$solicit-grp }>
 
 ; Message type list
 $$solicit-grp //= (
@@ -1110,7 +1108,7 @@ The Credential Advertisement message is populated in-part using the data identif
         <figure anchor="fig-msg-credential">
           <name>Credential Advertisement Message CDDL</name>
           <sourcecode type="cddl"><![CDATA[
-$sand-msg /= sand-msg-gen<2, $$cred-grp>
+$sand-msg /= sand-msg-gen<2, {+ $$cred-grp }>
 
 ; X509 Bag
 $$cred-grp //= (
@@ -1153,7 +1151,7 @@ If this parameter is absent the termination point <bcp14>SHALL</bcp14> be treate
         <figure anchor="fig-msg-uln">
           <name>ULN Advertisement message CDDL</name>
           <sourcecode type="cddl"><![CDATA[
-$sand-msg /= sand-msg-gen<8, $$uln-grp>
+$sand-msg /= sand-msg-gen<8, {+ $$uln-grp }>
 
 ; Termination Point Index
 $$uln-grp //= (
@@ -1608,7 +1606,7 @@ The absence of this parameter <bcp14>SHALL</bcp14> be interpreted as the node ex
         <figure anchor="fig-msg-resource">
           <name>Resource Advertisement CDDL</name>
           <sourcecode type="cddl"><![CDATA[
-$sand-msg /= sand-msg-gen<4, $$resource-grp>
+$sand-msg /= sand-msg-gen<4, {+ $$resource-grp }>
 
 ; Operating schedule
 $$resource-grp //= (
@@ -1664,7 +1662,7 @@ Each Routing Metrics List item <bcp14>SHALL</bcp14> have a unique combination of
         <figure anchor="fig-msg-localtopo">
           <name>Local Topology Advertisement CDDL</name>
           <sourcecode type="cddl"><![CDATA[
-$sand-msg /= sand-msg-gen<5, $$localtopo-grp>
+$sand-msg /= sand-msg-gen<5, {+ $$localtopo-grp }>
 
 ; Node ID
 $$localtopo-grp //= (
@@ -1898,7 +1896,7 @@ See <xref target="sec-security-attached-authz"/> for considerations about using 
         <figure anchor="fig-msg-router">
           <name>Router Advertisement CDDL</name>
           <sourcecode type="cddl"><![CDATA[
-$sand-msg /= sand-msg-gen<1, $$router-grp>
+$sand-msg /= sand-msg-gen<1, {+ $$router-grp }>
 
 ; Willingness for Singleton
 $$router-grp //= (
@@ -1959,7 +1957,7 @@ The security flag at bit 1 indicates that the any accepted security block <bcp14
         <figure anchor="fig-msg-endpoint">
           <name>Endpoint Advertisement CDDL</name>
           <sourcecode type="cddl"><![CDATA[
-$sand-msg /= sand-msg-gen<7, $$endpoint-grp>
+$sand-msg /= sand-msg-gen<7, {+ $$endpoint-grp }>
 
 $$endpoint-grp //= ( * priv16 => any )
 
