@@ -212,7 +212,7 @@ Future modes could involve multi-hop flooding of bundles to distribute data for 
         <t>
 Many of the structural, behavioral, and especially timing definitions in this specification follow the model of MANET messaging <xref target="RFC5444"/> and MANET NHDP <xref target="RFC6130"/> in both terminology and semantics.
 This is intentional to allow an implementer to understand BP discovery with very similar logic to MANET discovery.
-Where the NHDP is concerned with IP routers discovering reachable IP routes, the SAND is concerned with BP nodes discovering reachable bundle routes.
+Where the NHDP is concerned with IP routers discovering reachable IP neighbors and routes, SAND is concerned with BP nodes discovering reachable BP neighbors and routes.
         </t>
         <t>
 A node participating in the SAND protocol is expected to use lower-layer discovery mechanisms as necessary to enroll in a local network, obtain network-layer address(es) and parameters, and possibly discover network-layer neighbor nodes and routers.
@@ -220,7 +220,7 @@ This might involve the use of IPv4 Internet Router Discovery Protocol (IRDP) <xr
         </t>
         <t>
 The robust and delay-tolerant protocol in this document is also compatible with the DNS-Based Service Discovery (DNS-SD) of BP routers by edge nodes <xref target="I-D.sipos-dtn-edge-zeroconf"/>.
-The SAND can be used to enroll an edge router in a BP network and synchronize routing information across a variety of network and link types, while DNS-SD is used within IP stub underlay networks (or enclaves) at the edges of the BP network.
+The SAND protocol can be used to enroll an edge router in a BP network and synchronize routing information across a variety of network and link types, while DNS-SD is used within IP stub underlay networks (or enclaves) at the edges of the BP network for simpler and more synchronous edge nodes.
         </t>
       </section>
     </section>
@@ -793,12 +793,18 @@ Because multiple SAND Messages can be sent in a single bundle to which a Hop Lim
       <section anchor="sec-transport-prevnode">
         <name>Previous Node Identification</name>
         <t>
-In order to properly handle an SAND Bundle, the previous-hop node needs to be positively identified.
-This occurs by using either an authenticated identity from the CL over which the bundle was received, if available, a Previous Node extension block <xref section="4.4.1" target="RFC9171"/>, if present, or the Source Node ID from the Primary block <xref section="4.3.1" target="RFC9171"/>.
+In order to properly handle a SAND Bundle, the previous-hop node needs to be positively identified.
+This occurs by using one of the following (in priority order):
         </t>
+        <ol>
+          <li>An authenticated identity (EID) from the CL over which the bundle was received, when available.</li>
+          <li>An authenticated Previous Node extension block <xref section="4.4.1" target="RFC9171"/>, which is mandated below when forwarding beyond the first hop.</li>
+          <li>The Source Node ID from the Primary block <xref section="4.3.1" target="RFC9171"/> when forwarding for the first hop.</li>
+        </ol>
         <t>
 A SAND Bundle which is forwarded over a CL which includes an authenticated identity <bcp14>SHOULD NOT</bcp14> contain a Previous Node extension block.
-Otherwise, a SAND Bundle which is forwarded but not sourced on a node <bcp14>SHALL</bcp14> contain a Previous Node extension block to indicate that the node sending it is not its source.
+Otherwise, a SAND Bundle which is forwarded from a node which is not its source <bcp14>SHALL</bcp14> contain a Previous Node extension block to indicate that the node sending it is not its source.
+This last requirement is more strict than <xref section="4.3.1" target="RFC9171"/> to ensure that the forwarding node identity can always be determined for a SAND bundle.
         </t>
       </section>
       <section anchor="sec-transport-security">
@@ -852,49 +858,96 @@ The timestamp comparison <bcp14>SHALL</bcp14> be based on ordering of the DTN Ti
 Ignoring a superseded message <bcp14>SHALL NOT</bcp14> be considered a failure of processing the message, its containing ADU, or its containing bundle.
         </t>
       </section>
-      <section anchor="sec-transport-cl">
-        <name>Default Convergence Layer</name>
+      <section anchor="sec-transport-cls">
+        <name>Default Convergence Layers</name>
         <t>
 Part of the ability of the SAND to be a <em>discovery</em> protocol is the need for initial authenticated messaging without any pre-configuration of any participating node.
-This is accomplished by using the UDPCL with an IP multicast destination, either IPv4 or IPv6 or both as needed on each IP-based ULN termination point.
-        </t>
-        <t>
-All SAND-participating nodes <bcp14>SHALL</bcp14> listen for UDPCL packets on default port 4556, defined in <xref section="6.2" target="I-D.ietf-dtn-udpcl"/>, and by joining IP multicast group(s) defined in <xref section="6.1" target="I-D.ietf-dtn-udpcl"/> on all local termination points over which the entity is participating in discovery.
-Nodes <bcp14>MAY</bcp14> listen for UDPCL packets destined for other (unicast) addresses and/or on other ports as needed.
-        </t>
-        <t>
-When sending SAND Bundles, participating nodes <bcp14>SHALL</bcp14> use this default convergence layer in accordance with the modes defined in <xref target="sec-mode"/>, one of which uses the above multicast configuration.
-Because an IP multicast destination is used, the advertising node will need to condition certain UDP and IP parameters based on a specific ULN termination point to send from.
-The means by which an entity does this is implementation specific.
-        </t>
-        <t>
-To send bundles using the UDPCL on a specific local termination point:
+This is accomplished by using one or all of the following as needed on each ULN termination point:
         </t>
         <ul>
-          <li>
-An implementation-defined Redundancy Factor <bcp14>SHALL</bcp14> be used based on the specific ULN or termination point.
-          </li>
-          <li>The default UDP port 4556 <bcp14>SHALL</bcp14> be used as its destination.</li>
-          <li>The default UDP port 4556 <bcp14>SHOULD</bcp14> be used as its source.</li>
-          <li>
-            <t>
-If a specific destination IP address is given that <bcp14>SHALL</bcp14> be used as its destination.
-Otherwise, use one or more of the following:
-            </t>
-            <ul>
-              <li>
-If the interface has an assigned IPv4 address, a UDPCL transfer <bcp14>SHALL</bcp14> be sent using the IPv4 multicast address for "All BP Nodes" as its destination and that assigned address as its source.
-              </li>
-              <li>
-If the interface has an assigned IPv6 address, a UDPCL transfer <bcp14>SHALL</bcp14> be sent using the IPv6 multicast address for "All BP Nodes" as its destination and that assigned address as its source.
-              </li>
-            </ul>
-          </li>
-          <li>
-Unless there is additional configuration available, the link MTU <bcp14>SHALL</bcp14> be assumed to be the path MTU for all nodes on that IP network.
-The advertising node <bcp14>SHALL</bcp14> use CL segmentation as necessary to adapt the SAND Bundle size to the path MTU.
-          </li>
+          <li>Sending with <xref target="sec-msg-cl-udpclv2">UDPCLv2</xref> to an IPv4 multicast destination</li>
+          <li>Sending with <xref target="sec-msg-cl-udpclv2">UDPCLv2</xref> to an IPv6 multicast destination.</li>
+          <li>Sending with <xref target="sec-msg-cl-btpuoe">BTPU-over-Ethernet</xref> to a multicast destination.</li>
         </ul>
+        <section>
+          <name>IP Multicast Discovery</name>
+          <t>
+All SAND-participating nodes <bcp14>SHALL</bcp14> listen for UDPCL packets on default port 4556 (defined in <xref section="6.2" target="I-D.ietf-dtn-udpcl"/>) and by joining IP multicast group(s) defined in <xref section="6.1" target="I-D.ietf-dtn-udpcl"/> on all local termination points on which the entity has an IP address and over which the entity is participating in discovery.
+Nodes <bcp14>MAY</bcp14> listen for UDPCL packets destined for other (unicast) addresses and/or on other ports as needed.
+          </t>
+          <t>
+When sending SAND Bundles, participating nodes <bcp14>SHALL</bcp14> use this default UDPCL listener in accordance with the modes defined in <xref target="sec-mode"/>, one of which uses the above multicast configuration.
+Because a multicast destination is used, the advertising node will need to condition certain UDP and IP parameters based on a specific ULN termination point to send from.
+The means by which an entity does this is implementation specific.
+          </t>
+          <t>
+To send bundles using the UDPCL on a specific local termination point:
+          </t>
+          <ul>
+            <li>
+An implementation-defined Redundancy Factor <bcp14>SHALL</bcp14> be used based on the specific ULN or termination point.
+            </li>
+            <li>The default UDP port 4556 <bcp14>SHALL</bcp14> be used as its destination.</li>
+            <li>The default UDP port 4556 <bcp14>SHOULD</bcp14> be used as its source.</li>
+            <li>
+              <t>
+If a specific destination IP address is given that <bcp14>SHALL</bcp14> be used as its destination.
+              </t>
+              <t>
+Otherwise, use one or more of the following:
+              </t>
+              <ul>
+                <li>
+If the termination point has an assigned IPv4 address, a UDPCL transfer <bcp14>SHALL</bcp14> be sent using the IPv4 multicast address for "All BP Nodes" as its destination.
+                </li>
+                <li>
+If the termination point has an assigned IPv6 address, a UDPCL transfer <bcp14>SHALL</bcp14> be sent using the IPv6 multicast address for "All BP Nodes" as its destination.
+                </li>
+              </ul>
+            </li>
+            <li>
+A corresponding local IPv4 or IPv6 address for the termination point <bcp14>SHALL</bcp14> be used as its source.
+            </li>
+            <li>
+Unless there is additional configuration available, the link MTU <bcp14>SHALL</bcp14> be assumed to be the path MTU for all nodes on that MAC domain.
+The advertising node <bcp14>SHALL</bcp14> use CL segmentation as necessary to adapt the transfer size to the path MTU.
+            </li>
+          </ul>
+        </section>
+        <section>
+          <name>Ethernet Multicast Discovery</name>
+          <t>
+All SAND-participating nodes <bcp14>MAY</bcp14> listen for BTP-U messages on default ethertype by joining multicast group defined in <xref section="4.2.1" target="I-D.ek-dtn-ethernet"/> on all local termination points over which the entity is participating in discovery.
+          </t>
+          <t>
+When sending SAND Bundles, participating nodes <bcp14>SHALL</bcp14> use this default BTPU-over-Ethernet listener in accordance with the modes defined in <xref target="sec-mode"/>, one of which uses the above multicast configuration.
+Because a multicast destination is used, the advertising node will need to condition certain interface parameters based on a specific ULN termination point to send from.
+The means by which an entity does this is implementation specific.
+          </t>
+          <t>
+To send bundles using BTPU-over-Ethernet on a specific local termination point:
+          </t>
+          <ul>
+            <li>
+An implementation-defined Redundancy Factor <bcp14>SHALL</bcp14> be used based on the specific ULN or termination point.
+            </li>
+            <li>
+              <t>
+If a specific destination MAC address is given that <bcp14>SHALL</bcp14> be used as its destination.
+              </t>
+              <t>
+Otherwise, if the termination point has an assigned Ethernet MAC address, a BTPU-over-Ethernet transfer <bcp14>SHALL</bcp14> be sent using the Ethernet multicast address for "All BP Nodes" as its destination.
+              </t>
+            </li>
+            <li>
+A corresponding local MAC address for the termination point <bcp14>SHALL</bcp14> be used as its source.
+            </li>
+            <li>
+Unless there is additional configuration available, the link MTU <bcp14>SHALL</bcp14> be assumed to be the path MTU for all nodes on that IP network.
+The advertising node <bcp14>SHALL</bcp14> use CL segmentation as necessary to adapt the transfer size to the path MTU.
+            </li>
+          </ul>
+        </section>
       </section>
     </section>
     <section anchor="sec-msg">
@@ -1201,17 +1254,24 @@ If this parameter is absent the node <bcp14>SHALL</bcp14> be treated as not havi
             <dt>IP Address List:</dt>
             <dd>
               <t>
-This pair uses key 3 and value of a single <tt>bstr</tt> or array of <tt>bstr</tt> from IPv4 or IPv6 addresses encoded as four-byte or 16-byte sequences respectively (consistent with the types <tt>ipv4-address</tt> and <tt>ipv6-address</tt> from <xref section="5" target="RFC9164"/>).
-If this parameter is absent the node <bcp14>SHALL</bcp14> be treated as not having an IP address on the ULN.
+This pair uses key 3 and value type <tt>ip-addr-ctr</tt> from IPv4 or IPv6 addresses encoded as 4-byte or 16-byte strings respectively.
+The encodings are consistent with the types <tt>ipv4-address</tt> and <tt>ipv6-address</tt> from <xref section="5" target="RFC9164"/>).
+If this parameter is absent the node <bcp14>SHALL</bcp14> be treated as not having a specific IP address on the ULN.
               </t>
               <t>
 This address list <bcp14>MAY</bcp14> contain link-local addresses if the sender has an expectation that <xref target="sec-msg-cl">CL instances</xref> will be usable over the associated IP endpoint.
               </t>
             </dd>
+            <dt>MAC Address List:</dt>
+            <dd>
+This pair uses key 5 and value type <tt>mac-addr-ctr</tt> from EUI-48 or EUI-64 addresses encoded as 6-byte or 8-byte strings respectively.
+The encodings are consistent with the unwrapped CBOR tag 48 from <xref section="2.4" target="RFC9542"/>).
+If this parameter is absent the node <bcp14>SHALL</bcp14> be treated as not having a specific MAC address on the ULN.
+            </dd>
             <dt>Link MTU:</dt>
             <dd>
-This pair uses key 4 and value indicating the link MTU, as seen by the termination point of the advertising node, in units of octets.
-This value <bcp14>SHOULD</bcp14> adhere to the lower limit of 68 octets for IPv4 <xref target="RFC791"/> or 1280 for IPv6 <xref target="RFC8200"/>.
+This pair uses key 4 and value type <tt>mtu-size</tt> indicating the link MTU, as seen by the termination point of the advertising node, in units of octets.
+This value <bcp14>SHALL</bcp14> adhere to the lower limit of 68 octets for IPv4 <xref target="RFC791"/> or 1280 for IPv6 <xref target="RFC8200"/> when those technologies are used on the termination point.
 Other ULN technologies will still have an MTU value but with a different lower bound.
 If this parameter is absent then other means of configuring or estimating link or path MTU are needed.
             </dd>
@@ -1247,6 +1307,16 @@ ip-addr-ctr = ip-address / [+ ip-address]
 ip-address = ipv4-address / ipv6-address
 ipv4-address = bstr .size 4
 ipv6-address = bstr .size 16
+
+; MAC Address List
+$$uln-grp //= (
+    5: mac-addr-ctr
+)
+mac-addr-ctr = mac-address / [+ mac-address]
+; Agrees with untagged bstr contents from [RFC 9542]
+mac-address = eui48-address / eui64-address
+eui48-address = bstr .size 6
+eui64-address = bstr .size 8
 
 ; Link MTU
 $$uln-grp //= (
@@ -1313,13 +1383,13 @@ Even when acting in the active role only, the CL <bcp14>MAY</bcp14> still be bou
 $sand-msg /= sand-msg-gen<3, cl-recv>
 cl-recv = $cl-recv .within sand-generic-map
 
-; Generic to provide base CL instance
+; Generic to provide base CL parameters
 ; The cl-type is from "SAND CL Types" registry
-cl-base<cl-type> = {
+cl-base<cl-type> = (
     0: cl-type .within int16,
     cl-tp-ix,
     $$cl-common-grp
-}
+)
 
 ; Corresponding ULN TP Index
 cl-tp-ix = (
@@ -1356,42 +1426,52 @@ Even in that case there is still value in discovering the presence of the non-li
         <section anchor="sec-msg-cl-ip">
           <name>IP-Related CL Parameters</name>
           <t>
-There are several common CL parameters related to IP-based transports: an IPv4/IPv6 address and port number used to bind a transport endpoint.
+These are several common CL parameters related to IP-based or IP-related transports.
           </t>
           <dl>
-            <dt>Bind Address List:</dt>
-            <dd>
-This pair uses key 3 and value of a single <tt>bstr</tt> or array of <tt>bstr</tt> from IPv4 or IPv6 addresses encoded as four-byte or 16-byte sequences respectively (consistent with the types <tt>ipv4-address</tt> and <tt>ipv6-address</tt> from <xref section="5" target="RFC9164"/>).
-Each address represents a destination to which the CL is bound in order to receive traffic.
-If this parameter is absent, the CL <bcp14>SHALL</bcp14> bet treated as if it was bound to the "any endpoint" IPv4 <em>and</em> IPv6 addresses (<tt>0.0.0.0</tt> and <tt>::</tt> respectively).
-If a node has either IPv4 or IPv6 addresses assigned but is not listening on the associated address family, this list <bcp14>SHALL</bcp14> contain the associated "any destination" bind address on which it is listening.
-            </dd>
             <dt>Bind Port Number:</dt>
             <dd>
 This pair uses key 4 and value type <tt>uint</tt> indicating the transport-layer port number to which the CL is bound.
-If this parameter is absent the default (<em>i.e.</em>, IANA assigned) port number <bcp14>SHALL</bcp14> be used.
+If this parameter is absent, an IP-based CL type shall be treated as using the default (<em>i.e.</em>, IANA assigned) port number <bcp14>SHALL</bcp14> for that type.
+            </dd>
+            <dt>IP Bind List:</dt>
+            <dd>
+This pair uses key 3 and value type <tt>ip-addr-ctr</tt> from IPv4 or IPv6 addresses encoded as 4-byte or 16-byte strings respectively.
+Each address represents a local destination to which the CL is bound in order to receive traffic.
+If this parameter is absent, an IP-based CL type <bcp14>SHALL</bcp14> be treated as if it was bound to the "any endpoint" IPv4 <em>and</em> IPv6 addresses (<tt>0.0.0.0</tt> and <tt>::</tt> respectively).
+If a node has either IPv4 or IPv6 addresses assigned but is not listening on the associated address family, this list <bcp14>SHALL</bcp14> contain the associated "any destination" bind address on which it <em>is</em> listening.
+            </dd>
+            <dt>IP Multicast List:</dt>
+            <dd>
+This pair uses key 5 and value type <tt>ip-addr-ctr</tt> from IPv4 or IPv6 addresses encoded as 4-byte or 16-byte strings respectively.
+Each address represents a multicast group for which the CL is a member in order to receive traffic.
+If this parameter is absent, an IP-based CL type <bcp14>SHALL</bcp14> be treated as if it does not participate in any multicast group.
             </dd>
           </dl>
           <figure anchor="fig-msg-cl-ip">
             <name>IP-Related CL Parameters CDDL</name>
             <sourcecode type="cddl"><![CDATA[
-; Bind IP address(es)
-$$cl-common-grp //= (
-    3: ip-addr-ctr
-)
 ; Bind port number
 $$cl-common-grp //= (
     4: 1 .. 0xFFFF
 )
+; IP bind address(es)
+$$cl-common-grp //= (
+    3: ip-addr-ctr
+)
+; IP multicast address(es)
+$$cl-common-grp //= (
+    5: ip-addr-ctr
+)
 ]]></sourcecode>
           </figure>
           <t>
-A <xref target="sec-msg-uln">ULN Advertisement</xref> from a node can contain any combination of DNS Name List, IP Address List, and Link MTU items.
-Because of this individual CL Instances <bcp14>MAY</bcp14> contain additional DNS names and/or IP addresses specific to that instance.
-Duplication between underlayer DNS Name or IP Address and CL instance values <bcp14>SHOULD</bcp14> be avoided, but has no effect on the interpretation of the values.
+A <xref target="sec-msg-uln">ULN Advertisement</xref> from a node can contain any combination of DNS Name List, IP Address List, MAC Address List, and Link MTU items.
+Because of this individual CL Instances <bcp14>MAY</bcp14> contain additional DNS names and/or addresses specific to that instance.
+Duplication between underlayer DNS name or address and CL instance values <bcp14>SHOULD</bcp14> be avoided, but has no effect on the interpretation of the values.
           </t>
           <t>
-If multiple values are present in Bind Address List for a CL it is an implementation matter to choose which one to attempt first, and whether multiple attempts are made sequentially or simultaneously.
+If multiple values are present in IP Address List for a CL it is an implementation matter to choose which one to attempt first, and whether multiple attempts are made sequentially or simultaneously.
 One possible algorithm to handle multiple network addresses for the same service is Happy Eyeballs <xref target="RFC8305"/>, but details are likely to be CL-type-specific.
           </t>
         </section>
@@ -1492,7 +1572,7 @@ udpcl-ext-support = (
           </figure>
         </section>
         <section anchor="sec-msg-cl-ltpcl-udp">
-          <name>LTPCL-Over-UDP Parameters</name>
+          <name>LTPCL-over-UDP Parameters</name>
           <t>
 While there is no IETF specification for transporting BPv7 bundles over the Licklider Transport Protocol (LTP) <xref target="RFC5326"/>, the Consultative Committee for Space Data Systems (CCSDS) profile of BPv7 includes a specification for this in Appendix&nbsp;<cref>TBD</cref> of <xref target="CCSDS-BPv7"/> using Client Service ID (CSID) value 5.
 Additionally the LTP-over-UDP binding is defined in <xref section="3.3" target="RFC7122"/>.
@@ -1545,6 +1625,69 @@ ltp-ext-support = (
 ]]></sourcecode>
           </figure>
         </section>
+        <section anchor="sec-msg-cl-btpuoe">
+          <name>BTPU-over-Ethernet Parameters</name>
+          <t>
+This CL type specifically refers to the transport of BTP-U PDUs <xref target="I-D.ietf-dtn-btpu"/> in Ethernet frames <xref target="I-D.ek-dtn-ethernet"/>.
+This CL type <bcp14>SHALL</bcp14> be identified by code point 4.
+          </t>
+          <t>
+This CL type does not make use of any of the <xref target="sec-msg-cl-ip">IP-related parameters</xref> or the Transport Security Required parameter.
+          </t>
+          <t>
+The CL-specific parameters are listed below and correspond with the CDDL of <xref target="fig-cl-btpuoe"/>.
+These are also registered in the IANA registry defined in <xref target="sec-iana-cl"/>.
+          </t>
+          <t>
+<cref>This parameterization assumes there is a single well-known ethertype assigned by <xref target="I-D.ek-dtn-ethernet"/> and used by all implementations.</cref>
+<cref>Is there a need to expose transfer ID window size for receiver? Would it affect sending behavior?</cref>
+          </t>
+          <dl>
+            <dt>Hint Support:</dt>
+            <dd>
+This pair uses key -1 and value type of an array of BTP-U Hint Type code points indicating which extensions the advertising node supports.
+Well-known code points are managed in the "BTPU Hint Types" registry of <xref target="IANA-BP"/>.
+This information indicates support without needing to operate the actual CL. 
+            </dd>
+            <dt>MAC Bind List:</dt>
+            <dd>
+This pair uses key -2 and value type <tt>mac-addr-ctr</tt> from EUI-48 or EUI-64 addresses encoded as 6-byte or 8-byte strings respectively.
+Each address represents a local destination to which the CL is bound in order to receive traffic.
+If this parameter is absent, the CL instance <bcp14>SHALL</bcp14> be treated as if it was bound to the "any endpoint" MAC address(es).
+            </dd>
+            <dt>MAC Multicast List:</dt>
+            <dd>
+This pair uses key -3 and value type <tt>mac-addr-ctr</tt> from EUI-48 or EUI-64 addresses encoded as 6-byte or 8-byte strings respectively.
+Each address represents a multicast group for which the CL is a member in order to receive traffic.
+If this parameter is absent, the CL instance <bcp14>SHALL</bcp14> be treated as if it does not participate in any multicast group.
+            </dd>
+          </dl>
+          <figure anchor="fig-cl-btpuoe">
+            <name>BTPUoE Parameters CDDL</name>
+            <sourcecode type="cddl"><![CDATA[
+$cl-recv /= {
+    cl-base<4>,
+    * $$cl-btpuoe-grp,
+}
+
+; Hint Type support
+$$cl-btpuoe-grp //= (
+    -1: [+ btpu-hint]
+)
+btpu-hint = 0x00 .. 0x7F
+
+; MAC bind address(es)
+$$cl-btpuoe-grp //= (
+    -2: mac-addr-ctr,
+)
+; MAC multicast address(es)
+$$cl-btpuoe-grp //= (
+    -3: mac-addr-ctr,
+)
+
+]]></sourcecode>
+          </figure>
+        </section>
         <section anchor="sec-msg-cl-tcpclv3">
           <name>TCPCLv3 Parameters</name>
           <t>
@@ -1571,7 +1714,7 @@ While there is no concrete specification for transporting BPv7 bundles over the 
 This CL type <bcp14>SHALL</bcp14> be identified by code point 255.
           </t>
           <figure anchor="fig-cl-udpcl-7122">
-            <name>RFC 7122 UDPCL Parameters CDDL</name>
+            <name>Experimental UDPCL Parameters CDDL</name>
             <sourcecode type="cddl"><![CDATA[
 $cl-recv /= {
     cl-base<255>,
@@ -2005,7 +2148,7 @@ Because SAND messages can be combined in many ways and because the contents of e
       <section anchor="sec-mode-group-hello">
         <name>Group Hello</name>
         <t>
-When a node first enrolls in a network, or when a node is informed of a link state change to active, it <bcp14>SHOULD</bcp14> send an Group Hello message set with a Hop Limit of 1 using the <xref format="title" target="sec-transport-cl"/>.
+When a node first enrolls in a network, or when a node is informed of a link state change to active, it <bcp14>SHOULD</bcp14> send an Group Hello message set with a Hop Limit of 1 using the <xref format="title" target="sec-transport-cls"/>.
 Because this is a group destination, it will be sent as a plaintext payload.
 This message set consists of the following:
         </t>
@@ -2042,7 +2185,7 @@ The node <bcp14>SHOULD</bcp14> include a Local Topology Advertisement message co
       <section anchor="sec-mode-targeted-hello">
         <name>Targeted Hello</name>
         <t>
-When a node is informed by some lower-level discovery mechanism that a specific peer is reachable via IP address, it <bcp14>SHOULD</bcp14> send a Targeted Hello message set with a Hop Limit of 1 using the <xref format="title" target="sec-transport-cl"/> with the peer's IP address as destination.
+When a node is informed by some lower-level discovery mechanism that a specific peer is reachable via IP address, it <bcp14>SHOULD</bcp14> send a Targeted Hello message set with a Hop Limit of 1 using the <xref format="title" target="sec-transport-cls"/> with the peer's IP address as destination.
 This message set contains the same messages and data as the <xref format="title" target="sec-mode-group-hello"/> and is also sent as plaintext payload when peer BP identity and security information is not yet available.
         </t>
       </section>
@@ -2121,7 +2264,7 @@ This method also assumes that transport-layer security is even possible while in
 Regardless of whether the SAND messages are kept confidential (using BPSec or lower-layer security) there is a possibility for an on-path attacker to record and replay SAND bundles.
         </t>
         <t>
-Because this specification defines rules for superseding messages in <xref target="sec-transport-latest"/> and there is already an expectation that redundant transmissions can happen normally in the <xref format="title" target="sec-transport-cl"/>, the only bad effect of SAND bundle replay is to waste network resources on the path(s) to the bundle destinations.
+Because this specification defines rules for superseding messages in <xref target="sec-transport-latest"/> and there is already an expectation that redundant transmissions can happen normally in the <xref format="title" target="sec-transport-cls"/>, the only bad effect of SAND bundle replay is to waste network resources on the path(s) to the bundle destinations.
         </t>
       </section>
       <section>
@@ -2138,10 +2281,10 @@ Rather than causing a set of advertisements directly, the solicitation is treate
         <t>
 A participating node may, intentionally or not, use singleton or group messaging to overwhelm a link or network, requiring the receiving node to process the data.
 This kind of attack applies to BP Agents generally and is not specific to SAND messaging.
-The victim node can block bundles from network peers which are thought to be incorrectly behaving within network.
+The victim node can block bundles or CL reception from network peers which are thought to be incorrectly behaving within the network.
         </t>
         <t>
-Because the <xref format="title" target="sec-transport-cl"/> uses UDP transport, the recommended configurations of this document result in behaviors which conform to the limitations of "UDP Usage Guidelines" BCP 145, specifically <xref section="4" target="RFC8085"/>.
+Because the <xref format="title" target="sec-transport-cls"/> include UDP transport, the recommended configurations of this document need to result in behaviors which conform to the limitations of "UDP Usage Guidelines" BCP 145, specifically <xref section="4" target="RFC8085"/>.
 This protocol uses the "congestion avoidance" strategy by having implementations choose appropriate timer intervals for minimum SAND updates and, when applicable, for UDPCL redundant transmission explained in <xref section="3.3.1" target="I-D.ietf-dtn-udpcl"/>.
         </t>
       </section>
@@ -2440,7 +2583,12 @@ Expert(s) are encouraged to be biased towards approving registrations unless the
               <td><xref target="sec-msg-uln-ip"/> of [This specification]</td>
             </tr>
             <tr>
-              <td>7 to 32511</td>
+              <td>5</td>
+              <td>MAC Address List</td>
+              <td><xref target="sec-msg-uln-ip"/> of [This specification]</td>
+            </tr>
+            <tr>
+              <td>6 to 32511</td>
               <td>unassigned</td>
               <td></td>
             </tr>
@@ -2575,7 +2723,12 @@ Expert(s) are encouraged to be biased towards approving registrations unless the
               <td><xref target="sec-msg-cl-ltpcl-udp"/> of [This specification]</td>
             </tr>
             <tr>
-              <td>4 to 251</td>
+              <td>4</td>
+              <td>BTP-U Over Ethernet</td>
+              <td><xref target="sec-msg-cl-btpuoe"/> of [This specification]</td>
+            </tr>
+            <tr>
+              <td>5 to 251</td>
               <td>unassigned</td>
               <td/>
             </tr>
@@ -2596,7 +2749,7 @@ Expert(s) are encouraged to be biased towards approving registrations unless the
             </tr>
             <tr>
               <td>255</td>
-              <td>RFC 7122 UDPCL</td>
+              <td>Experimental UDPCL</td>
               <td><xref target="sec-msg-cl-udpcl-7122"/> of [This specification]</td>
             </tr>
             <tr>
@@ -3046,6 +3199,8 @@ Expert(s) are encouraged to be biased towards approving registrations unless the
         <xi:include href="https://xml2rfc.tools.ietf.org/public/rfc/bibxml/reference.RFC.9360.xml"/>
         <xi:include href="https://xml2rfc.tools.ietf.org/public/rfc/bibxml3/reference.I-D.ietf-dtn-bpsec-cose.xml"/>
         <xi:include href="https://xml2rfc.tools.ietf.org/public/rfc/bibxml3/reference.I-D.ietf-dtn-udpcl.xml"/>
+        <xi:include href="https://xml2rfc.tools.ietf.org/public/rfc/bibxml3/reference.I-D.ietf-dtn-btpu.xml"/>
+        <xi:include href="https://xml2rfc.tools.ietf.org/public/rfc/bibxml3/reference.I-D.ek-dtn-ethernet.xml"/>
         <xi:include href="https://xml2rfc.tools.ietf.org/public/rfc/bibxml3/reference.I-D.ietf-dtn-eid-pattern.xml"/>
       </references>
       <references>
@@ -3073,6 +3228,7 @@ Expert(s) are encouraged to be biased towards approving registrations unless the
         <xi:include href="https://xml2rfc.tools.ietf.org/public/rfc/bibxml/reference.RFC.8345.xml"/>
         <xi:include href="https://xml2rfc.tools.ietf.org/public/rfc/bibxml/reference.RFC.8415.xml"/>
         <xi:include href="https://xml2rfc.tools.ietf.org/public/rfc/bibxml/reference.RFC.9164.xml"/>
+        <xi:include href="https://xml2rfc.tools.ietf.org/public/rfc/bibxml/reference.RFC.9542.xml"/>
         <xi:include href="https://xml2rfc.tools.ietf.org/public/rfc/bibxml3/reference.I-D.ietf-tvr-requirements.xml"/>
         <xi:include href="https://xml2rfc.tools.ietf.org/public/rfc/bibxml3/reference.I-D.irtf-dtnrg-ipnd.xml"/>
         <xi:include href="https://xml2rfc.tools.ietf.org/public/rfc/bibxml3/reference.I-D.sipos-dtn-edge-zeroconf.xml"/>
