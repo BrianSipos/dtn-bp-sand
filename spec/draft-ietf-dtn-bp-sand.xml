@@ -3,10 +3,10 @@
  <!ENTITY nbsp    "&#160;">
  <!ENTITY zwsp   "&#8203;">
 ]>
-<rfc xmlns:xi="http://www.w3.org/2001/XInclude" category="std" consensus="true" docName="draft-ietf-dtn-bp-sand-03" ipr="trust200902" submissionType="IETF" tocDepth="4" tocInclude="true" version="3" xml:lang="en">
+<rfc xmlns:xi="http://www.w3.org/2001/XInclude" category="std" consensus="true" docName="draft-ietf-dtn-bp-sand-04" ipr="trust200902" submissionType="IETF" tocDepth="4" tocInclude="true" version="3" xml:lang="en">
   <front>
     <title abbrev="BP SAND">Bundle Protocol (BP) Secure Advertisement and Neighborhood Discovery (SAND)</title>
-    <seriesInfo name="Internet-Draft" value="draft-ietf-dtn-bp-sand-03"/>
+    <seriesInfo name="Internet-Draft" value="draft-ietf-dtn-bp-sand-04"/>
     <author fullname="Brian Sipos" initials="B." surname="Sipos">
       <organization abbrev="JHU/APL">The Johns Hopkins University Applied Physics Laboratory</organization>
       <address>
@@ -798,8 +798,8 @@ This occurs by using one of the following (in priority order):
         </t>
         <ol>
           <li>An authenticated identity (EID) from the CL over which the bundle was received, when available.</li>
-          <li>An authenticated Previous Node extension block <xref section="4.4.1" target="RFC9171"/>, which is mandated below when forwarding beyond the first hop.</li>
-          <li>The Source Node ID from the Primary block <xref section="4.3.1" target="RFC9171"/> when forwarding for the first hop.</li>
+          <li>An authenticated Previous Node extension block (<xref section="4.4.1" target="RFC9171"/>), which is mandated below when forwarding beyond the first hop.</li>
+          <li>An authenticated Source Node ID from the Primary block (<xref section="4.3.1" target="RFC9171"/>) when forwarding for the first hop.</li>
         </ol>
         <t>
 A SAND Bundle which is forwarded over a CL which includes an authenticated identity <bcp14>SHOULD NOT</bcp14> contain a Previous Node extension block.
@@ -876,8 +876,8 @@ All SAND-participating nodes <bcp14>SHALL</bcp14> listen for UDPCL packets on de
 Nodes <bcp14>MAY</bcp14> listen for UDPCL packets destined for other (unicast) addresses and/or on other ports as needed.
           </t>
           <t>
-When sending SAND Bundles, participating nodes <bcp14>SHALL</bcp14> use this default UDPCL listener in accordance with the modes defined in <xref target="sec-mode"/>, one of which uses the above multicast configuration.
-Because a multicast destination is used, the advertising node will need to condition certain UDP and IP parameters based on a specific ULN termination point to send from.
+When sending SAND Bundles over an IP-based ULN to a group destination (see <xref target="sec-mode"/>), participating nodes will use this default UDPCL with an IP multicast configuration.
+Because a multicast destination is used, the advertising node <bcp14>MAY</bcp14> need to condition certain UDP and IP parameters based on a specific ULN termination point to send from.
 The means by which an entity does this is implementation specific.
           </t>
           <t>
@@ -920,8 +920,8 @@ The advertising node <bcp14>SHALL</bcp14> use CL segmentation as necessary to ad
 All SAND-participating nodes <bcp14>MAY</bcp14> listen for BTP-U messages on default ethertype by joining multicast group defined in <xref section="4.2.1" target="I-D.ek-dtn-ethernet"/> on all local termination points over which the entity is participating in discovery.
           </t>
           <t>
-When sending SAND Bundles, participating nodes <bcp14>SHALL</bcp14> use this default BTPU-over-Ethernet listener in accordance with the modes defined in <xref target="sec-mode"/>, one of which uses the above multicast configuration.
-Because a multicast destination is used, the advertising node will need to condition certain interface parameters based on a specific ULN termination point to send from.
+When sending SAND Bundles over an Ethernet-only ULN to a group destination (see <xref target="sec-mode"/>), participating nodes will use this default BTPU-over-Ethernet with a MAC multicast configuration.
+Because a multicast destination is used, the advertising node <bcp14>MAY</bcp14> need to condition certain Ethernet parameters based on a specific ULN termination point to send from.
 The means by which an entity does this is implementation specific.
           </t>
           <t>
@@ -3246,7 +3246,8 @@ Expert(s) are encouraged to be biased towards approving registrations unless the
     <section anchor="sec-doc-ack" numbered="false">
       <name>Acknowledgments</name>
       <t>
-Much pre-draft review was performed to make the document clear and readable by Sarah Heiner of JHU/APL.
+Thanks to Sarah Heiner at JHU/APL for pre-draft review to make the document clear and readable at its start.
+Thanks to Oleksandr Nazymko at D3TN for trial implementation and editorial feedback.
       </t>
     </section>
     <section removeInRFC="true" numbered="false">
