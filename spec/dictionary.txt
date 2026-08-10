@@ -19,6 +19,9 @@ BPbis
 BPSec
 BPv
 bstr
+BTP
+BTPU
+BTPUoE
 Burleigh
 CAs
 CBOR
@@ -66,6 +69,8 @@ EID
 EIDs
 encodings
 endian
+ethertype
+EUI
 extensibility
 FQDN
 Heiner
