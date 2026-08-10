@@ -109,6 +109,7 @@ multicast
 Multicast
 multipoint
 Multipoint
+Nazymko
 ness
 NHDP
 nmp
@@ -116,6 +117,7 @@ NMP
 nodeid
 nodeset
 OCSP
+Oleksandr
 OWLT
 packetization
 parameterization
