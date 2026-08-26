@@ -2237,7 +2237,7 @@ The use of Data Solicitation is also not meant to limit the types of data being 
         </t>
         <t>
 Depending on the exact use case for which SAND advertisement is being used (see <xref target="sec-intro-usecases"/>), different types of data will be more or less useful.
-For example, when used to express the liveliness of links or 
+For example, when used to express the liveliness of expected links there is little value in including long-lived credentials or unchanging CL instances with every advertisement.
         </t>
       </section>
       <section anchor="sec-ops-instances">
@@ -2287,23 +2287,29 @@ Because of this careful consideration needs to be made when choosing to filter-i
 Another aspect of choice for an advertising node is when to send specific types and instances of advertised data.
         </t>
         <t>
-One valid strategy is for a node to have independent timers associated with different types of data, instances of data, and/or ULN termination points, and periodically transmitting an associated SAND message containing the state of that data.
+One valid strategy is for a node to have independent timers associated with different types of data, instances of data, and/or ULN termination points, and periodically sending an associated SAND message containing the state of that data.
 This makes advertisement behavior more deterministic and provides predictable message sizes and rates.
 The message metadata parameter Repetition Interval is meant to express an associated timer interval when this strategy is used and allow a message receiver to adapt to the expected message rates.
 In this case the parameter Validity Duration is expected be on the same order of magnitude as the Repetition Interval.
         </t>
         <t>
-An extreme strategy is for a node to transmit SAND messages only when its associated state has changed.
+Another strategy is for a node to send SAND messages only when its associated state has changed.
 This strategy additionally requires some hysteresis threshold so that frequent, small state changes do not cause excessive advertisement messaging.
 The message metadata parameter Validity Duration does not apply in this case, as the message content will need to be valid until a superseding message (see <xref target="sec-transport-latest"/>) is sent.
+Using this strategy exclusively is vulnerable to messages being lost because of SAND bundles not being delivered (for any number of possible, even temporary, reasons).
         </t>
         <t>
-A hybrid strategy of these two extremes would use timers to provide a baseline average of messaging interval, with some way for a change of associated state to trigger an early send along with some hysteresis logic to prevent frequent state changes from causing excessive messaging.
-The use of timers allow the use of appropriate Validity Duration and Repetition Interval parameters, and the superseding logic covers cases of early sending.
+An even more extreme strategy is to send messages only when solicited by some other node.
+Messages sent in response to solicitations can, but do not need to, be specifically directed to the soliciting node.
+So one possible variation of this strategy is to send advertisements to a group destination in response to solicitations (themselves having either group or singleton destinations).
+        </t>
+        <t>
+A hybrid of these strategies would use timers to provide a baseline average of messaging interval, with some way for a change of associated state or a received solicitation to trigger an early send along with some hysteresis or cool-down logic to prevent excessive messaging.
+The use of timers allow the use of appropriate Validity Duration and Repetition Interval parameters, and the superseding logic covers cases of earlier-than-expected sending.
         </t>
       </section>
       <section anchor="sec-ops-authz">
-        <name>Authorizing Data Use</name>
+        <name>Authorizing Discovered Data</name>
         <t>
 Just because a SAND message has been received by a participating node and its transport meets all of the needed conditions of <xref target="sec-transport"/> does not imply that the receiving node needs to actually <em>use</em> the message or all of the data contained within.
 This specification defines a mechanism with mandatory-to-implement structures and code points (meaning that implementations need to be able to properly interpret them) but none of these mechanisms are mandatory-to-use by either an advertising node (the sender) or a discovering node (a receiver).
@@ -2314,10 +2320,28 @@ Authorization for use of SAND data can be dependent on the SAND data/message typ
 Authorization of for use of specific data can also be conditional on previously discovered or negotiated data about the advertising node.
         </t>
       </section>
+      <section anchor="sec-ops-culling">
+        <name>Culling Discovered Data</name>
+        <t>
+Beyond the logic to authorize use of data, it can also be helpful for a discovering node to cull irrelevant data.
+It is an implementation matter on the discovering node for how to identify irrelevant data, but some examples are below.
+One reason for such data to be present in the first place is when the advertising node does not use <xref target="sec-ops-ctxspecific">context-specific advertisement</xref> and includes credentials, ULN instances, and/or CL instances which do not apply to all discovering nodes which can receive the associated SAND messages.
+        </t>
+        <t>
+One example of this is an advertising node which includes non-IP ULN or CL parameters in its advertisements, which simply cannot be interpreted by an IP-only discovering node.
+The culling applies only to the internal representation of data within the discovering node and not to any subsequent messaging.
+This culling is a clear example because a software change would be needed on the discovering node to be able to support the unhandled parameters.
+        </t>
+        <t>
+Another example is the case where a node advertises ULN instances and/or CL instances with addresses logically unreachable to the discovering node.
+This does not mean that the addresses need to be probed, just when one or more of the addresses does not have a possible route from the discovering node.
+Care must be taken in this situation because a routing check failing at the time of reception does not mean that the routing check will not succeed at some later time due to subsequent changes to the discovering node's routing configuration.
+        </t>
+      </section>
       <section anchor="sec-ops-clparams">
         <name>Correlating CL Instances with SAND Bundles</name>
         <t>
-When the context-specific advertisement (see <xref target="sec-ops-ctxspecific"/>) is used by an advertising node, it is necessary to relate advertised data to CL instances in two ways:
+When the <xref target="sec-ops-ctxspecific">context-specific advertisement</xref> is used by an advertising node, it is necessary to relate advertised data to CL instances in two ways:
         </t>
         <ul>
           <li>
@@ -2331,7 +2355,7 @@ In the absence of such control, context-specific advertisement might not be avai
           </li>
         </ul>
         <t>
-When context-specific authorization (see <xref target="sec-ops-authz"/>) is used by a discovering node, it is necessary to relate received SAND messages to their original enveloping SAND Bundle as well as the local CL instance over which the bundle was received.
+When <xref target="sec-ops-authz">context-specific authorization</xref> is used by a discovering node, it is necessary to relate received SAND messages to their original enveloping SAND Bundle as well as the local CL instance over which the bundle was received.
 The means by which the CL-related reception details are parameterized and retained with the received bundle is an implementation matter and not all BPA--application interfaces will allow such deep visibility.
 In the absence of such visibility, context-specific authorization might not be available on a node.
         </t>
