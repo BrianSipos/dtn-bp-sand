@@ -3347,7 +3347,8 @@ Expert(s) are encouraged to be biased towards approving registrations unless the
     <section anchor="sec-doc-ack" numbered="false">
       <name>Acknowledgments</name>
       <t>
-Thanks to Sarah Heiner at JHU/APL for pre-draft review to make the document clear and readable at its start.
+Thanks to Sarah Heiner at JHU/APL for pre-draft review to make the document clear and readable in its first draft.
+Thanks to Leonardo Babun at JHU/APL for editorial review and feedback.
 Thanks to Oleksandr Nazymko at D3TN for trial implementation and editorial feedback.
       </t>
     </section>
