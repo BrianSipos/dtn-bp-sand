@@ -81,10 +81,11 @@ The full protocol stack of this document uses the UDP Convergence Layer (UDPCL) 
 +-------------------------+
 ]]></artwork>
       </figure>
-      <section>
+      <section anchor="sec-intro-scope">
         <name>Scope</name>
         <t>
 This document describes the format of the protocol data units passed between BP nodes for neighborhood discovery and defines behavior at message source and destination nodes.
+This document is specifically limited to one-hop messaging between neighbors and reserves any discussion of multi-hop advertisement with forwarded messages to later specifications.
         </t>
         <t>
 This document does not address:
@@ -109,6 +110,17 @@ Policies or mechanisms for issuing Public Key Infrastructure Using X.509 (PKIX) 
 Uses of Bundle Protocol Security (BPSec) in which authentication of the Source Node ID is not possible (see <xref target="sec-security-noauth"/>).
           </li>
         </ul>
+      </section>
+      <section anchor="sec-intro-usecases">
+        <name>Use Cases Considered</name>
+        <t>
+This section explains use cases for which the SAND protocol defined in this document serves as a supporting role.
+Other use cases might be supported by or enhanced by SAND and are left to later documents.
+        </t>
+        <dl>
+          <dt>Zero-Configuration Neighbor Discovery:</dt>
+          <dd></dd>
+        </dl>
       </section>
       <section>
         <name>Use of CDDL</name>
@@ -150,10 +162,14 @@ This document re-uses the following terms from IETF network topology model <xref
 Additional terminology used within the SAND protocol includes the following.
         </t>
         <dl>
-          <dt>Advertising node:</dt>
-          <dd>The BP node which is the source of a SAND Bundle containing SAND Messages.</dd>
+          <dt>SAND Bundle:</dt>
+          <dd>A BPv7 PDU which envelopes a payload of a SAND PDU as defined in <xref target="sec-transport"/>.</dd>
           <dt>Participating node:</dt>
-          <dd>A BP node which sources and/or delivers SAND Bundles.</dd>
+          <dd>A BP node which transmits and/or delivers SAND Bundles.</dd>
+          <dt>Advertising node:</dt>
+          <dd>A BP node which transmits SAND Bundles. Because SAND transport requires a singleton source EID, each SAND Bundle has a single advertising node.</dd>
+          <dt>Discovering node:</dt>
+          <dd>A BP node which delivers SAND Bundles. Because SAND transport allows a non-singleton destination EID, each SAND Bundle can have multiple discovering nodes (or none).</dd>
           <dt>Reference node:</dt>
           <dd>A BP node which serves as the reference point for some local topology.</dd>
           <dt>Reachable:</dt>
@@ -2211,28 +2227,113 @@ Periodic update advertisement <bcp14>SHOULD</bcp14> be sent with a duration shor
       <t>
 This section explains various operational topics based on guidance of the IETF Operations and Management Area Working Group <xref target="RFC5706"/>.
       </t>
-      <section>
+      <section anchor="sec-ops-types">
         <name>Types of Data to Advertise</name>
         <t>
-<cref>TBD</cref>
+The choice of which types of data to advertise, in the form of different SAND message types being transmitted, is an operational decision of the advertising node alone.
+The reception and delivery of Data Solicitation messages can inform an advertising node that there is a desire to receive specific types of data.
+The use of Data Solicitation <bcp14>SHALL NOT</bcp14> override local policy about what can be advertised by a node.
+The use of Data Solicitation is also not meant to limit the types of data being advertised by a node.
+        </t>
+        <t>
+Depending on the exact use case for which SAND advertisement is being used (see <xref target="sec-intro-usecases"/>), different types of data will be more or less useful.
+For example, when used to express the liveliness of links or 
         </t>
       </section>
-      <section>
+      <section anchor="sec-ops-instances">
         <name>Instances of Data to Advertise</name>
         <t>
-<cref>TBD</cref>
+The choice of which instances of the various types of data to advertise is an operational decision of the advertising node alone.
+This choice can involve a node filtering-in specific instances to include or filtering-out specific instances to exclude advertising.
+The choice of which instances to filter-in or filter-out and how to parameterize those filters is entirely an implementation matter on the advertising node.
+        </t>
+        <t>
+One simple reason to filter instances would be to exclude ULN termination points or entire ULNs which are not enabled for advertisement or discovery.
+This corresponds with a strategy to either "only advertise relevant data" or "only advertise dynamic data" to avoid advertising data which is either irrelevant to discovery or not expected to change.
+        </t>
+        <t>
+Another possible reason to filter instances is related to ULN visibility or limiting cross-ULN-technology exposure of parameter types.
+For example, only advertising IP-related CL instances or DNS-based credentials when advertising is enabled only on IP-related termination points.
+This reason is not quite security related, and not concerned with leaking data across different underlayers (see <xref target="sec-ops-ctxspecific"/> for details about that).
         </t>
       </section>
-      <section>
-        <name>Underlayer-Specific Advertisement</name>
+      <section anchor="sec-ops-ctxspecific">
+        <name>Context-Specific Advertisement Filtering</name>
         <t>
-<cref>TBD</cref>
+The choice of which types or instances of data to advertise can also be dependent on the ULN over which the advertisement will be made, or dependent on the (BP-layer) destination to or source from which the advertisement is addressed.
+This is slightly different than the choices discussed in <xref target="sec-ops-types"/> and <xref target="sec-ops-instances"/>, which would apply filtering to all advertisement from a node, and requires more visibility into or control over message transport than those choices.
+        </t>
+        <t>
+A simple strategy for destination-specific filtering could be to only advertise certain types or instances of data when using singleton destinations for which some amount of security (at BP-layer or below) can be guaranteed.
+Other advertisement to a group destination (if enabled) could be restricted to contain only enough information to attempt reaching the advertising node and establishing a more secure channel.
+        </t>
+        <t>
+A possible strategy for termination-point-specific filtering would be to only advertise credentials or CL instances which are relevant to a specific ULN reachable via termination points for which advertisement is enabled.
+This is slightly different than the blanket filtering discussed in <xref target="sec-ops-instances"/> because different ULNs being advertised on will see different instances of data being advertised, each tailored to relevancy on that ULN.
+For example, when a ULN uses a private PKIX CA hierarchy an advertising node can filter-in certificates under the associated root of trust when sending Credential Advertisement messages on that ULN.
+        </t>
+        <t>
+When these kinds of context-specific filtering strategies are orthogonal, they can be combined.
+For example filtering based on ULN technology and based on BP destination when advertising CL instances (<em>e.g.</em>, only advertise IPv6-based CLs via an IPv6-only termination point).
+        </t>
+        <t>
+Using these context-specific filtering strategies can result in a kind of "split brain" situation, where different neighbors observe different (possibly non-overlapping) sets of data associated with an advertising node.
+Because of this careful consideration needs to be made when choosing to filter-in or filter-out data instances across different contexts.
         </t>
       </section>
-      <section>
-        <name>Authorizing Reception</name>
+      <section anchor="sec-ops-sendtime">
+        <name>When to Advertise</name>
         <t>
-<cref>TBD</cref>
+Another aspect of choice for an advertising node is when to send specific types and instances of advertised data.
+        </t>
+        <t>
+One valid strategy is for a node to have independent timers associated with different types of data, instances of data, and/or ULN termination points, and periodically transmitting an associated SAND message containing the state of that data.
+This makes advertisement behavior more deterministic and provides predictable message sizes and rates.
+The message metadata parameter Repetition Interval is meant to express an associated timer interval when this strategy is used and allow a message receiver to adapt to the expected message rates.
+In this case the parameter Validity Duration is expected be on the same order of magnitude as the Repetition Interval.
+        </t>
+        <t>
+An extreme strategy is for a node to transmit SAND messages only when its associated state has changed.
+This strategy additionally requires some hysteresis threshold so that frequent, small state changes do not cause excessive advertisement messaging.
+The message metadata parameter Validity Duration does not apply in this case, as the message content will need to be valid until a superseding message (see <xref target="sec-transport-latest"/>) is sent.
+        </t>
+        <t>
+A hybrid strategy of these two extremes would use timers to provide a baseline average of messaging interval, with some way for a change of associated state to trigger an early send along with some hysteresis logic to prevent frequent state changes from causing excessive messaging.
+The use of timers allow the use of appropriate Validity Duration and Repetition Interval parameters, and the superseding logic covers cases of early sending.
+        </t>
+      </section>
+      <section anchor="sec-ops-authz">
+        <name>Authorizing Data Use</name>
+        <t>
+Just because a SAND message has been received by a participating node and its transport meets all of the needed conditions of <xref target="sec-transport"/> does not imply that the receiving node needs to actually <em>use</em> the message or all of the data contained within.
+This specification defines a mechanism with mandatory-to-implement structures and code points (meaning that implementations need to be able to properly interpret them) but none of these mechanisms are mandatory-to-use by either an advertising node (the sender) or a discovering node (a receiver).
+        </t>
+        <t>
+The choice of a discovering node to authorize use of specific data (for reasons discussed below) is an implementation matter on that node.
+Authorization for use of SAND data can be dependent on the SAND data/message type, SAND bundle source or destination, or CL-related parameters about the reception of the bundle PDU.
+Authorization of for use of specific data can also be conditional on previously discovered or negotiated data about the advertising node.
+        </t>
+      </section>
+      <section anchor="sec-ops-clparams">
+        <name>Correlating CL Instances with SAND Bundles</name>
+        <t>
+When the context-specific advertisement (see <xref target="sec-ops-ctxspecific"/>) is used by an advertising node, it is necessary to relate advertised data to CL instances in two ways:
+        </t>
+        <ul>
+          <li>
+The advertising node chooses one or more termination points for which advertisement is enabled and correlates those to CL instances which operate on those termination points.
+This logic can be aggregate across the termination points, sending one advertisement about "all of" those TPs, or iterative, sending separate advertisements for "each of" the TPs.
+          </li>
+          <li>
+Once the SAND PDU(s) are constructed, the advertising node transmits an enveloping SAND Bundle to the appropriate destination EID and ensures that bundle is forwarded over the appropriate CL instance.
+The means by which the forwarding logic is parameterized and controlled is an implementation matter and not all BPA--application interfaces will cleanly allow such deep control.
+In the absence of such control, context-specific advertisement might not be available on a node.
+          </li>
+        </ul>
+        <t>
+When context-specific authorization (see <xref target="sec-ops-authz"/>) is used by a discovering node, it is necessary to relate received SAND messages to their original enveloping SAND Bundle as well as the local CL instance over which the bundle was received.
+The means by which the CL-related reception details are parameterized and retained with the received bundle is an implementation matter and not all BPA--application interfaces will allow such deep visibility.
+In the absence of such visibility, context-specific authorization might not be available on a node.
         </t>
       </section>
     </section>
