@@ -61,7 +61,7 @@ It also would require allocation of well-known UDP port number and IP multicast 
       <t>
 To mitigate the need for manual parameter discovery and configuration, an online neighborhood discovery protocol can be used, and such a protocol is defined in this document.
 The Secure Advertisement and Neighborhood Discovery (SAND) protocol operates at and above the BP-layer, as shown in <xref target="fig-dtn-ip-stack"/>, which insulates it from strict dependence on any specific CL for its message transport and allows the use of BPSec for message security.
-The full protocol stack of this document uses the UDP Convergence Layer (UDPCL) version 2 <xref target="I-D.ietf-dtn-udpcl"/> as a zero-configuration default for its any-source multicast (ASM) capabilities but SAND could be, and is expected to be, used over other CLs to include unicast transports which might be informed by lower-layer discovery protocols (see <xref target="sec-protocol-discovery"/>).
+The full protocol stack of this document uses the UDP Convergence Layer (UDPCL) version 2 <xref target="I-D.ietf-dtn-udpcl"/> as a <xref target="sec-transport-cls">zero-configuration default</xref> for its any-source multicast (ASM) capability but SAND could be, and is expected to be, used over other CLs (to include unicast transports) which might be informed by lower-layer discovery protocols (see <xref target="sec-protocol-discovery"/>).
       </t>
       <figure anchor="fig-dtn-ip-stack">
         <name>The Locations of SAND and BP above the Internet Protocol Stack</name>
@@ -115,12 +115,59 @@ Uses of Bundle Protocol Security (BPSec) in which authentication of the Source N
         <name>Use Cases Considered</name>
         <t>
 This section explains use cases for which the SAND protocol defined in this document serves as a supporting role.
-Other use cases might be supported by or enhanced by SAND and are left to later documents.
+Other use cases might be supported by or enhanced by SAND and are left to other documents to explain.
         </t>
-        <dl>
-          <dt>Zero-Configuration Neighbor Discovery:</dt>
-          <dd></dd>
-        </dl>
+        <section>
+          <name>Zero-Configuration Neighbor Discovery</name>
+          <t>
+This case is the most simple to explain, to discover enough information about BP neighbors to forward to them and receive from them without any prior in-band configuration needed.
+It relies on a critical assumption about its operating environment: that nodes are listening on multicast group destinations for one or more default convergence layer (see <xref target="sec-transport-cls"/>) which is reachable from each advertising node through some shared medium.
+          </t>
+          <t>
+Given that assumption, any SAND participant can (periodically or based on link status events, see <xref target="sec-ops-when"/>) advertise itself to and/or solicit from potential neighbors using the well-known BP <xref target="sec-iana-well-known-imc">group destination</xref> and the lower-layer multicast group.
+There is no guarantee that any other lower-layer multicast group members exist, happen to be listening at, or are in fact reachable at any specific time.
+          </t>
+        </section>
+        <section>
+          <name>Targeted Neighbor Discovery</name>
+          <t>
+This case is when another, lower-layer discovery mechanism (see <xref target="sec-protocol-discovery"/>) has prompted the node that some lower-layer neighbor exists and is reachable.
+Information about that lower-layer neighbor is then used by the SAND participant to advertise itself to and/or solicit from the potential new neighbor using the well-known BP <xref target="sec-iana-well-known-imc">group destination</xref> and the lower-layer unicast destination address.
+There is no guarantee that just because a lower-layer neighbor exists that it will also be a SAND participant.
+          </t>
+        </section>
+        <section>
+          <name>Neighbor Reachability Discovery</name>
+          <t>
+Once a SAND participant BP neighbor is known to exist (with specific compatible CL instances), there is both operational and diagnostic value in verifying reachability to and from that neighbor regardless of the presence (or absence) of other BP traffic with that neighbor.
+Each node can periodically send <xref format="title" target="sec-msg-localtopo"/> messages to known neighbors that contain at least the SAND singleton EID for the neighbor itself.
+The message itself conveys reachability to the neighbor and the presence of the neighbor within the message conveys near-past reachability from that neighbor.
+This BP-layer information can be combined with lower-layer mechanisms for reachability or link metrics discovery to drive routing decisions on a node.
+          </t>
+        </section>
+        <section>
+          <name>Neighborhood Topology Discovery</name>
+          <t>
+As the title of this document implies, one of the most complex use cases of this protocol is to discover the topology of the local 2-hop neighborhood.
+This is an extension of the simple reachability discovery case where each advertising node includes <em>all</em> known 1-hop neighbors in its <xref format="title" target="sec-msg-localtopo"/> so that each neighbor is made aware of each other within the 2-hop neighborhood.
+The means by which these advertisements are transported (either as group destinations in BP and underlayer or singleton/unicast destinations) is an implementation choice based on the availability of multicast in the underlayer(s) and any need for <xref target="sec-ops-ctxspecific">context-specific filtering</xref> of the data.
+          </t>
+        </section>
+        <section>
+          <name>Credential Discovery</name>
+          <t>
+A secondary use case of this protocol is to allow an advertising node to distribute arbitrary credentials to other participating nodes.
+This enables capabilities such as using short-term auto-renewed (STAR) signing certificates with the BPSec COSE Context <xref target="I-D.ietf-dtn-bpsec-cose"/> without requiring each BIB on every bundle to contain a copy of the certificate chain.
+Other BP-based applications could also make use of credentials discovered via SAND, but such uses are left to other specifications.
+          </t>
+        </section>
+        <section>
+          <name>Private Use Discovery</name>
+          <t>
+While applications are free to use their own payload structures with BP non-singleton destinations, this protocol provides <xref target="sec-protocol-ext">extensibility</xref> of both message types and data parameters which can enable an implementation to maintain, advertise, and discover application-specific data.
+The benefit to the application in this case would be that it interacts with the information bases of the local SAND entity rather than need to deal with <xref target="sec-transport">messaging and transport logic</xref> provided by SAND.
+          </t>
+        </section>
       </section>
       <section>
         <name>Use of CDDL</name>
@@ -147,10 +194,10 @@ This document re-uses the following terms from IETF network topology model <xref
         <dl>
           <dt>Node:</dt>
           <dd>This refers both to the concept of a BP node and more generally as a node in a network inventory or topology.</dd>
-          <dt>Termination Point:</dt>
-          <dd>This refers to a single stable, identified feature of a node to which underlayer names and/or addresses are assigned.</dd>
+          <dt>Termination Point (TP):</dt>
+          <dd>This refers to a single stable, identified feature of a node to which underlayer names and/or addresses are assigned. Outside of the topology model, in the actual data plane, each TP might correspond with an IP interface <xref target="RFC8200"/> or Ethernet interface.</dd>
           <dt>Link:</dt>
-          <dd>This term is used in the abstract sense to identify pairwise reachability between termination points of different nodes.</dd>
+          <dd>This term is used in the abstract sense to identify pairwise reachability between TPs of different nodes in the same topological layer. The actual link-layer is not implied by this logical entity, and exists in a separate supporting underlayer.</dd>
           <dt>Inventory:</dt>
           <dd>A collection of known nodes and their properties without regard for their reachability.</dd>
           <dt>Topology:</dt>
@@ -216,12 +263,55 @@ Each type of data can be associated with a desired update time interval to ensur
         <dt>Application endpoints:</dt>
         <dd>Contains endpoints available on the node.</dd>
       </dl>
-      <section>
+      <section anchor="sec-protocol-ext">
         <name>Extensibility</name>
         <t>
-Future specifications can use this same messaging and transport mechanism to define additional message types and modes, including types for private or experimental use (see <xref target="sec-iana-msg-type"/>).
-Future modes could involve multi-hop flooding of bundles to distribute data for link-state style routing algorithms.
+Future specifications can use this same messaging and transport mechanism to define additional message modes, types, and data content including types for private or experimental use.
         </t>
+        <section>
+          <name>Transport Extensions</name>
+          <t>
+This document specifies only the use of SAND for one-hop advertisement over either a unicast or multicast convergence layer.
+Future specifications could extend this to define multi-hop flooding of SAND Bundles in order to distribute data more widely for link-state-style routing algorithms.
+          </t>
+          <t>
+Altering the transport profile can be done without changing the SAND PDU or message structure of <xref target="sec-msg"/>, and would allow re-using much of the logic defined in <xref target="sec-transport"/>.
+          </t>
+        </section>
+        <section>
+          <name>SAND Message Types</name>
+          <t>
+The set of SAND message types (as integer code points) is defined in an IANA registry in <xref target="sec-iana-sand-msg-type"/>.
+This allows for future specifications to add new message types as well as reserving blocks of code points for private use and experimental use.
+New message types could be used for BP-node-related discovery, BP-routing-related discovery, or even application data discovery facilitated by SAND.
+          </t>
+        </section>
+        <section>
+          <name>Metadata Parameters</name>
+          <t>
+The set of message metadata parameters (as integer map keys) is defined in individual IANA registries in <xref target="sec-iana-sand-msg-meta"/>.
+This allows future specifications to augment message semantics if necessary.
+          </t>
+        </section>
+        <section>
+          <name>Message Data Parameters</name>
+          <t>
+The set of message-type-specific data parameters (as integer map keys) is defined in an IANA registry in <xref target="sec-iana-sand-msg-meta"/>.
+This allows future specifications to expand the envelope of technologies supported by SAND without needing a change in message structure or semantics.
+          </t>
+          <t>
+For example, a non-IP-based CL type can define new parameters (either IANA-registered or within a private-use block) to express other address families.
+As another example, a specific implementation can augment existing CL-type-specific parameters (negative keys) without needing to define a new CL type code point, so there is a backward compatibility with implementations that do not support the new parameters.
+          </t>
+        </section>
+        <section>
+          <name>Enumerated Data Values</name>
+          <t>
+There are specific message data parameters which define and use an IANA registry for extensible values.
+In this document, these parameters are the <xref target="tab-iana-cl-type">CL Type</xref> within the <xref target="sec-msg-cl">CL Advertisement message</xref>, and the <xref target="tab-iana-nbr-algo">Routing Type</xref> within the <xref target="sec-msg-localtopo">Local Topology Advertisement message</xref>.
+Both of these parameters allow additional type-specific parameters to be used and reserve blocks of value code space for private use and experimental use.
+          </t>
+        </section>
       </section>
       <section anchor="sec-protocol-discovery">
         <name>Relationship to other Discovery Protocols</name>
@@ -547,7 +637,7 @@ Due to having multiple-network connectivity, it is possible to have multiple rec
             </tr>
             <tr>
               <td>Latest Timestamps</td>
-              <td>This is the latest bundle creation timestamp (<xref section="4.2.7" target="RFC9171"/>) for each <xref target="sec-iana-msg-type">SAND Message Type</xref> received from the neighbor on this termination point, which is used to filter-out old, out-of-order messages in <xref target="sec-transport-latest"/>.</td>
+              <td>This is the latest bundle creation timestamp (<xref section="4.2.7" target="RFC9171"/>) for each <xref target="sec-iana-sand-msg-type">SAND Message Type</xref> received from the neighbor on this termination point, which is used to filter-out old, out-of-order messages in <xref target="sec-transport-latest"/>.</td>
             </tr>
             <tr>
               <td>DNS Name Set</td>
@@ -638,7 +728,7 @@ Due to having multiple-network connectivity, it is possible to have multiple rec
             </tr>
             <tr>
               <td>Latest Timestamps</td>
-              <td>This is the latest bundle creation timestamp (<xref section="4.2.7" target="RFC9171"/>) for each <xref target="sec-iana-msg-type">SAND Message Type</xref> received from the node, which is used to filter-out old, out-of-order messages in <xref target="sec-transport-latest"/>.</td>
+              <td>This is the latest bundle creation timestamp (<xref section="4.2.7" target="RFC9171"/>) for each <xref target="sec-iana-sand-msg-type">SAND Message Type</xref> received from the node, which is used to filter-out old, out-of-order messages in <xref target="sec-transport-latest"/>.</td>
             </tr>
           </tbody>
         </table>
@@ -759,10 +849,10 @@ Beyond its necessary use as a bundle EID, the SAND Singleton EID also serves as 
         <t>
 For the remainder of this document a bundle with a source matching the SAND Singleton EID will be referred to as a SAND Bundle.
 A SAND Bundle will have a destination of either the SAND Group EID or another SAND Singleton EID.
-This is illustrated by the following EID Pattern of <xref target="I-D.ietf-dtn-eid-pattern"/>.
+This is illustrated by the following text form EID Pattern <xref target="I-D.ietf-dtn-eid-pattern"/>.
         </t>
         <sourcecode>
-imc:TBA1.TBA2|ipn:*.*.TBA3|dtn://**/TBA4
+imc:TBA1.TBA2|ipn:*.*.TBA3
         </sourcecode>
         <t>
 A SAND Bundle has the following basic characteristics:
@@ -799,8 +889,7 @@ adu-item = bstr .cborseq sand-msg
 ]]></sourcecode>
         <t>
 Each encoded SAND Message <bcp14>SHOULD</bcp14> use CBOR core deterministic encoding requirements from <xref section="4.2.1" target="RFC8949"/>.
-Even if not using deterministic encoding the first item of each SAND Message map <bcp14>SHALL</bcp14> have key zero (the Message Type item).
-This will cause the Message Type item to be the first one in the encoded message, which will allow a SAND processor to quickly determine if the specific message is of interest and skip over it if not.
+Each message in this ADU is bstr-wrapped and the Message Type item is the front of the encoded message, which allows a SAND processor to quickly determine if the specific message is of interest and skip over it if not.
         </t>
         <t>
 Because multiple SAND Messages can be sent in a single bundle to which a Hop Limit applies, all messages in a single bundle need to have the same restriction (or non-restriction) of Hop Limit.
@@ -843,7 +932,7 @@ Similar to the payload, any BIB targeting the Previous Node block <bcp14>SHALL</
         </t>
         <t>
 Any BIB used by SAND <bcp14>SHALL</bcp14> authenticate the bundle source EID and provide proof-of-possession (PoP) of the private key bound to the bundle source EID via PKIX certificate.
-This could be done using a cryptographic signature as available in the COSE Context of <xref target="I-D.ietf-dtn-bpsec-cose"/> because the primary block Creation Timestamp functions as a unique nonce for PoP.
+This could be done using a cryptographic signature as available in the COSE Context <xref target="I-D.ietf-dtn-bpsec-cose"/> because the primary block Creation Timestamp functions as a unique nonce for PoP.
         </t>
         <t>
 A SAND Bundle <bcp14>MAY</bcp14> contain a Block Confidentiality Block (BCB) which targets the payload block when being transported over an insecure CL to a known set of recipients.
@@ -886,7 +975,7 @@ This is accomplished by using one or all of the following as needed on each ULN 
           <li>Sending with <xref target="sec-msg-cl-btpuoe">BTPU-over-Ethernet</xref> to a multicast destination.</li>
         </ul>
         <section>
-          <name>IP Multicast Discovery</name>
+          <name>IP Multicast Forwarding</name>
           <t>
 All SAND-participating nodes <bcp14>SHALL</bcp14> listen for UDPCL packets on default port 4556 (defined in <xref section="6.2" target="I-D.ietf-dtn-udpcl"/>) and by joining IP multicast group(s) defined in <xref section="6.1" target="I-D.ietf-dtn-udpcl"/> on all local termination points on which the entity has an IP address and over which the entity is participating in discovery.
 Nodes <bcp14>MAY</bcp14> listen for UDPCL packets destined for other (unicast) addresses and/or on other ports as needed.
@@ -931,7 +1020,7 @@ The advertising node <bcp14>SHALL</bcp14> use CL segmentation as necessary to ad
           </ul>
         </section>
         <section>
-          <name>Ethernet Multicast Discovery</name>
+          <name>Ethernet Multicast Forwarding</name>
           <t>
 All SAND-participating nodes <bcp14>MAY</bcp14> listen for BTP-U messages on default ethertype by joining multicast group defined in <xref section="4.2.1" target="I-D.ek-dtn-ethernet"/> on all local termination points over which the entity is participating in discovery.
           </t>
@@ -978,12 +1067,12 @@ A SAND Message <bcp14>SHALL</bcp14> consist of a CBOR sequence of the following:
       <ol>
         <li>
 A message type code point of type <tt>int16</tt> identifying the type of the message.
-The registry of message types is IANA-managed and defined in <xref target="sec-iana-msg-type"/>.
+The registry of message types is IANA-managed and defined in <xref target="sec-iana-sand-msg-type"/>.
         </li>
         <li>
 A map of message metadata (about the message itself) matching the <tt>sand-generic-map</tt> rule.
 All keys in the metadata map <bcp14>SHALL</bcp14> be of type <tt>int16</tt> identifying the purpose of each map value.
-The registry of metadata parameters is IANA-managed and defined in <xref target="sec-iana-msg-meta"/>.
+The registry of metadata parameters is IANA-managed and defined in <xref target="sec-iana-sand-msg-meta"/>.
         </li>
         <li>
 One or more maps of type-specific message data matching the <tt>sand-generic-map</tt> rule.
@@ -2281,7 +2370,7 @@ Using these context-specific filtering strategies can result in a kind of "split
 Because of this careful consideration needs to be made when choosing to filter-in or filter-out data instances across different contexts.
         </t>
       </section>
-      <section anchor="sec-ops-sendtime">
+      <section anchor="sec-ops-when">
         <name>When to Advertise</name>
         <t>
 Another aspect of choice for an advertising node is when to send specific types and instances of advertised data.
@@ -2515,11 +2604,16 @@ Within the URI Schemes registry group of <xref target="IANA-URI"/>, the registry
           </tbody>
         </table>
       </section>
-      <section anchor="sec-iana-msg-type">
-        <name>SAND Message Types</name>
-        <t>EDITOR NOTE: registries to-be-created upon publication of this specification.</t>
+      <section anchor="sec-iana-sand">
+        <name>BP SAND Registry Group</name>
+        <t>EDITOR NOTE: Registry group and registries to-be-created upon publication of this specification.</t>
         <t>
-IANA will create, under the "Bundle Protocol Secure Advertisement and Neighborhood Discovery (SAND)" registry group <xref target="IANA-BPSAND"/>, a registry titled "SAND Message Types" and initialize it with the contents of <xref target="tab-iana-msg-type"/>.
+IANA will create the "Bundle Protocol Secure Advertisement and Neighborhood Discovery (SAND)" registry group <xref target="IANA-BPSAND"/> to contain registries associated with the SAND protocol.
+        </t>
+      <section anchor="sec-iana-sand-msg-type">
+        <name>SAND Message Types</name>
+        <t>
+IANA will create, under the "Bundle Protocol Secure Advertisement and Neighborhood Discovery (SAND)" registry group <xref target="IANA-BPSAND"/>, a registry titled "SAND Message Types" and initialize it with the contents of <xref target="tab-iana-sand-msg-type"/>.
 For positive code points the registration procedure is Specification Required.
 Negative code points are reserved for use on private networks for functions not published to the IANA.
         </t>
@@ -2530,7 +2624,7 @@ Specifications need to define how those CBOR data are used by a node to relate t
         <t>
 Expert(s) are encouraged to be biased towards approving registrations unless they are abusive, frivolous, or actively harmful (not merely aesthetically displeasing, or architecturally dubious).
         </t>
-        <table align="center" anchor="tab-iana-msg-type">
+        <table align="center" anchor="tab-iana-sand-msg-type">
           <name>SAND Message Types</name>
           <thead>
             <tr>
@@ -2603,11 +2697,10 @@ Expert(s) are encouraged to be biased towards approving registrations unless the
           </tbody>
         </table>
       </section>
-      <section anchor="sec-iana-msg-meta">
+      <section anchor="sec-iana-sand-msg-meta">
         <name>SAND Message Metadata</name>
-        <t>EDITOR NOTE: registries to-be-created upon publication of this specification.</t>
         <t>
-IANA will create, under the "Bundle Protocol Secure Advertisement and Neighborhood Discovery (SAND)" registry group <xref target="IANA-BPSAND"/>, a registry titled "SAND Message Common Parameters" and initialize it with the contents of <xref target="tab-iana-msg-meta"/>.
+IANA will create, under the "Bundle Protocol Secure Advertisement and Neighborhood Discovery (SAND)" registry group <xref target="IANA-BPSAND"/>, a registry titled "SAND Message Common Parameters" and initialize it with the contents of <xref target="tab-iana-sand-msg-meta"/>.
 The registration procedure is Specification Required.
         </t>
         <t>
@@ -2616,7 +2709,7 @@ Specifications of new common parameters need to define the code point (an <tt>in
         <t>
 Expert(s) are encouraged to be biased towards approving registrations unless they are abusive, frivolous, or actively harmful (not merely aesthetically displeasing, or architecturally dubious).
         </t>
-        <table align="center" anchor="tab-iana-msg-meta">
+        <table align="center" anchor="tab-iana-sand-msg-meta">
           <name>SAND Message Metadata Parameters</name>
           <thead>
             <tr>
@@ -2656,7 +2749,6 @@ Expert(s) are encouraged to be biased towards approving registrations unless the
       </section>
       <section anchor="sec-iana-uln">
         <name>SAND ULN Registries</name>
-        <t>EDITOR NOTE: registries to-be-created upon publication of this specification.</t>
         <t>
 IANA will create, under the "Bundle Protocol Secure Advertisement and Neighborhood Discovery (SAND)" registry group <xref target="IANA-BPSAND"/>, a registry titled "SAND ULN Advertisement Parameters" and initialize it with the contents of <xref target="tab-iana-uln-param"/>.
 The registration procedure is Specification Required.
@@ -2727,7 +2819,6 @@ Expert(s) are encouraged to be biased towards approving registrations unless the
       </section>
       <section anchor="sec-iana-cl">
         <name>SAND CL Registries</name>
-        <t>EDITOR NOTE: registries to-be-created upon publication of this specification.</t>
         <t>
 IANA will create, under the "Bundle Protocol Secure Advertisement and Neighborhood Discovery (SAND)" registry group <xref target="IANA-BPSAND"/>, a registry titled "SAND CL Common Parameters" and initialize it with the contents of <xref target="tab-iana-cl-param"/>.
 The registration procedure is Specification Required.
@@ -2946,7 +3037,6 @@ Specifications of new common parameters need to define the associated CL type, c
       </section>
       <section anchor="sec-iana-resource">
         <name>SAND Resource Registries</name>
-        <t>EDITOR NOTE: registries to-be-created upon publication of this specification.</t>
         <t>
 IANA will create, under the "Bundle Protocol Secure Advertisement and Neighborhood Discovery (SAND)" registry group <xref target="IANA-BPSAND"/>, a registry titled "SAND Resource Parameters" and initialize it with the contents of <xref target="tab-iana-resource-param"/>.
 The registration procedure is Specification Required.
@@ -2993,7 +3083,6 @@ Expert(s) are encouraged to be biased towards approving registrations unless the
       </section>
       <section anchor="sec-iana-localtopo">
         <name>SAND Local Topology Registries</name>
-        <t>EDITOR NOTE: registries to-be-created upon publication of this specification.</t>
         <t>
 IANA will create, under the "Bundle Protocol Secure Advertisement and Neighborhood Discovery (SAND)" registry group <xref target="IANA-BPSAND"/>, a registry titled "SAND Neighbor Parameters" and initialize it with the contents of <xref target="tab-iana-nbr-param"/>.
 The registration procedure is Specification Required.
@@ -3216,6 +3305,7 @@ Expert(s) are encouraged to be biased towards approving registrations unless the
           </tbody>
         </table>
       </section>
+    </section>
     </section>
   </middle>
   <back>
