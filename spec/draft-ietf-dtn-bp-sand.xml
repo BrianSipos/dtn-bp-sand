@@ -2480,7 +2480,7 @@ Just because a bundle is marked with a hop limit of 1 and is expected to travers
         <name>Threat: Leak of Data to Discovering Nodes</name>
         <t>
 Even if group messaging is prohibited or restricted, and confidentiality is provided to messages targeted to a specific node, the data itself may leak details that should be hidden from the discovering node.
-The only mitigatation for these kinds of leaks is to perform destination-specific filtering as described in <xref target="sec-ops-ctxspecific"/>.
+The only mitigation for these kinds of leaks is to perform destination-specific filtering as described in <xref target="sec-ops-ctxspecific"/>.
 This filtering will be separate from (and possibly in addition to) any TP-specific filtering that might be applied based on the underlayer through which the SAND bundle will be forwarded.
         </t>
       </section>
