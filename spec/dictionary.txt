@@ -10,6 +10,7 @@ anycast
 APL
 ASB
 ASM
+Babun
 BCB
 BCP
 BER
@@ -163,6 +164,7 @@ TCPCLv
 teardown
 TLS
 TP
+TPs
 tstr
 UDP
 UDPCL
