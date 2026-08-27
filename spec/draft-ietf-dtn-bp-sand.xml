@@ -2456,12 +2456,12 @@ In the absence of such visibility, context-specific authorization might not be a
 This section separates security considerations into threat categories based on guidance of BCP 72 <xref target="RFC3552"/>.
       </t>
       <section anchor="sec-security-passive-leak">
-        <name>Threat: Passive Leak of Data</name>
+        <name>Threat: Passive Leak of Data to Eavesdroppers</name>
         <t>
 Because this protocol is involved in enrollment of a node into a BP network, any initial zero-configuration <xref target="sec-mode-group-hello">group messaging</xref> from a participating node necessarily has a plaintext payload.
         </t>
         <t>
-One avoidance of passive leaking is for the advertising node to filter-out sensitive data from its initial messages.
+One avoidance of passive leaking is for the advertising node to filter-out sensitive data from its initial messages as described in <xref target="sec-ops"/>.
 This could include not disclosing certain DNS names or IP addresses assigned to termination points, certain CL instances, or certain 1-hop neighbors from advertisement messages.
 It could also include not disclosing certificates from CAs or with key purposes which are sensitive.
 Because the initial group messaging is termination point-specific, the filtering-out of data does not need to be symmetric across all termination points on which the node is participating in SAND.
@@ -2470,6 +2470,18 @@ Because the initial group messaging is termination point-specific, the filtering
 Another possible mitigation is to avoid group messaging entirely on a termination point and rely on lower-layer network peer discovery to identify potential participants and then attempt to use UDPCL with DTLS (or some underlayer-specific equivalent) to establish secure transport with the peer.
 While more secure from eavesdroppers, this method is more time- and resource-consuming than group messaging.
 This method also assumes that transport-layer security is even possible while in some environments only BP-layer security is viable.
+        </t>
+        <t>
+It is important to consider that if end-to-end confidentiality is not applied to the payload of a SAND bundle, its messages need to be treated as observable by middleboxes and/or eavesdroppers.
+Just because a bundle is marked with a hop limit of 1 and is expected to traverse a single forwarding hop to its destination does not provide any assurance that it will not be observed by some middlebox (operating at BP layer or below).
+        </t>
+      </section>
+      <section anchor="sec-security-advert-leak">
+        <name>Threat: Leak of Data to Discovering Nodes</name>
+        <t>
+Even if group messaging is prohibited or restricted, and confidentiality is provided to messages targeted to a specific node, the data itself may leak details that should be hidden from the discovering node.
+The only mitigatation for these kinds of leaks is to perform destination-specific filtering as described in <xref target="sec-ops-ctxspecific"/>.
+This filtering will be separate from (and possibly in addition to) any TP-specific filtering that might be applied based on the underlayer through which the SAND bundle will be forwarded.
         </t>
       </section>
       <section anchor="sec-security-replay">
