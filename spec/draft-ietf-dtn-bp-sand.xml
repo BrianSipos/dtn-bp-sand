@@ -251,11 +251,11 @@ Each type of data can be associated with a desired update time interval to ensur
         <dt>Security credentials:</dt>
         <dd>Defined in <xref target="sec-msg-credential"/> to contain credentials (<em>e.g.</em>, PKIX certificates) associated with the node's identities which are used for signing/key-agreement/encryption.</dd>
         <dt>Underlayer networks:</dt>
-        <dd>Defined in <xref target="sec-msg-uln"/> to contain information about what underlayer networks (and termination points) are available on the node.</dd>
+        <dd>Defined in <xref target="sec-msg-uln"/> to contain information about what underlayer networks (and their termination points) are available on the node.</dd>
         <dt>Convergence Layer instances:</dt>
         <dd>Defined in <xref target="sec-msg-cl"/> to contain CL types and parameters needed to communicate with the node through specific underlayer networks.</dd>
         <dt>Node resource forecast:</dt>
-        <dd>Contains operating state and other forecasts for the node..</dd>
+        <dd>Contains operating state and other forecasts for the node.</dd>
         <dt>Local (1-hop) topology:</dt>
         <dd>Contains 1-hop neighbors seen by the node.</dd>
         <dt>Routing willingness:</dt>
@@ -344,7 +344,7 @@ It exists as input to SAND processing and messaging and is unaffected by the res
         </t>
         <t>
 The resource information of <xref target="tab-info-local-resource"/> is used to populate <xref format="title" target="sec-msg-resource"/> messages.
-The information in this table are general to the node as a whole and not for any specific underlayer network, termination point, or CL.
+The information in this table applies generally to the node as a whole and not for any specific underlayer network, termination point, or CL.
         </t>
         <table align="center" anchor="tab-info-local-resource">
           <name>Local Resource Information</name>
@@ -771,7 +771,7 @@ Only coarse routing metrics are needed between peer nodes outside of 1-hop neigh
           </tbody>
         </table>
         <t>
-The Peer Certificate Information of <xref target="tab-info-peer-certs"/> is used as way to store and cache certificates received via <xref format="title" target="sec-msg-credential"/> messages and validated in a time-independent way.
+The Peer Certificate Information of <xref target="tab-info-peer-certs"/> is used as a way to store and cache certificates received via <xref format="title" target="sec-msg-credential"/> messages and validated in a time-independent way.
         </t>
         <t>
 This means that certificates <bcp14>SHALL</bcp14> only be considered for caching by a node unless they have been part of a chain validated in accordance with the procedures of <xref section="6" target="RFC5280"/>, up to a root CA from the Trust Anchor information of <xref target="tab-info-local-identity-ca"/>, while ignoring validity times.
@@ -1237,7 +1237,7 @@ Each credential is itself verifiable up to a trusted root which is assumed to be
         <t>
 Credentials in this message are sourced from the Identity Information Base of <xref target="tab-info-local-identity-ee"/>.
 Each credential can contain validity time intervals which have no strict relationship to the validity time of the containing advertisement message or the lifetime of the containing bundle, and do not relate to any SAND-form of schedule.
-The creator of an Credential Advertisement message <bcp14>MAY</bcp14> filter-in or filter-out credentials based on their validity time.
+The creator of a Credential Advertisement message <bcp14>MAY</bcp14> filter-in or filter-out credentials based on their validity time.
         </t>
         <t>
 Each message with this type <bcp14>SHOULD</bcp14> contain credentials valid at the time of creation.
@@ -1472,7 +1472,7 @@ This pair uses key 6 and value type <tt>uint</tt> containing flags indicating wh
 Details about how to interpret this common parameter are CL-type-specific.
             </t>
             <t>
-The role flag at bit 0 indicates that the node can act in an passive role.
+The role flag at bit 0 indicates that the node can act in a passive role.
 The role flag at bit 1 indicates that the node can act in an active role.
 If this parameter is absent it is assumed to be <tt>0b11</tt> (the node can be either role).
             </t>
@@ -1589,7 +1589,7 @@ This CL type <bcp14>SHALL</bcp14> be identified by code point 1.
           <t>
 If the Port Number parameter is absent, the default TCPCL port 4556 <bcp14>SHALL</bcp14> be used.
 The Transport Security Required parameter <bcp14>SHALL</bcp14> indicate both the Contact Header <tt>USE_TLS</tt> flag and the post-negotiation policy enforcement (<em>i.e.</em>, when the session will be disallowed).
-The Role parameter <bcp14>SHALL</bcp14> indicate whether the the TCPCL entity on the node can function as either active or passive or both.
+The Role parameter <bcp14>SHALL</bcp14> indicate whether the TCPCL entity on the node can function as either active or passive or both.
           </t>
           <t>
 The CL-specific parameters are listed below and correspond with the CDDL of <xref target="fig-cl-tcpclv4"/>.
@@ -1832,7 +1832,7 @@ $cl-recv /= {
         <name>Resource Advertisement</name>
         <t>
 The Resource Advertisement message is used to indicates the node's resource forecast (operating state and storage) for some near time horizon.
-This corresponds to a node-scope schedule of <xref section="2.3.1" target="I-D.ietf-tvr-requirements"/> and these resource relate to all of the CLs exposed in the <xref format="title" target="sec-msg-cl"/> message from the same node.
+This corresponds to a node-scope schedule of <xref section="2.3.1" target="I-D.ietf-tvr-requirements"/> and these resources relate to all of the CLs exposed in the <xref format="title" target="sec-msg-cl"/> message from the same node.
 Per the definitions in <xref target="sec-msg"/>, each schedule applies within the Validity Duration of the message.
         </t>
         <t>
@@ -1868,7 +1868,7 @@ $$resource-grp //= (
         <name>Local Topology Advertisement</name>
         <t>
 The Local Topology Advertisement message allows a participating node to enumerate the 1-hop neighbors with which the advertising node can communicate (via some unspecified CL or combined aggregate of CLs).
-Each neighbor is identified by it's SAND Singleton EID which is a unique across a BP network.
+Each neighbor is identified by its SAND Singleton EID which is a unique across a BP network.
         </t>
         <t>
 Each 1-hop neighbor (peer) is associated with a reachability status and a set of communication metrics similar to the behavior of MANET NHDP <xref target="RFC6130"/>.
@@ -2253,8 +2253,8 @@ Because SAND messages can be combined in many ways and because the contents of e
       <section anchor="sec-mode-group-hello">
         <name>Group Hello</name>
         <t>
-When a node first enrolls in a network, or when a node is informed of a link state change to active, it <bcp14>SHOULD</bcp14> send an Group Hello message set with a Hop Limit of 1 using the <xref format="title" target="sec-transport-cls"/>.
-Because this is a group destination, it will be sent as a plaintext payload.
+When a node first enrolls in a network, or when a node is informed of a link state change to active, it <bcp14>SHOULD</bcp14> send a Group Hello message set with a Hop Limit of 1 using one or more <xref target="sec-transport-cls">default convergence layer</xref>.
+Because this is a group BP destination, it will be sent as a plaintext payload.
 This message set consists of the following:
         </t>
         <dl>
@@ -2307,7 +2307,7 @@ The wait time <bcp14>MAY</bcp14> include a random jitter <xref target="RFC5148"/
         <name>Periodic Update</name>
         <t>
 A participating node <bcp14>MAY</bcp14> send periodic update advertisements based on an internal timer associated with the message type being advertised and the Destination EID being advertised to.
-Periodic update advertisement <bcp14>SHOULD</bcp14> be sent with a duration shorter than or equal to the <xref target="param-rep-intvl">Repetition Interval</xref> in sent with associated message type and destination.
+A periodic update advertisement <bcp14>SHOULD</bcp14> be sent with an actual interval shorter than or equal to the <xref target="param-rep-intvl">Repetition Interval</xref> in sent with associated message type and destination.
         </t>
       </section>
     </section>
