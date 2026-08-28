@@ -336,6 +336,14 @@ The SAND protocol can be used to enroll an edge router in a BP network and synch
 SAND operates by each participating node keeping a persistent store of its enrolled underlayer networks, 1-hop neighbors, symmetric 2-hop neighbors along with attributes for each type of entity.
 These are used as the basis for outgoing SAND message contents and are updated as part of message reception processing.
       </t>
+      <t>
+The discussion in this section is in support of interoperable SAND implementations by providing a conceptual information model <xref target="RFC3444"/> which is abstracted from implementation details about how data conforming to the information model is actually structured, maintained, stored, accessed, <em>etc.</em>
+This information model is not normative for a SAND entity, and where there are normative statements in this section they are all related somehow to observable protocol behavior.
+      </t>
+      <t>
+There are also relationships between this information model and the extensibility discussed in <xref target="sec-protocol-ext"/> which are left as an implementation matter to resolve.
+The information model presented here applies only to the base protocol defined in this document with hints about where extensibility might affect this model or the more concrete data model of an implementation.
+      </t>
       <section anchor="local-info-bases">
         <name>Local Node Information Bases</name>
         <t>
@@ -3434,6 +3442,7 @@ Expert(s) are encouraged to be biased towards approving registrations unless the
         <name>Informative References</name>
         <xi:include href="https://bib.ietf.org/public/rfc/bibxml/reference.RFC.1256.xml"/>
         <xi:include href="https://bib.ietf.org/public/rfc/bibxml/reference.RFC.2131.xml"/>
+        <xi:include href="https://bib.ietf.org/public/rfc/bibxml/reference.RFC.3444.xml"/>
         <xi:include href="https://bib.ietf.org/public/rfc/bibxml/reference.RFC.3552.xml"/>
         <xi:include href="https://bib.ietf.org/public/rfc/bibxml/reference.RFC.3971.xml"/>
         <xi:include href="https://bib.ietf.org/public/rfc/bibxml/reference.RFC.4593.xml"/>
