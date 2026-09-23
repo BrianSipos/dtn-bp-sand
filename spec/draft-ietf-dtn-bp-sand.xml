@@ -396,7 +396,7 @@ As defined in <xref target="sec-mode"/>, when assembling and sending SAND messag
               <td>Termination Point Index</td>
               <td>
 This is a locally-unique numeric identifier for a network interface or equivalent termination point.
-Whether or not this index corresponds some way to other identifiers is an implementation matter and does not affect this protocol.
+Whether or not this index corresponds in some way to other identifiers is an implementation matter and does not affect this protocol.
               </td>
             </tr>
             <tr>
