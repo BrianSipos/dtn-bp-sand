@@ -1676,6 +1676,11 @@ The following are CL parameters common to CCSDS data links as part of fully spec
 A parameter being present in this section does not imply that it is relevant to all CL types; each CL type defines the parameters which are applicable to it.
 These parameters are in addition to ULN TP information defined in <xref target="sec-msg-uln-ccsds"/> to construct global identifiers in the data plane.
           </t>
+          <t>
+Within this document, the term "AOS-SDLP" is used to mean the Virtual Channel Packet service of the Advanced Orbiting Systems SDLP (AOS-SDLP) <xref target="CCSDS-AOS"/>.
+Within this document, the term "USLP" is used to mean the Multiplexer Access Point Packet service of the Unified Space Data Link Protocol (USLP) <xref target="CCSDS-USLP"/>.
+Other services provided by those data link entities are not used here.
+          </t>
           <dl>
             <dt>SCID Source-or-Destination:</dt>
             <dd>
@@ -1826,8 +1831,8 @@ $$cl-udpclv2-grp //= (
 ]]></sourcecode>
           </figure>
         </section>
-        <section anchor="sec-msg-cl-ltpcl-udp">
-          <name>LTPCL Over UDP</name>
+        <section anchor="sec-msg-cl-type-ltpcl">
+          <name>LTPCL Over UDP or EPP</name>
           <t>
 The CL types defined in this section are variations of using the Licklider Transport Protocol (LTP) <xref target="RFC5326"/> to transport as a convergence layer protocol.
 Because SAND code points are fully specified, the full CL protocol stacks registered by this specification are the following.
@@ -1835,7 +1840,12 @@ Because SAND code points are fully specified, the full CL protocol stacks regist
           <t>
 The CCSDS profile of BPv7 includes a specification for this in Appendix&nbsp;<cref>TBD</cref> of <xref target="CCSDS-BPv7"/> using Client Service ID (CSID) value 5.
 Additionally the LTP-over-UDP binding is defined in <xref section="3.3" target="RFC7122"/>.
-This CL type <bcp14>SHALL</bcp14> be identified by code point 3.
+The combination of LTP CSID 5 with UDP segment transport <bcp14>SHALL</bcp14> be identified by code point 3.
+          </t>
+          <t>
+There is also an LTP-over-EPP binding, using EPP Protocol Identifier code point 1, defined in Appendix&nbsp;B2 of <xref target="CCSDS-LTP"/>.
+The combination of LTP CSID 5 with EPP segment transport over AOS-SDLP <bcp14>SHALL</bcp14> be identified by code point 7.
+The combination of LTP CSID 5 with EPP segment transport over USLP <bcp14>SHALL</bcp14> be identified by code point 8.
           </t>
           <t>
 There is also a CCSDS experimental BPv7 specification which has allocated LTP CSID value 4 for aggregating BP PDUs.
@@ -1846,11 +1856,11 @@ While there is no concrete specification for transporting BPv7 bundles over LTP 
 The use of LTP CSID 1 to transport single BP PDUs as defined for BPv6 in Appendix&nbsp;B3 of <xref target="CCSDS-BPv6"/> <bcp14>SHALL</bcp14> be identified by code point 253.
           </t>
           <t>
-If the Port Number parameter is absent, the default LTP port 1113 <bcp14>SHALL</bcp14> be used.
+If the Port Number parameter is absent for LTP-over-UDP, the default LTP port 1113 <bcp14>SHALL</bcp14> be used.
 The BPv7 use of LTP does not specify a transport-layer security mechanism.
           </t>
           <t>
-The CL-specific parameters are listed below and correspond with the CDDL of <xref target="fig-cl-ltpcl-udp"/>.
+The CL-specific parameters are listed below and correspond with the CDDL of <xref target="fig-cl-type-ltpcl"/>.
 These are also registered in the IANA registry defined in <xref target="sec-iana-cl"/>.
           </t>
           <dl>
@@ -1866,7 +1876,7 @@ Well-known code points are managed in the "LTP Extension Tags" registry of <xref
 There is no required minimum extension support defined for LTP.
             </dd>
           </dl>
-          <figure anchor="fig-cl-ltpcl-udp">
+          <figure anchor="fig-cl-type-ltpcl">
             <name>LTPCL Over UDP Parameters CDDL</name>
             <sourcecode type="cddl"><![CDATA[
 $cl-recv /= {
@@ -1933,11 +1943,11 @@ The CL types defined in this section are variations of using the CCSDS Encapsula
 Because CL Type code points are fully specified, the full CL protocol stacks registered by this specification are the following.
           </t>
           <t>
-EPP over the Virtual Channel Packet service of the Advanced Orbiting Systems SDLP (AOS-SDLP) <xref target="CCSDS-AOS"/>, which <bcp14>SHALL</bcp14> be identified by code point 5.
+The EPPCL using EPP over AOS-SDLP <bcp14>SHALL</bcp14> be identified by code point 5.
 The parameter for VCID defined in <xref target="sec-msg-cl-ccsds"/> applies to this CL Type.
           </t>
           <t>
-EPP over the Multiplexer Access Point Packet service of the Unified Space Data Link Protocol (USLP) <xref target="CCSDS-USLP"/>, which <bcp14>SHALL</bcp14> be identified by code point 6.
+The EPPCL using EPP over USLP <bcp14>SHALL</bcp14> be identified by code point 6.
 The parameters for Source-or-Destination, VCID, and MAPID defined in <xref target="sec-msg-cl-ccsds"/> apply to this CL Type.
           </t>
           <t>
@@ -2847,7 +2857,7 @@ Expert(s) are encouraged to be biased towards approving registrations unless the
             <tr>
               <td>1</td>
               <td>Validity Schedule</td>
-              <td><xref target="sec-msg-uln"/> of [This specification]</td>
+              <td><xref target="sec-msg-uln-general"/> of [This specification]</td>
             </tr>
             <tr>
               <td>2</td>
@@ -2862,7 +2872,7 @@ Expert(s) are encouraged to be biased towards approving registrations unless the
             <tr>
               <td>4</td>
               <td>Link MTU</td>
-              <td><xref target="sec-msg-uln-ip"/> of [This specification]</td>
+              <td><xref target="sec-msg-uln-general"/> of [This specification]</td>
             </tr>
             <tr>
               <td>5</td>
@@ -2942,12 +2952,12 @@ Expert(s) are encouraged to be biased towards approving registrations unless the
             <tr>
               <td>5</td>
               <td>Transport Security Required</td>
-              <td><xref target="sec-msg-cl"/> of [This specification]</td>
+              <td><xref target="sec-msg-cl-general"/> of [This specification]</td>
             </tr>
             <tr>
               <td>6</td>
               <td>Role</td>
-              <td><xref target="sec-msg-cl"/> of [This specification]</td>
+              <td><xref target="sec-msg-cl-general"/> of [This specification]</td>
             </tr>
             <tr>
               <td>7</td>
@@ -3035,8 +3045,8 @@ Expert(s) are encouraged to be biased towards approving registrations unless the
             </tr>
             <tr>
               <td>3</td>
-              <td>LTPCL CSID5 Over UDP</td>
-              <td><xref target="sec-msg-cl-ltpcl-udp"/> of [This specification]</td>
+              <td>LTPCL CSID 5 Over UDP</td>
+              <td><xref target="sec-msg-cl-type-ltpcl"/> of [This specification]</td>
             </tr>
             <tr>
               <td>4</td>
@@ -3054,19 +3064,29 @@ Expert(s) are encouraged to be biased towards approving registrations unless the
               <td><xref target="sec-msg-cl-type-epp"/> of [This specification]</td>
             </tr>
             <tr>
-              <td>7 to 251</td>
+              <td>7</td>
+              <td>LTPCL CSID 5 Over EPP over AOS-SDLP</td>
+              <td><xref target="sec-msg-cl-type-ltpcl"/> of [This specification]</td>
+            </tr>
+            <tr>
+              <td>8</td>
+              <td>LTPCL CSID 5 Over EPP over USLP</td>
+              <td><xref target="sec-msg-cl-type-ltpcl"/> of [This specification]</td>
+            </tr>
+            <tr>
+              <td>9 to 251</td>
               <td>unassigned</td>
               <td/>
             </tr>
             <tr>
               <td>252</td>
-              <td><cref>LTPCL CSID4 Over UDP</cref></td>
-              <td><xref target="sec-msg-cl-ltpcl-udp"/> of [This specification]</td>
+              <td><cref>LTPCL CSID 4 Over UDP</cref></td>
+              <td><xref target="sec-msg-cl-type-ltpcl"/> of [This specification]</td>
             </tr>
             <tr>
               <td>253</td>
-              <td><cref>LTPCL CSID1 Over UDP</cref></td>
-              <td><xref target="sec-msg-cl-ltpcl-udp"/> of [This specification]</td>
+              <td><cref>LTPCL CSID 1 Over UDP</cref></td>
+              <td><xref target="sec-msg-cl-type-ltpcl"/> of [This specification]</td>
             </tr>
             <tr>
               <td>254</td>
@@ -3129,18 +3149,18 @@ Specifications of new common parameters need to define the associated CL type, c
               <td>Extension Support</td>
               <td><xref target="sec-msg-cl-type-udpclv2"/> of [This specification]</td>
             </tr>
-            <tr><td colspan="4">CCSDS LTPCL Variants</td></tr>
+            <tr><td colspan="4">LTPCL Variants</td></tr>
             <tr>
               <td>3,252,253</td>
               <td>-1</td>
               <td>Engine ID</td>
-              <td><xref target="sec-msg-cl-ltpcl-udp"/> of [This specification]</td>
+              <td><xref target="sec-msg-cl-type-ltpcl"/> of [This specification]</td>
             </tr>
             <tr>
               <td>3,252,253</td>
               <td>-2</td>
               <td>Extension Support</td>
-              <td><xref target="sec-msg-cl-ltpcl-udp"/> of [This specification]</td>
+              <td><xref target="sec-msg-cl-type-ltpcl"/> of [This specification]</td>
             </tr>
           </tbody>
         </table>
@@ -3468,6 +3488,16 @@ Expert(s) are encouraged to be biased towards approving registrations unless the
               <organization>Consultative Committee for Space Data Systems</organization>
             </author>
             <date month="May" year="2020"/>
+          </front>
+        </reference>
+        <reference anchor="CCSDS-LTP" target="https://ccsds.org/publications/bluebooks/entry/3163/">
+          <front>
+            <title>Licklider Transmission Protocol (LTP) for CCSDS</title>
+            <seriesInfo name="CCSDS" value="734.1-B-1"/>
+            <author>
+              <organization>Consultative Committee for Space Data Systems</organization>
+            </author>
+            <date month="May" year="2015"/>
           </front>
         </reference>
         <reference anchor="CCSDS-USLP" target="https://ccsds.org/publications/bluebooks/entry/3287/">
