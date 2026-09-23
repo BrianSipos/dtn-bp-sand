@@ -1,4 +1,5 @@
 AAD
+GSCID
 acceptors
 Ack
 ACK
@@ -7,6 +8,7 @@ acknowledgements
 addr
 ADU
 anycast
+AOS
 APL
 ASB
 ASM
@@ -70,6 +72,8 @@ EID
 EIDs
 encodings
 endian
+EPP
+EPPCL
 ethertype
 EUI
 extensibility
@@ -100,6 +104,7 @@ LLC
 lt
 LTP
 LTPCL
+MAPID
 middlebox
 middleboxes
 misconfigured
@@ -152,6 +157,8 @@ RKF
 Routeable
 RPKI
 SABR
+SANA
+SCID
 SSL
 SSP
 STARTTLS
@@ -181,7 +188,9 @@ unicast
 untagged
 Untrusted
 URI
+USLP
 UTF
+VCID
 wireshark
 Wireshark
 XPath
