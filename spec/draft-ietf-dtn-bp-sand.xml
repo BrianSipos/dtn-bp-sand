@@ -3599,6 +3599,145 @@ Expert(s) are encouraged to be biased towards approving registrations unless the
         </reference>
       </references>
     </references>
+    <section anchor="sec-examples">
+      <name>Examples</name>
+      <t>
+
+      </t>
+      <section anchor="sec-ex-single">
+        <name>Single-ULN Router in an IP Domain</name>
+        <t>
+In this example, a BP router (Node A) has connectivity to an IP-based ULN through one TP (index 0), through which it acts as a router for nodes with time-varying operation (<em>e.g.</em>, a power schedule) or time-varying links (<em>e.g.</em>, caused by geometry or kinematics).
+This is depicted in <xref target="fig-ex-single-bptopo"/> for the BP topology layer <xref target="RFC8345"/>, which does not explicitly show any time-variance in the links.
+The other nodes on that ULN can be reachable separately or simultaneously depending on the state of those time-varying links.
+When there is traffic between the edge nodes and the links are not up simultaneously the router acts as storage for that traffic.
+        </t>
+        <figure anchor="fig-ex-single-bptopo">
+          <name>BP Network Topology</name>
+          <artwork align="center" type="ascii-art"><![CDATA[
+      +--------+     +--------+     +--------+
+      | Node A |     | Node B |     | Node C |
+      +----+---+     +----+---+     +----+---+
+          {0}            {0}            {0}
+          / \             |              |
+          |  -------------'              |
+          '------------------------------'
+]]></artwork>
+        </figure>
+        <t>
+The router and the edge nodes all have IPv6 link-local and/or global addresses as long as they are in the same prefix and are reachable at the ULN layer when links are up.
+This supporting network is depicted in <xref target="fig-ex-single-ulntopo"/> for the IP underlayer, depicting the possible links in that topology layer.
+        </t>
+        <figure anchor="fig-ex-single-ulntopo">
+          <name>Supporting IP Network Topology</name>
+          <artwork align="center" type="ascii-art"><![CDATA[
+                   +--------+
+           .---->{}| Node B |
++--------+ v       +--------+
+| Node A |{}
++--------+ ^       +--------+
+           '---->{}| Node C |
+                   +--------+
+]]></artwork>
+        </figure>
+        <t>
+The router advertises its presence on the IP-based ULN through its TP to the edge nodes when its internal schedule indicates that link(s) should be up and the other node(s) reachable.
+In turn, those participating edge nodes can advertise their own credentials and local topology so that the router can confirm its own reachability (and possibly also link metrics as seen by the nodes).
+After that, the router can include those edge nodes in its own local topology advertisement so that each edge can observe that its peer nodes are reachable indirectly via that router.
+        </t>
+        <t>
+This scenario can be extrapolated to any number of edge nodes operating on the same time-varying ULN.
+        </t>
+      </section>
+      <section anchor="sec-ex-gateway">
+        <name>Gateway Router in an IP Domain</name>
+        <t>
+In this example, a BP router (Node A) has connectivity to an arbitrary ULN through one TP (index 0), able to reach nodes attached to that ULN or reachable via other routers, and to an IP-based ULN through another TP (index 1), through which it acts as a router (just as in <xref target="sec-ex-single"/>) as well as a gateway to other reachable nodes.
+This is depicted in <xref target="fig-ex-gateway-bptopo"/> for the BP topology layer.
+        </t>
+        <figure anchor="fig-ex-gateway-bptopo">
+          <name>BP Network Topology</name>
+          <artwork align="center" type="ascii-art"><![CDATA[
+      +----------+     +--------+     +--------+
+      |  Node A  |     | Node B |     | Node C |
+      +--+----+--+     +----+---+     +----+---+
+        {0}  {1}           {0}            {0}
+         |   / \            |              |
+----------   |  ------------'              |
+other ULN |  '-----------------------------'
+----------   
+]]></artwork>
+        </figure>
+        <t>
+In this scenario, it is an implementation or policy decision about whether or not the routing node advertises any or all of: the existence of its own TP index 0, any particular parameters associated with the other ULN, or any 1-hop neighbors on that other ULN.
+When possible, the router will avoid including CL instances associated with TP index 0 when advertising via TP index 1.
+        </t>
+        <t>
+This scenario can be extrapolated to any number of edge nodes in the BP stub network accessing a larger network via a gateway.
+        </t>
+      </section>
+      <section anchor="sec-ex-multihome">
+        <name>Multi-Homed Router in an IP Domain</name>
+        <t>
+In this example, a BP router (Node A) has connectivity to an IP-based ULN through one TP (index 0), through which it acts as a router for nodes on disjoint IP prefixes.
+This is depicted in <xref target="fig-ex-multihome-bptopo"/> for the BP topology layer, which does not explicitly show the multiple addresses assigned to router TP index 0.
+        </t>
+        <figure anchor="fig-ex-multihome-bptopo">
+          <name>BP Network Topology</name>
+          <artwork align="center" type="ascii-art"><![CDATA[
+      +--------+     +--------+     +--------+
+      | Node A |     | Node B |     | Node C |
+      +----+---+     +----+---+     +----+---+
+          {0}            {0}            {0}
+          / \             |              |
+          |  -------------'              |
+          '------------------------------'
+]]></artwork>
+        </figure>
+        <t>
+In this scenario, the BP topology is superficially identical to the example in <xref target="sec-ex-single"/> but the router's TP is associated with multiple IP addresses, each in different prefix associated with a different edge node.
+This supporting network is depicted in <xref target="fig-ex-single-ulntopo"/> for the IP underlayer, illustrating the separate IP interfaces and possible links in that topology layer.
+        </t>
+        <figure anchor="fig-ex-multihome-ulntopo">
+          <name>Supporting IP Network Topology</name>
+          <artwork align="center" type="ascii-art"><![CDATA[
+                   +--------+
+       {}------->{}| Node B |
++--------+         +--------+
+| Node A |
++--------+         +--------+
+       {}------->{}| Node C |
+                   +--------+
+]]></artwork>
+        </figure>
+        <t>
+This scenario can be extrapolated to any number of edge nodes operating on any number of disjoint ULNs, either through the same physical link or through any number of separate links.
+        </t>
+      </section>
+      <section anchor="sec-ex-multitech">
+        <name>Multi-Technology Router</name>
+        <t>
+The multi-homed scenario of <xref target="sec-ex-multihome"/>, which can be modeled as multiple ULN addresses associated with the same TP, can be generalized to a scenario where the routing node accesses different neighbors using entirely different ULN technologies.
+In this example, a BP router (Node A) has connectivity to multiple ULN through multiple TPs, through which it acts as a router for nodes on disjoint underlayer network and/or link technologies.
+This is depicted in <xref target="fig-ex-multitech-bptopo"/> for the BP topology layer, which does not explicitly show the technologies associated with each TP or ULN.
+        </t>
+        <figure anchor="fig-ex-multitech-bptopo">
+          <name>BP Network Topology</name>
+          <artwork align="center" type="ascii-art"><![CDATA[
+      +--------+     +--------+     +--------+
+      | Node A |     | Node B |     | Node C |
+      +--+---+-+     +----+---+     +----+---+
+        {0} {1}          {0}            {0}
+         |   |            |              |
+         |   '------------'              |
+         '-------------------------------'
+]]></artwork>
+        </figure>
+        <t>
+This scenario of a router reaching different neighbors through different protocol stacks, with BP being the consistent layer throughout, is typical of architectural discussion in the CCSDS.
+        </t>
+      </section>
+    </section>
     <section anchor="sec-doc-ack" numbered="false">
       <name>Acknowledgments</name>
       <t>
