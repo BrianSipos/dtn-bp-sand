@@ -3599,10 +3599,14 @@ Expert(s) are encouraged to be biased towards approving registrations unless the
         </reference>
       </references>
     </references>
-    <section anchor="sec-examples">
-      <name>Examples</name>
+    <section anchor="sec-ex-scenario">
+      <name>Example Scenarios</name>
       <t>
-
+This section contains some simple scenarios which show how the various capabilities of BP SAND are needed in specific circumstances, and how some of the different <xref format="title" target="sec-ops"/> affect how a SAND deployment can be used.
+      </t>
+      <t>
+These examples illustrate that while SAND shares many concepts with MANET NHDP <xref target="RFC6130"/>, the fact that BP naming (and numbering) is associated with each node while IP numbering is associated with each interface changes the nuance of how information is managed, exchanged, and synthesized.
+Some examples also illustrate the subtleties of CCSDS SDLP numbering as an underlayer technology.
       </t>
       <section anchor="sec-ex-single">
         <name>Single-ULN Router in an IP Domain</name>
@@ -3718,6 +3722,8 @@ This scenario can be extrapolated to any number of edge nodes operating on any n
         <name>Multi-Technology Router</name>
         <t>
 The multi-homed scenario of <xref target="sec-ex-multihome"/>, which can be modeled as multiple ULN addresses associated with the same TP, can be generalized to a scenario where the routing node accesses different neighbors using entirely different ULN technologies.
+        </t>
+        <t>
 In this example, a BP router (Node A) has connectivity to multiple ULN through multiple TPs, through which it acts as a router for nodes on disjoint underlayer network and/or link technologies.
 This is depicted in <xref target="fig-ex-multitech-bptopo"/> for the BP topology layer, which does not explicitly show the technologies associated with each TP or ULN.
         </t>
