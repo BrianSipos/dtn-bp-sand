@@ -55,13 +55,13 @@ This means long one-way light-time (OWLT) delays between neighbors, expected tim
 More detailed descriptions of the challenges of DTNs can be found in "Delay-Tolerant Network Architecture" <xref target="RFC4838"/>.
       </t>
       <t>
-Earlier research into discovery within a BP network led to development of the draft experimental IP Neighbor Discovery (IPND) protocol <xref target="I-D.irtf-dtnrg-ipnd"/>, but that protocol is intimately tied to its use of UDP datagram "beacons" and necessary use of an IP underlay network.
+Earlier research into discovery within a BP network led to development of the draft experimental IP Neighbor Discovery (IPND) protocol <xref target="I-D.irtf-dtnrg-ipnd"/>, but that protocol is intimately tied to its use of UDP datagram "beacons" and necessary use of an Internet Protocol (IP) underlay network.
 It also would require allocation of well-known UDP port number and IP multicast addresses or pre-configuration of those parameters across network nodes, but no such allocations were ever made.
       </t>
       <t>
 To mitigate the need for manual parameter discovery and configuration, an online neighborhood discovery protocol can be used, and such a protocol is defined in this document.
 The Secure Advertisement and Neighborhood Discovery (SAND) protocol operates at and above the BP-layer, as shown in <xref target="fig-dtn-ip-stack"/>, which insulates it from strict dependence on any specific CL for its message transport and allows the use of BPSec for message security.
-The full protocol stack of this document uses the UDP Convergence Layer (UDPCL) version 2 <xref target="I-D.ietf-dtn-udpcl"/> as a <xref target="sec-transport-cls">zero-configuration default</xref> for its any-source multicast (ASM) capability but SAND could be, and is expected to be, used over other CLs (to include unicast transports) which might be informed by lower-layer discovery protocols (see <xref target="sec-protocol-discovery"/>).
+The full protocol stack of this document uses the UDP Convergence Layer (UDPCL) version 2 <xref target="I-D.ietf-dtn-udpcl"/> as a <xref target="sec-transport-cls">zero-configuration default</xref> for its any-source multicast (ASM) capability but SAND could be, and is expected to be, used over other CL types (to include unicast transports, see <xref target="sec-protocol-uln"/>) which might be informed by lower-layer discovery protocols (see <xref target="sec-protocol-discovery"/>).
       </t>
       <figure anchor="fig-dtn-ip-stack">
         <name>The Locations of SAND and BP above the Internet Protocol Stack</name>
@@ -251,31 +251,46 @@ Each type of data can be associated with a desired update time interval to ensur
       </t>
       <dl>
         <dt>Security credentials:</dt>
-        <dd>Defined in <xref target="sec-msg-credential"/> to contain credentials (<em>e.g.</em>, PKIX certificates) associated with the node's identities which are used for signing/key-agreement/encryption.</dd>
+        <dd>Defined in <xref target="sec-msg-credential"/> to contain credentials (<em>e.g.</em>, public key certificates) associated with the node's identities which are used for signing/key-agreement/encryption.</dd>
         <dt>Underlayer networks:</dt>
         <dd>Defined in <xref target="sec-msg-uln"/> to contain information about what underlayer networks (and their termination points) are available on the node.</dd>
         <dt>Convergence Layer instances:</dt>
         <dd>Defined in <xref target="sec-msg-cl"/> to contain CL types and parameters needed to communicate with the node through specific underlayer networks.</dd>
-        <dt>Node resource forecast:</dt>
-        <dd>Contains operating state and other forecasts for the node.</dd>
         <dt>Local (1-hop) topology:</dt>
-        <dd>Contains 1-hop neighbors seen by the node.</dd>
-        <dt>Routing willingness:</dt>
-        <dd>Contains willingness for the node to route specific traffic, and stub network contents.</dd>
+        <dd>Defined in <xref target="sec-msg-localtopo"/> to contain 1-hop neighbors seen by the node.</dd>
         <dt>Application endpoints:</dt>
-        <dd>Contains endpoints available on the node.</dd>
+        <dd>Defined in <xref target="sec-msg-endpoint"/> to contain BP endpoints registered on the node.</dd>
       </dl>
-      <section>
-        <name>Underlayer Technology Independence</name>
+      <section anchor="sec-protocol-uln">
+        <name>Underlayer Technology Neutrality</name>
         <t>
 The protocol defined in this document depends on BPv7 and BPSec for its transport (see <xref target="sec-transport"/>) and is otherwise only loosely coupled to underlying protocols of its data plane.
-Because of this, the SAND protocol can be used by participating nodes operating convergence layers which are based on IP technology, Ethernet media access control (MAC) technology, Consultative Committee for Space Data Systems (CCSDS) data link technology, or any other arbitrary protocol layering.
+Because of this, the SAND protocol can be used by participating nodes operating convergence layers which are based on IP technology, Ethernet (or equivalently-framed) media access control (MAC) technology, Consultative Committee for Space Data Systems (CCSDS) space data link protocol (SDLP) technology, or any other arbitrary protocol layering.
         </t>
         <t>
 This technology independence applies not only to the data plane used to transport SAND PDUs, but also how underlayer network (ULN) technologies and related CL instances are advertised to peers.
 This document registers code points for well-known ULN parameters, CL types, and CL parameters corresponding to IP-based, MAC-based, and CCSDS-link-based data planes.
 Beyond this, arbitrary protocol layering can be identified by either future registrations or by private-use code points.
         </t>
+        <section>
+          <name>Relationship to Specific Technologies</name>
+          <t>
+Although the SAND transport is neutral about underlayer technologies, there are aspects of SAND which need to have well-defined relationships to entities and terminology of specific technologies.
+This includes how SAND <xref target="sec-info-bases">information bases</xref> are constructed from the advertising node internal state and how SAND <xref target="sec-msg">message data</xref> are interpreted by other participating nodes.
+          </t>
+          <t>
+When applied to IP underlayer technology <xref target="RFC8200"/> <xref target="RFC8344"/>, each TP corresponds with an IP "interface" and TP parameters are interpreted as applying to that single interface.
+Each CL instance under such a TP represents how transport layers (and above) in the IP architecture bind to that interface.
+In the IP architecture, addresses are assigned to the interface as a "zone" and transports bind to those addresses (and optionally zones).
+Because zone identifiers are internal to a node, there is no strict relationship in SAND between an advertising node's (internal) zone identifiers and TP Index values in ULN Advertisement messages.
+          </t>
+          <t>
+When applied to CCSDS SDLP technology <xref target="CCSDS-SDLP"/>, each TP corresponds with the local endpoint of a physical channel and TP parameters are interpreted as applying to that channel.
+Each CL instance under such a TP corresponds with a "service access point" of a single data link service on that channel.
+In the SDLP architecture, identifiers are assigned to entire nodes (a "spacecraft" or a "ground system") rather than specific channels, so when all parameters are otherwise equal multiple distinct channels can be coalesced into one TP in ULN Advertisement messages.
+There can be operational convenience to keeping distinct TP Index values for physical channels, so any coalescing is optional.
+          </t>
+        </section>
       </section>
       <section anchor="sec-protocol-ext">
         <name>Extensibility</name>
@@ -364,32 +379,6 @@ The information model presented here applies only to the base protocol defined i
 This category of information is based on a participating node's knowledge of its own ULN and PKI configuration.
 It exists as input to SAND processing and messaging and is unaffected by the results of processing or reception of messages.
         </t>
-        <t>
-The resource information of <xref target="tab-info-local-resource"/> is used to populate <xref format="title" target="sec-msg-resource"/> messages.
-The information in this table applies generally to the node as a whole and not for any specific underlayer network, termination point, or CL.
-        </t>
-        <table align="center" anchor="tab-info-local-resource">
-          <name>Local Resource Information</name>
-          <thead>
-            <tr>
-              <th>Name</th>
-              <th>Description</th>
-            </tr>
-          </thead>
-          <tbody>
-            <tr>
-              <td>Validity Interval</td>
-              <td>This is the full time horizon for resource schedules in this information base.</td>
-            </tr>
-            <tr>
-              <td>Operating Schedule</td>
-              <td>
-This represents a time-varying operating state of the local node (as either "on" or "off") within the validity interval.
-An operating schedule which indicates "always on" is a valid default.
-              </td>
-            </tr>
-          </tbody>
-        </table>
         <t>
 The ULN information described in <xref target="tab-info-local-network"/> allows a participating node to define different profiles for different networks (IP or otherwise) accessible by the node through local termination points.
 As defined in <xref target="sec-mode"/>, when assembling and sending SAND messages much of the data can be filtered-down based on what is accessible via a termination point associated with the network-layer source of a SAND message (among other possible additional filtering, see <xref target="sec-security-passive-leak"/>).
@@ -621,11 +610,6 @@ Multiple sources of information are aggregated together into this table.
             <tr>
               <td>Node ID</td>
               <td>This is the SAND Singleton EID for the node.</td>
-            </tr>
-            <tr>
-              <td>Operating Schedule</td>
-              <td>
-This represents a time-varying operating state of the node (as either "on" or "off") as reported in <xref format="title" target="sec-msg-resource"/> messages.</td>
             </tr>
           </tbody>
         </table>
@@ -996,6 +980,10 @@ This is accomplished by using one or all of the following as needed on each ULN 
           <li>Sending with <xref target="sec-msg-cl-type-udpclv2">UDPCLv2</xref> to an IPv6 multicast destination.</li>
           <li>Sending with <xref target="sec-msg-cl-type-btpuoe">BTPU-over-Ethernet</xref> to a multicast destination.</li>
         </ul>
+        <t>
+There is also the possibility of using one of the CCSDS space data link protocols in a broadcast mode over a specific virtual channel, but there is no well-known virtual channel identifier (VCID) reserved by SANA for this purpose.
+All participating nodes would need to have prior agreement about which VCID to use for this service, so this strategy is not truly zero-configuration.
+        </t>
         <section>
           <name>IP Multicast Forwarding</name>
           <t>
@@ -1169,7 +1157,7 @@ If no Repetition Interval is present, the message <bcp14>SHALL NOT</bcp14> be as
       <figure anchor="fig-msg-metadata">
         <name>SAND Message Generic and Metadata</name>
         <sourcecode type="cddl"><![CDATA[
-; Generic for a specific message type
+; CDDL generic for a specific message type
 ; The type-id is from "SAND Message Types" registry
 ; The data-map defines type-specific labels
 sand-msg-gen<type-id, data-map> = [
@@ -1313,7 +1301,7 @@ Only 1-hop neighbors are capable of using underlayer network parameters so there
         <t>
 The ULN Advertisement message <bcp14>SHALL</bcp14> be identified by message type 8.
 Each message with this type <bcp14>SHALL</bcp14> contain a separate data map for each ULN termination point being advertised.
-The generic parameters for each ULN are listed below and correspond with the CDDL of <xref target="fig-msg-uln"/>.
+This message corresponds with the CDDL of <xref target="fig-msg-uln"/> and the following minimum instance parameters.
 These parameters are also in the IANA registry defined in <xref target="sec-iana-uln"/>.
         </t>
         <dl>
@@ -1321,12 +1309,6 @@ These parameters are also in the IANA registry defined in <xref target="sec-iana
           <dd>
 This pair uses key 0 and value type <tt>uint</tt>.
 This index uniquely identifies the termination point within the advertising node, and allows correlating changes to its properties across time.
-          </dd>
-          <dt>Validity Schedule:</dt>
-          <dd>
-This pair uses key 1 and value type <tt>schedule</tt> as defined in <xref target="fig-msg-schedule"/>.
-Each time at which the schedule is valid indicates when the termination point is expected to be usable for traffic to and from the ULN.
-If this parameter is absent the termination point <bcp14>SHALL</bcp14> be treated as always valid (within the validity schedule of the node itself, see <xref target="sec-msg-resource"/>).
           </dd>
         </dl>
         <figure anchor="fig-msg-uln">
@@ -1339,15 +1321,13 @@ $$uln-grp //= (
     0: uln-tp-ix-value
 )
 uln-tp-ix-value = uint
-
-; Validity Schedule
-$$uln-grp //= (
-    1: schedule,
-)
 ]]></sourcecode>
         </figure>
         <t>
 Each data map in this message <bcp14>SHALL</bcp14> have a unique Termination Point Index parameter.
+Each Termination Point Index value is arbitrary and <bcp14>SHALL NOT</bcp14> be used for any other purpose than correlating other SAND data from the same advertising node.
+An advertising node <bcp14>SHALL</bcp14> use each Termination Point Index consistently over time, using the same index across all messages to identify the same entity.
+An advertising node with only simple connectivity <bcp14>MAY</bcp14> use Termination Point Index zero as a default when only a single logical TP is needed.
         </t>
         <t>
 Each termination point being advertised <bcp14>SHOULD</bcp14> be reachable via the ULN over which the enveloping message is sent.
@@ -1355,20 +1335,53 @@ Advertising ULN termination points which are not reachable by receiving SAND par
 An implementation could simplify its internal logic by advertising the same full set of termination points to all of its neighbors, regardless of reachability.
         </t>
         <t>
-Each different ULN termination point (TP) is likely to have varying parameter sets, with items corresponding to parameters specific to a termination point and its associated network technology.
-The parameters defined in this document are focused on IP-based underlayer networks because this protocol is a product of the IETF.
-Other ULN technologies can be supported by SAND to advertise other forms of network names, addresses, and/or protocol identifiers by either registering well-known type-specific parameters or using the private use range of type-specific parameters.
+Each TP is expected to have varying parameter sets, with items corresponding to specific technology associated with the TP (see <xref target="sec-protocol-uln"/>).
         </t>
+        <section anchor="sec-msg-uln-general">
+          <name>General ULN Parameters</name>
+          <t>
+The general, technology-non-specific ULN parameters are listed below and correspond with the CDDL of <xref target="fig-msg-uln-general"/>.
+          </t>
+          <dl>
+            <dt>Validity Schedule:</dt>
+            <dd>
+This pair uses key 1 and value type <tt>schedule</tt> as defined in <xref target="fig-msg-schedule"/>.
+Each time at which the schedule is valid indicates when the termination point is expected to be usable for traffic to and from the ULN.
+This corresponds to the TP-related schedule as described in <xref section="2.3.2" target="I-D.ietf-tvr-requirements"/>.
+If this parameter is absent the termination point <bcp14>SHALL</bcp14> be treated as always valid.
+            </dd>
+            <dt>Link MTU:</dt>
+            <dd>
+This pair uses key 4 and value type <tt>mtu-size</tt> indicating the link MTU, as seen by the termination point of the advertising node, in units of octets.
+If this parameter is absent then other means of configuring or estimating link MTU are needed.
+Even when present, the link MTU only sets an upper bound on the path MTU to the advertising node if a path traverses multiple links.
+            </dd>
+          </dl>
+          <figure anchor="fig-msg-uln-general">
+            <name>General ULN Parameters CDDL</name>
+            <sourcecode type="cddl"><![CDATA[
+; Validity Schedule
+$$uln-grp //= (
+    1: schedule,
+)
+
+; Link MTU
+$$uln-grp //= (
+    4: mtu-size
+)
+mtu-size = uint .gt 0
+]]></sourcecode>
+          </figure>
+          <t>
+When present, the Link MTU <bcp14>SHALL</bcp14> adhere to the lower limit of 68 octets for IPv4 <xref target="RFC791"/> or 1280 for IPv6 <xref target="RFC8200"/> when those technologies are used on the termination point.
+Other ULN technologies will still have an MTU value but with a different lower bound.
+          </t>
+        </section>
         <section anchor="sec-msg-uln-ip">
           <name>IP-Related ULN Parameters</name>
           <t>
 There are several common ULN parameters related to IP networks: a DNS name or IPv4/IPv6 address used to communicate with the node, and information common to links using that termination point.
           </t>
-          <aside>
-            <t>
-When applied to IP networks, each TP corresponds with an IP "interface" <xref target="RFC8200"/> <xref target="RFC8344"/> and all TP parameters are interpreted as applying to that single interface.
-            </t>
-          </aside>
           <t>
 The IP-related parameters are listed below and correspond with the CDDL of <xref target="fig-msg-uln-ip"/>.
           </t>
@@ -1394,13 +1407,6 @@ This address list <bcp14>MAY</bcp14> contain link-local addresses if the sender 
 This pair uses key 5 and value type <tt>mac-addr-ctr</tt> from EUI-48 or EUI-64 addresses encoded as 6-byte or 8-byte strings respectively.
 The encodings are consistent with the unwrapped CBOR tag 48 from <xref section="2.4" target="RFC9542"/>).
 If this parameter is absent the node <bcp14>SHALL</bcp14> be treated as not having a specific MAC address on the ULN.
-            </dd>
-            <dt>Link MTU:</dt>
-            <dd>
-This pair uses key 4 and value type <tt>mtu-size</tt> indicating the link MTU, as seen by the termination point of the advertising node, in units of octets.
-This value <bcp14>SHALL</bcp14> adhere to the lower limit of 68 octets for IPv4 <xref target="RFC791"/> or 1280 for IPv6 <xref target="RFC8200"/> when those technologies are used on the termination point.
-Other ULN technologies will still have an MTU value but with a different lower bound.
-If this parameter is absent then other means of configuring or estimating link or path MTU are needed.
             </dd>
           </dl>
           <figure anchor="fig-msg-uln-ip">
@@ -1442,21 +1448,17 @@ mac-addr-ctr = mac-address / [+ mac-address]
 mac-address = eui48-address / eui64-address
 eui48-address = bstr .size 6
 eui64-address = bstr .size 8
-
-; Link MTU
-$$uln-grp //= (
-    4: mtu-size
-)
-mtu-size = uint .gt 0
 ]]></sourcecode>
           </figure>
         </section>
         <section anchor="sec-msg-uln-ccsds">
-          <name>CCSDS Link ULN Parameters</name>
+          <name>SDLP-Related ULN Parameters</name>
           <t>
 Unlike IP-related ULN termination points (see <xref target="sec-msg-uln-ip"/>), a termination point which represents access to a CCSDS data link does not necessarily need to advertise its own identity in order to communicate over the data link.
-Some use cases of CCSDS data links use a unique, version-qualified spacecraft identifier (SCID) to identify the receiving node, typically in Earth-to-space "forward" modes, while other cases use the SCID to identify the sending node, typically in space-to-Earth "return" modes.
-The determination of which SCID to use for inter-satellite links or more complex cases is mission-specific.
+          </t>
+          <t>
+Some types of SDLP use a unique, version-qualified spacecraft identifier (SCID) to identify the receiving node, typically in Earth-to-space "forward" modes, while other cases use the SCID to identify the sending node, typically in space-to-Earth "return" modes.
+The determination of which SCID to use for inter-satellite links or more complex cases is mission-specific. <cref>Is there a good reference for conventions here?</cref>
           </t>
           <dl>
             <dt>CCSDS Spacecraft Identifier:</dt>
@@ -1497,7 +1499,8 @@ Only 1-hop neighbors are capable of using CL data so there is no need to forward
         <t>
 The CL Advertisement message <bcp14>SHALL</bcp14> be identified by message type 3.
 Each message with this type <bcp14>SHALL</bcp14> contain a separate data map for each CL instance being advertised.
-This message corresponds with the message CDDL of <xref target="fig-msg-cl"/> and the following minimum instance parameters.
+This message corresponds with the CDDL of <xref target="fig-msg-cl"/> and the following minimum instance parameters.
+These parameters are also in the IANA registry defined in <xref target="sec-iana-cl"/>.
         </t>
         <dl>
           <dt anchor="dt-cl-type">CL Type:</dt>
@@ -1544,11 +1547,10 @@ It is not about ability of the node to forward bundles, which may in fact be mor
 For example, in the situation where a node has an ephemeral IP address and no DNS name that node may not listen with any CL yet, because some CLs are bidirectional, it may have symmetric (BP layer) connectivity to some set of peer nodes.
 Even in that case there is still value in discovering the presence of the non-listening node because there is the potential for a contact (coming from that node) to allow bundle routes to other nodes "behind" that non-listening node.
         </t>
-        <section anchor="sec-msg-cl-generic">
-          <name>Generic CL Parameters</name>
+        <section anchor="sec-msg-cl-general">
+          <name>General CL Parameters</name>
           <t>
-The generic CL parameters are listed below and correspond with the CDDL of <xref target="fig-msg-cl-generic"/>.
-These parameters are also in the IANA registry defined in <xref target="sec-iana-cl"/>.
+The general, technology-non-specific CL parameters are listed below and correspond with the CDDL of <xref target="fig-msg-cl-general"/>.
           </t>
           <dl>
             <dt>Transport Security Required:</dt>
@@ -1574,8 +1576,8 @@ Even when acting in the active role only, the CL <bcp14>MAY</bcp14> still be bou
               </t>
             </dd>
           </dl>
-          <figure anchor="fig-msg-cl-generic">
-            <name>Generic CL Parameters CDDL</name>
+          <figure anchor="fig-msg-cl-general">
+            <name>General CL Parameters CDDL</name>
             <sourcecode type="cddl"><![CDATA[
 ; Security Required, if any, for this CL
 $$cl-common-grp //= (
@@ -1668,7 +1670,7 @@ One possible algorithm to handle multiple network addresses for the same service
           </t>
         </section>
         <section anchor="sec-msg-cl-ccsds">
-          <name>CCSDS-Related CL Parameters</name>
+          <name>SDLP-Related CL Parameters</name>
           <t>
 The following are CL parameters common to CCSDS data links as part of fully specified CL types.
 A parameter being present in this section does not imply that it is relevant to all CL types; each CL type defines the parameters which are applicable to it.
@@ -1682,9 +1684,9 @@ This pair uses key 10 and value type <tt>uint</tt> containing an enumerated valu
               </t>
               <dl>
                 <dt>SOURCE (0):</dt>
-                <dd>This means that packets will be accepted when they contain a Source-or-Destination field of 0 (<em>i.e.</em>, the frame identifies SCID of the source).</dd>
+                <dd>This means that USLP frames will be accepted when they contain a "Source-or-Destination" field of 0 (<em>i.e.</em>, the frame identifies SCID of the source).</dd>
                 <dt>DESTINATION (1):</dt>
-                <dd>This means that packets will be accepted when they contain a Source-or-Destination field of 1 (<em>i.e.</em>, the frame identifies SCID of the destination).</dd>
+                <dd>This means that USLP frames will be accepted when they contain a "Source-or-Destination" field of 1 (<em>i.e.</em>, the frame identifies SCID of the destination).</dd>
               </dl>
               <t>
 If this parameter is absent for a CL type which uses an SCID, the CL instance <bcp14>SHALL</bcp14> be treated as if it will accept packets with DESTINATION mode.
@@ -1693,7 +1695,7 @@ If this parameter is absent for a CL type which uses an SCID, the CL instance <b
             <dt>VCID List:</dt>
             <dd>
 This pair uses key 11 and value type of an array of <tt>uint</tt>, each with a valid range between 0 and 64 inclusive.
-Each integer represents an AOS or USLP Virtual Channel Identifier (VCID) to which the CL is bound in order to receive traffic.
+Each integer represents an AOS-SDLP or USLP Virtual Channel Identifier (VCID) to which the CL is bound in order to receive traffic.
 If this parameter is absent for a CL type which uses a VCID, the CL instance <bcp14>SHALL</bcp14> be treated as if it will accept on any virtual channel.
             </dd>
             <dt>MAPID List:</dt>
@@ -1704,9 +1706,9 @@ If this parameter is absent for a CL type which uses a MAPID, the CL instance <b
             </dd>
           </dl>
           <figure anchor="fig-msg-cl-ccsds">
-            <name>CCSDS-Related CL Parameters CDDL</name>
+            <name>SDLP-Related CL Parameters CDDL</name>
             <sourcecode type="cddl"><![CDATA[
-; Data frame SCID use
+; USLP frame SCID use
 $$cl-common-grp //= (
     10: &(
         SOURCE: 0,
@@ -1714,18 +1716,17 @@ $$cl-common-grp //= (
     )
 )
 
-; CCSDS link VCID
+; SDLP VCID
 $$cl-common-grp //= (
     11: [+ ccsds-vcid]
 )
 ccsds-vcid = 0..64
 
-; CCSDS link MAPID
+; SDLP MAPID
 $$cl-common-grp //= (
     12: [+ ccsds-mapid],
 )
 ccsds-mapid = 0..16
-
 ]]></sourcecode>
           </figure>
         </section>
@@ -1926,22 +1927,22 @@ btpu-hint = 0x00 .. 0x7F
           </figure>
         </section>
         <section anchor="sec-msg-cl-type-epp">
-          <name>EPPCL Over CCSDS Link</name>
+          <name>EPPCL Over SDLP</name>
           <t>
-The CL types defined in this section are variations of using the CCSDS Encapsulation Packet Protocol (EPP) as a simple convergence layer, having the existing EPP Protocol Identifier code point 4 <xref target="CCSDS-BPv7-OB"/>, framed in one of the CCSDS data links.
-Because SAND code points are fully specified, the full CL protocol stacks registered by this specification are the following.
+The CL types defined in this section are variations of using the CCSDS Encapsulation Packet Protocol (EPP) <xref target="CCSDS-EPP"/> as a simple convergence layer, having the existing EPP Protocol Identifier code point 4 <xref target="CCSDS-BPv7-OB"/>, framed in one of the SDLP types.
+Because CL Type code points are fully specified, the full CL protocol stacks registered by this specification are the following.
           </t>
           <t>
-EPP over the Virtual Channel Packet service of the Advanced Orbiting Systems (AOS) space data link <xref target="CCSDS-AOS"/>, which <bcp14>SHALL</bcp14> be identified by code point 5.
+EPP over the Virtual Channel Packet service of the Advanced Orbiting Systems SDLP (AOS-SDLP) <xref target="CCSDS-AOS"/>, which <bcp14>SHALL</bcp14> be identified by code point 5.
 The parameter for VCID defined in <xref target="sec-msg-cl-ccsds"/> applies to this CL Type.
           </t>
           <t>
-EPP over the MAP Packet service of the Unified Space Data Link Protocol (USLP) <xref target="CCSDS-USLP"/>, which <bcp14>SHALL</bcp14> be identified by code point 6.
-The parameters for VCID and MAPID defined in <xref target="sec-msg-cl-ccsds"/> apply to this CL Type.
+EPP over the Multiplexer Access Point Packet service of the Unified Space Data Link Protocol (USLP) <xref target="CCSDS-USLP"/>, which <bcp14>SHALL</bcp14> be identified by code point 6.
+The parameters for Source-or-Destination, VCID, and MAPID defined in <xref target="sec-msg-cl-ccsds"/> apply to this CL Type.
           </t>
           <t>
 These CL types do not make use of any of the <xref target="sec-msg-cl-ip">IP-related parameters</xref> or the Transport Security Required parameter.
-Any data-link-related parameters or security indications are exchanged outside of BP SAND.
+Any additional data-link-related parameters or security indications are exchanged outside of BP SAND.
           </t>
           <t>
 This document specifies no CL-specific parameters, which corresponds with the CDDL of <xref target="fig-cl-epp"/>.
@@ -1999,42 +2000,6 @@ $cl-recv /= {
           </figure>
         </section>
       </section>
-      </section>
-      <section anchor="sec-msg-resource">
-        <name>Resource Advertisement</name>
-        <t>
-The Resource Advertisement message is used to indicates the node's resource forecast (operating state and storage) for some near time horizon.
-This corresponds to a node-scope schedule of <xref section="2.3.1" target="I-D.ietf-tvr-requirements"/> and these resources relate to all of the CLs exposed in the <xref format="title" target="sec-msg-cl"/> message from the same node.
-Per the definitions in <xref target="sec-msg"/>, each schedule applies within the Validity Duration of the message.
-        </t>
-        <t>
-          Resource Advertisement messages are populated using the data in <xref target="tab-info-local-resource"/>, part of the Local Node Information Base described in <xref target="local-info-bases"/>. 
-        </t>
-        <t>
-The Resource Advertisement message <bcp14>SHALL</bcp14> be identified by message type 4.
-Each message with this type <bcp14>SHALL</bcp14> contain a single data map.
-The message parameters are listed below and correspond with the CDDL of <xref target="fig-msg-resource"/>.
-These parameters are also in the IANA registry defined in <xref target="sec-iana-resource"/>.
-        </t>
-        <dl>
-          <dt>Operating Schedule:</dt>
-          <dd>
-This pair uses key 1 and value of a <tt>schedule</tt> item as defined in <xref target="fig-msg-schedule"/>.
-Each time at which the schedule is valid indicates when the node is forecast to be operating.
-The absence of this parameter <bcp14>SHALL</bcp14> be interpreted as the node expected to be always operating.
-          </dd>
-        </dl>
-        <figure anchor="fig-msg-resource">
-          <name>Resource Advertisement CDDL</name>
-          <sourcecode type="cddl"><![CDATA[
-$sand-msg /= sand-msg-gen<4, {+ $$resource-grp }>
-
-; Operating schedule
-$$resource-grp //= (
-    1: schedule,
-)
-]]></sourcecode>
-        </figure>
       </section>
       <section anchor="sec-msg-localtopo">
         <name>Local Topology Advertisement</name>
@@ -2168,7 +2133,7 @@ This is different than the resource schedule of the node itself, and represents 
             <sourcecode type="cddl"><![CDATA[
 nbr-metrics = $nbr-metrics .within sand-generic-map
 
-; Generic for reachability metrics
+; CDDL generic for reachability metrics
 ; The rtg-type is from "SAND Routing Types" registry
 nbr-metrics-base<rtg-type> = (
     0: rtg-type .within int16,
@@ -2274,69 +2239,6 @@ Another way to think of it is that the sum-total valid time duration multiplied 
           </section>
         </section>
       </section>
-      <section anchor="sec-msg-router">
-        <name>Router Advertisement</name>
-        <t>
-The Router Advertisement message exposes parameters about the advertising node's willingness to route bundles with different categories of destination EIDs.
-<cref>Each willingness to associate with an EID pattern?</cref>
-        </t>
-        <t>
-The Router Advertisement message <bcp14>SHALL</bcp14> be identified by message type 6.
-The message parameters are listed below and correspond with the CDDL of <xref target="fig-msg-router"/>.
-        </t>
-        <dl>
-          <dt>Willingness for Singleton:</dt>
-          <dd>
-This pair uses key 1 and value type <tt>uint</tt> representing a willingness to route (see later definition) for bundles with a singleton destination EID.
-The absence of this parameter <bcp14>SHALL</bcp14> be interpreted as a willingness of zero (not willing).
-          </dd>
-          <dt>Willingness for Multipoint:</dt>
-          <dd>
-This pair uses key 2 and value type <tt>uint</tt> representing a willingness to route (see later definition) for bundles with a non-singleton destination EID.
-The absence of this parameter <bcp14>SHALL</bcp14> be interpreted as a willingness of zero (not willing).
-          </dd>
-          <dt>Attached Networks:</dt>
-          <dd>
-This pair uses key 3 and value type <tt>bstr</tt> embedding an EID Pattern as defined in <xref section="4" target="I-D.ietf-dtn-eid-pattern"/>.
-The value contains the set of endpoints not participating in SAND but for which the advertising node is willing to route.
-The value <bcp14>MAY</bcp14> be an any-scheme pattern or contain an any-SSP pattern.
-          </dd>
-        </dl>
-        <t>
-Each willingness value is an integer in the inclusive range from 0 through 6, where 0 indicates the node will never route for that type and the values 1 through 6 indicate an increasing level of willingness.
-In the absence of additional configuration, a node which is willing to route <bcp14>SHALL</bcp14> have a default willingness of 3 and include the associated message item.
-        </t>
-        <t>
-The presence of an Attached Networks pattern allows a participating router to expose node information from a stub network reachable "behind" the router.
-All of these endpoints <bcp14>SHALL</bcp14> be treated as having persistent and reliable connectivity to the router sending the message.
-It also allows the router to advertise that it is acting as a BP gateway by using the pattern "*:**".
-Care needs to be taken for which underlayer networks the gateway advertisement is made.
-Only a stub network should see the gateway advertisement.
-See <xref target="sec-security-attached-authz"/> for considerations about using attached network advertisement.
-        </t>
-        <figure anchor="fig-msg-router">
-          <name>Router Advertisement CDDL</name>
-          <sourcecode type="cddl"><![CDATA[
-$sand-msg /= sand-msg-gen<1, {+ $$router-grp }>
-
-; Willingness for Singleton
-$$router-grp //= (
-    1: will-route .default 0
-)
-will-route = (0 .. 6) .within uint
-
-; Willingness for Multipoint
-$$router-grp //= (
-    2: will-route .default 0
-)
-
-; Attached Networks
-$$router-grp //= (
-    3: embed-eid-pattern, ; From [I-D.ietf-dtn-eid-pattern]
-)
-]]></sourcecode>
-        </figure>
-      </section>
       <section anchor="sec-msg-endpoint">
         <name>Endpoint Advertisement</name>
         <t>
@@ -2436,7 +2338,7 @@ This message set consists of the following:
 The node <bcp14>SHALL</bcp14> include a Data Solicitation message if the time since the last Data Solicitation on that termination point has exceeded an implementation-defined threshold.
             </t>
             <t>
-For a new enrollment, a node <bcp14>SHOULD</bcp14> solicit all of the following: Credential Advertisement, Resource Advertisement, ULN Advertisement, CL Advertisement, Local Topology Advertisement.
+For a new enrollment, a node <bcp14>SHOULD</bcp14> solicit all of the following: Credential Advertisement, ULN Advertisement, CL Advertisement, Local Topology Advertisement.
 For link state change, a node <bcp14>SHOULD</bcp14> solicit at least Local Topology Advertisement.
             </t>
           </dd>
@@ -2686,17 +2588,6 @@ Because the <xref format="title" target="sec-transport-cls"/> include UDP transp
 This protocol uses the "congestion avoidance" strategy by having implementations choose appropriate timer intervals for minimum SAND updates and, when applicable, for UDPCL redundant transmission explained in <xref section="3.3.1" target="I-D.ietf-dtn-udpcl"/>.
         </t>
       </section>
-      <section anchor="sec-security-attached-authz">
-        <name>Threat: Route Leaking and Hijacking</name>
-        <t>
-The choice to advertise attached networks by a BP router (see <xref target="sec-msg-router"/>) is a separate concern from the choice of other participating nodes to authorize use (some or all of) those advertised networks for routing.
-This authorization-for-routing is also separate from the recording of received SAND data in information bases associated with the advertising node.
-        </t>
-        <t>
-Without proper authorization for routing use, the vulnerabilities associated with route leaking <xref target="RFC4593"/> and route hijacking <xref target="RFC7908"/> apply to the online use of SAND Router Advertisement.
-There is currently no equivalent to Resource Public Key Infrastructure (RPKI) <xref target="RFC6480"/> for authorizing BP routing.
-        </t>
-      </section>
       <section anchor="sec-security-identity">
         <name>Identity Bootstrapping</name>
         <t>
@@ -2849,19 +2740,9 @@ Expert(s) are encouraged to be biased towards approving registrations unless the
               <td><xref target="sec-msg-cl"/> of [This specification]</td>
             </tr>
             <tr>
-              <td>4</td>
-              <td>Resource Advertisement</td>
-              <td><xref target="sec-msg-resource"/> of [This specification]</td>
-            </tr>
-            <tr>
               <td>5</td>
               <td>Local Topology Advertisement</td>
               <td><xref target="sec-msg-localtopo"/> of [This specification]</td>
-            </tr>
-            <tr>
-              <td>6</td>
-              <td>Router Advertisement</td>
-              <td><xref target="sec-msg-router"/> of [This specification]</td>
             </tr>
             <tr>
               <td>7</td>
@@ -3099,7 +2980,7 @@ Expert(s) are encouraged to be biased towards approving registrations unless the
               <td><xref target="sec-msg-cl-ccsds"/> of [This specification]</td>
             </tr>
             <tr>
-              <td>13 to 32511</td>
+              <td>14 to 32511</td>
               <td>unassigned</td>
               <td></td>
             </tr>
@@ -3164,7 +3045,7 @@ Expert(s) are encouraged to be biased towards approving registrations unless the
             </tr>
             <tr>
               <td>5</td>
-              <td>EPP Over AOS</td>
+              <td>EPP Over AOS-SDLP</td>
               <td><xref target="sec-msg-cl-type-epp"/> of [This specification]</td>
             </tr>
             <tr>
@@ -3260,52 +3141,6 @@ Specifications of new common parameters need to define the associated CL type, c
               <td>-2</td>
               <td>Extension Support</td>
               <td><xref target="sec-msg-cl-ltpcl-udp"/> of [This specification]</td>
-            </tr>
-          </tbody>
-        </table>
-      </section>
-      <section anchor="sec-iana-resource">
-        <name>SAND Resource Registries</name>
-        <t>
-IANA will create, under the "Bundle Protocol Secure Advertisement and Neighborhood Discovery (SAND)" registry group <xref target="IANA-BPSAND"/>, a registry titled "SAND Resource Parameters" and initialize it with the contents of <xref target="tab-iana-resource-param"/>.
-The registration procedure is Specification Required.
-        </t>
-        <t>
-Specifications of new peer parameters need to define the code point (an <tt>int16</tt> integer) as well as the CBOR form and meaning of the associated value.
-Specifications need to define how those CBOR parameters are used by a node to relate the encoded message to the node's information bases.
-        </t>
-        <t>
-Expert(s) are encouraged to be biased towards approving registrations unless they are abusive, frivolous, or actively harmful (not merely aesthetically displeasing, or architecturally dubious).
-        </t>
-        <table align="center" anchor="tab-iana-resource-param">
-          <name>SAND Resource Parameters</name>
-          <thead>
-            <tr>
-              <th>Code</th>
-              <th>Name</th>
-              <th>Reference</th>
-            </tr>
-          </thead>
-          <tbody>
-            <tr>
-              <td>-32768 to 0</td>
-              <td>Reserved</td>
-              <td>[This specification]</td>
-            </tr>
-            <tr>
-              <td>1</td>
-              <td>Operating Schedule</td>
-              <td><xref target="sec-msg-resource"/> of [This specification]</td>
-            </tr>
-            <tr>
-              <td>2 to 32511</td>
-              <td>unassigned</td>
-              <td></td>
-            </tr>
-            <tr>
-              <td>32512 to 32767</td>
-              <td>Reserved for private and experimental parameters</td>
-              <td>[This specification]</td>
             </tr>
           </tbody>
         </table>
@@ -3606,7 +3441,7 @@ Expert(s) are encouraged to be biased towards approving registrations unless the
             <date month="September" year="2015"/>
           </front>
         </reference>
-        <reference anchor="CCSDS-BPv7-OB" target="https://ccsds.org/wp-content/uploads/gravity_forms/5-448e85c647331d9cbaf66c096458bdd5/2025/06/734x20o1.pdf">
+        <reference anchor="CCSDS-BPv7-OB" target="https://ccsds.org/publications/orangebooks/entry/4218/">
           <front>
             <title>CCSDS Bundle Protocol Specification (Experimental)</title>
             <seriesInfo name="CCSDS" value="734.20-O-1"/>
@@ -3623,6 +3458,16 @@ Expert(s) are encouraged to be biased towards approving registrations unless the
             <author>
               <organization>Consultative Committee for Space Data Systems</organization>
             </author>
+          </front>
+        </reference>
+        <reference anchor="CCSDS-EPP" target="https://ccsds.org/publications/bluebooks/entry/3261/">
+          <front>
+            <title>Encapsulation Packet Protocol</title>
+            <seriesInfo name="CCSDS" value="133.1-B-3"/>
+            <author>
+              <organization>Consultative Committee for Space Data Systems</organization>
+            </author>
+            <date month="May" year="2020"/>
           </front>
         </reference>
         <reference anchor="CCSDS-USLP" target="https://ccsds.org/publications/bluebooks/entry/3287/">
@@ -3678,12 +3523,21 @@ Expert(s) are encouraged to be biased towards approving registrations unless the
       </references>
       <references>
         <name>Informative References</name>
+        <reference anchor="CCSDS-SDLP" target="https://ccsds.org/publications/greenbooks/entry/3272/">
+          <front>
+            <title>Space Data Link Protocols—Summary of Concept and Rationale</title>
+            <seriesInfo name="CCSDS" value="130.2-G-3"/>
+            <author>
+              <organization>Consultative Committee for Space Data Systems</organization>
+            </author>
+            <date month="September" year="2015"/>
+          </front>
+        </reference>
         <xi:include href="https://bib.ietf.org/public/rfc/bibxml/reference.RFC.1256.xml"/>
         <xi:include href="https://bib.ietf.org/public/rfc/bibxml/reference.RFC.2131.xml"/>
         <xi:include href="https://bib.ietf.org/public/rfc/bibxml/reference.RFC.3444.xml"/>
         <xi:include href="https://bib.ietf.org/public/rfc/bibxml/reference.RFC.3552.xml"/>
         <xi:include href="https://bib.ietf.org/public/rfc/bibxml/reference.RFC.3971.xml"/>
-        <xi:include href="https://bib.ietf.org/public/rfc/bibxml/reference.RFC.4593.xml"/>
         <xi:include href="https://bib.ietf.org/public/rfc/bibxml/reference.RFC.4632.xml"/>
         <xi:include href="https://bib.ietf.org/public/rfc/bibxml/reference.RFC.4838.xml"/>
         <xi:include href="https://bib.ietf.org/public/rfc/bibxml/reference.RFC.4861.xml"/>
@@ -3692,8 +3546,6 @@ Expert(s) are encouraged to be biased towards approving registrations unless the
         <xi:include href="https://bib.ietf.org/public/rfc/bibxml/reference.RFC.5444.xml"/>
         <xi:include href="https://bib.ietf.org/public/rfc/bibxml/reference.RFC.5706.xml"/>
         <xi:include href="https://bib.ietf.org/public/rfc/bibxml/reference.RFC.6130.xml"/>
-        <xi:include href="https://bib.ietf.org/public/rfc/bibxml/reference.RFC.6480.xml"/>
-        <xi:include href="https://bib.ietf.org/public/rfc/bibxml/reference.RFC.7908.xml"/>
         <xi:include href="https://bib.ietf.org/public/rfc/bibxml/reference.RFC.7942.xml"/>
         <xi:include href="https://bib.ietf.org/public/rfc/bibxml/reference.RFC.8085.xml"/>
         <xi:include href="https://bib.ietf.org/public/rfc/bibxml/reference.RFC.8175.xml"/>

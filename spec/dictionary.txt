@@ -1,5 +1,4 @@
 AAD
-GSCID
 acceptors
 Ack
 ACK
@@ -78,6 +77,7 @@ ethertype
 EUI
 extensibility
 FQDN
+GSCID
 Heiner
 IANA
 IESG
@@ -159,6 +159,7 @@ RPKI
 SABR
 SANA
 SCID
+SDLP
 SSL
 SSP
 STARTTLS
