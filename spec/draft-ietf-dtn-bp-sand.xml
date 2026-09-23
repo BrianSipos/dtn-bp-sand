@@ -2847,7 +2847,7 @@ Expert(s) are encouraged to be biased towards approving registrations unless the
             <tr>
               <td>1</td>
               <td>Validity Schedule</td>
-              <td><xref target="sec-msg-uln"/> of [This specification]</td>
+              <td><xref target="sec-msg-uln-general"/> of [This specification]</td>
             </tr>
             <tr>
               <td>2</td>
@@ -2862,7 +2862,7 @@ Expert(s) are encouraged to be biased towards approving registrations unless the
             <tr>
               <td>4</td>
               <td>Link MTU</td>
-              <td><xref target="sec-msg-uln-ip"/> of [This specification]</td>
+              <td><xref target="sec-msg-uln-general"/> of [This specification]</td>
             </tr>
             <tr>
               <td>5</td>
@@ -2942,12 +2942,12 @@ Expert(s) are encouraged to be biased towards approving registrations unless the
             <tr>
               <td>5</td>
               <td>Transport Security Required</td>
-              <td><xref target="sec-msg-cl"/> of [This specification]</td>
+              <td><xref target="sec-msg-cl-general"/> of [This specification]</td>
             </tr>
             <tr>
               <td>6</td>
               <td>Role</td>
-              <td><xref target="sec-msg-cl"/> of [This specification]</td>
+              <td><xref target="sec-msg-cl-general"/> of [This specification]</td>
             </tr>
             <tr>
               <td>7</td>
