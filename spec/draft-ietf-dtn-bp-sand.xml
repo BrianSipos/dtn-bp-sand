@@ -232,7 +232,7 @@ Additional terminology used within the SAND protocol includes the following.
           <dt>Neighborhood:</dt>
           <dd>The collection of all 1-hop and 2-hop neighbors of a participating node.</dd>
           <dt>Fully specified CL Type:</dt>
-          <dd>A name and code point for as much of a convergence layer protocol stack as needed to reach an advertising node without additional information.</dd>
+          <dd>A name and code point for as much of a convergence layer protocol stack as needed to reach an advertising node without additional information, as explained in <xref target="sec-protocol-ident"/>.</dd>
         </dl>
       </section>
     </section>
@@ -289,6 +289,43 @@ When applied to CCSDS SDLP technology <xref target="CCSDS-SDLP"/>, each TP corre
 Each CL instance under such a TP corresponds with a "service access point" of a single data link service on that channel.
 In the SDLP architecture, identifiers are assigned to entire nodes (a "spacecraft" or a "ground system") rather than specific channels, so when all parameters are otherwise equal multiple distinct channels can be coalesced into one TP in ULN Advertisement messages.
 There can be operational convenience to keeping distinct TP Index values for physical channels, so any coalescing is optional.
+          </t>
+        </section>
+      </section>
+      <section anchor="sec-protocol-ident">
+        <name>Identifiers in SAND</name>
+        <t>
+Because this protocol is meant to be used for zero-configuration discovery, there are several cases where identifiers used in SAND messages need to be interpreted without additional context and cannot rely on vague interpretation by participating entities.
+These are explained below, with detailed definitions later in <xref target="sec-info-bases"/> and <xref target="sec-msg"/>.
+        </t>
+        <section anchor="sec-protocol-ident-cl">
+          <name>Fully Specified CL Type</name>
+          <t>
+The point of including <xref target="sec-msg-cl">CL instances</xref> from an advertising node is to allow other participating nodes to be able to use those instances to forward bundles to the advertising node without additional configuration.
+Because of this, the definition of each CL Type within SAND needs to extend from just below the BP PDU (and BP Agent behavior) all the way down to whatever portions of the underlying protocol stack (and protocol entity behavior) are needed to unambiguously transfer BP PDUs to the advertising node.
+          </t>
+          <t>
+This is why LTP alone cannot be the bottom of a fully specified CL Type.
+It does not have its own mechanism of either discovering a mapping from LTP Engine ID to its segment transport protocols (and their parameters) or for a sending LTP engine to be able to positively identify its own segment transport endpoint for receiving report segments.
+More details are explained in <xref target="sec-ltp-zeroconf"/>.
+          </t>
+        </section>
+        <section anchor="sec-protocol-ident-uln">
+          <name>ULN Endpoints</name>
+          <t>
+Endpoints in an underlayer network translate into <xref target="sec-msg-uln">TP instances</xref> from an advertising node.
+Because advertisements need to be interpreted from the point of view of another participating node, the ULN names and/or addresses being advertised must be somehow reachable by a neighbor node to be useful.
+          </t>
+          <t>
+For the case of IP technology, this means that link-local addressing is meaningful only in cases where there is an expectation that participating nodes will also have an address under the same prefix and there is reachability to the advertising node.
+Additionally, using IP as the "bottom" of a <xref target="sec-protocol-ident-cl">fully specified CL type</xref> assumes that there is some other mechanism by which the participating nodes ensure IP reachability (<em>e.g.</em>, the IPv4 Address Resolution Protocol <xref target="RFC826"/> or IPv6 Neighbor Discovery Protocol <xref target="RFC4861"/>).
+          </t>
+          <t>
+For the case of SDLP technology, the various protocols each use a spacecraft identifier (SCID) to identify either the sending or receiving node and not a specific physical channel terminating at that node.
+The SCID identifies the receiving node in Earth-to-space "forward" modes, while the SCID identifies the sending node in space-to-Earth "return" modes.
+The determination of which SCID to use for inter-satellite links or more complex cases is mission-specific. <cref>Is there a good reference for conventions here?</cref>
+The use of more fine grained "virtual channel" identifiers allows differentiation of frames within a data link instance (similar to IP differentiated services <xref target="RFC2474"/>) but these identifiers are not meant to have well-known meaning outside of that individual instance.
+A node is free to re-use virtual channel identifiers for entirely different purposes when communicating with different neighbors or even over different links.
           </t>
         </section>
       </section>
@@ -576,7 +613,7 @@ This will cause the CL instance to no longer be associated with its previous par
               <td>Roles</td>
               <td>
 This indicates the logical roles which this CL instance is able to perform among "active" or "passive" options.
-The definition of an active role is CL-specific, but is expected to involve initiating outgoing conversations/connections/sessions, while a passive role is expected to involve listening for incoming ones.
+The definition of an active role is CL-specific, but is expected to involve initiating outgoing conversations/connections/sessions, while a passive role is expected to involve responding to incoming ones.
 A single CL instance can be capable of both roles.
               </td>
             </tr>
@@ -1455,15 +1492,12 @@ eui64-address = bstr .size 8
           <name>SDLP-Related ULN Parameters</name>
           <t>
 Unlike IP-related ULN termination points (see <xref target="sec-msg-uln-ip"/>), a termination point which represents access to a CCSDS data link does not necessarily need to advertise its own identity in order to communicate over the data link.
-          </t>
-          <t>
-Some types of SDLP use a unique, version-qualified spacecraft identifier (SCID) to identify the receiving node, typically in Earth-to-space "forward" modes, while other cases use the SCID to identify the sending node, typically in space-to-Earth "return" modes.
-The determination of which SCID to use for inter-satellite links or more complex cases is mission-specific. <cref>Is there a good reference for conventions here?</cref>
+Each version of SDLP uses a unique, version-qualified SCID to identify either the sending or receiving node within each data link frame.
           </t>
           <dl>
             <dt>CCSDS Spacecraft Identifier:</dt>
             <dd>
-This pair uses key 6 and value type <tt>ccsds-scid</tt> indicating the transfer frame version number and Spacecraft Identifier (SCID) number of the advertising node in the CCSDS ecosystem.
+This pair uses key 6 and value type <tt>ccsds-scid</tt> indicating the Transfer Frame Version Number and Spacecraft Identifier (SCID) number of the advertising node in the CCSDS ecosystem.
 Together these two numbers compose the derived global SCID (GSCID), but they are represented in SAND as separate values.
 The registry of qualified SCID is maintained by SANA <xref target="SANA-SCID"/>.
 If this parameter is absent then other means of determining an associated SCID are needed, or when the advertising node only uses the data frame SCID as the source entity.
@@ -1570,10 +1604,6 @@ The role flag at bit 0 indicates that the node can act in a passive role.
 The role flag at bit 1 indicates that the node can act in an active role.
 If this parameter is absent it is assumed to be <tt>0b11</tt> (the node can be either role).
               </t>
-              <t>
-The definition of an "active role" is CL-specific but is expected to involve initiating outgoing conversations/connections/sessions rather than listening for incoming ones.
-Even when acting in the active role only, the CL <bcp14>MAY</bcp14> still be bound to a specific port number.
-              </t>
             </dd>
           </dl>
           <figure anchor="fig-msg-cl-general">
@@ -1594,6 +1624,11 @@ cl-role-flags = &(
 )
 ]]></sourcecode>
           </figure>
+          <t>
+The definition of an "active role" is CL-specific but is expected to involve initiating outgoing conversations/connections/sessions rather than responding to incoming ones.
+Even when acting in the active role only, the CL <bcp14>MAY</bcp14> still include specific transport parameters.
+For example, a source <xref target="sec-msg-cl-ip">bind port number</xref> for bidirectional CL protocols.
+          </t>
         </section>
         <section anchor="sec-msg-cl-ip">
           <name>IP-Related CL Parameters</name>
@@ -2704,6 +2739,7 @@ Negative code points are reserved for use on private networks for functions not 
         </t>
         <t>
 Specifications of new message types need to define the code point (an <tt>int16</tt> integer), as well as what message metadata are required and allowed within the message and how to interpret the message data maps.
+The definition of each message type <bcp14>SHALL</bcp14> include the semantics of each valid data map item within the message.
 Specifications need to define how those CBOR data are used by a node to relate the encoded message to the agent's information bases.
         </t>
         <t>
@@ -3008,7 +3044,8 @@ Negative code points are reserved for use on private networks for functions not 
         </t>
         <t>
 Specifications of new CL types need to define the CL Type value (an <tt>int16</tt> integer), as well as the other CL parameters required and allowed.
-Specifications need to define how those CBOR parameters are used by a node to transfer bundles to the referred-to CL.
+The definition of each CL type <bcp14>SHALL</bcp14> include the semantics of each valid data map item within the message.
+The definition of each CL type <bcp14>SHALL</bcp14> include details about how data map items are used by a participating node to transfer bundles to the advertising node via that CL.
         </t>
         <t>
 Expert(s) are encouraged to be biased towards approving registrations unless they are abusive, frivolous, or actively harmful (not merely aesthetically displeasing, or architecturally dubious).
@@ -3563,8 +3600,10 @@ Expert(s) are encouraged to be biased towards approving registrations unless the
             <date month="September" year="2015"/>
           </front>
         </reference>
+        <xi:include href="https://bib.ietf.org/public/rfc/bibxml/reference.RFC.826.xml"/>
         <xi:include href="https://bib.ietf.org/public/rfc/bibxml/reference.RFC.1256.xml"/>
         <xi:include href="https://bib.ietf.org/public/rfc/bibxml/reference.RFC.2131.xml"/>
+        <xi:include href="https://bib.ietf.org/public/rfc/bibxml/reference.RFC.2474.xml"/>
         <xi:include href="https://bib.ietf.org/public/rfc/bibxml/reference.RFC.3444.xml"/>
         <xi:include href="https://bib.ietf.org/public/rfc/bibxml/reference.RFC.3552.xml"/>
         <xi:include href="https://bib.ietf.org/public/rfc/bibxml/reference.RFC.3971.xml"/>
@@ -3599,6 +3638,34 @@ Expert(s) are encouraged to be biased towards approving registrations unless the
         </reference>
       </references>
     </references>
+    <section anchor="sec-ltp-zeroconf">
+      <name>Challenges with Zero-Configuration LTP</name>
+      <t>
+The core LTP specification in <xref section="5" target="RFC5326"/> relies on an underlying transport to convey each LTP "segment" PDU between sending and receiving LTP engines for its normal operation.
+      </t>
+      <t>
+When using "red part" block data within a session, which is the requirement from CCSDS uses of LTP <xref target="CCSDS-BPv7-OB"/> <xref target="CCSDS-BPv7"/> as a CL, segments need to be conveyed in both directions between the block-sending engine to the block-receiving engine.
+Some of the segments contain block data, some contain reception reports, and others have acknowledgement or cancellation data.
+      </t>
+      <t>
+Each LTP session is uniquely identified by the pair of LTP Engine ID of the entity which initiated the session and a Session ID issued by that entity.
+The LTP engine and session state machines are not at all bound to the specific transport (or its parameters) used to convey LTP segments in either direction.
+This means that successful LTP operation can occur over unidirectional transports with dissimilar protocol stacking in either direction between any two engines, even using dissimilar stacks for different segments within a single LTP session.
+It also means that there is no guarantee that a transport which <em>does</em> allow for bi-directional capability is able to be used by both engines for that capability.
+      </t>
+      <t>
+In more concrete terms, the current definition of LTP segment transport over UDP/IP in <xref section="3.3" target="RFC7122"/> does not require any relationship between the listening address-and-port on the block-sender side and block-receiver side.
+An implementation sending segments via UDP datagrams from a particular address-and-port is not obligated to listen for datagrams on that same address-and-port.
+In cases where the datagram source port is from the dynamic range but the listening port is the well-known number (which is a common implementation pattern), there is no in-band way for the receiving LTP engine to correlate the two or to even know about the listening port of its peer without prior configuration.
+      </t>
+      <t>
+Similarly, the definition of segment transport over EPP/SDLP <xref target="CCSDS-LTP"/> does not relate the virtual channel (VC), multiplexer access point (MAP), or even SCID used for one direction with any VC or MAP used for the opposite direction.
+      </t>
+      <t>
+A consequence of this in BP SAND is that successful use of LTP in a zero-configuration case between any two nodes requires each block-sending node to advertise its LTP listening parameters, including appropriate <xref target="sec-msg-cl-general">roles</xref>, so that they can be used by a block-receiving node for transport of report segments back to the sending node.
+Future updates to LTP binding specifications could require or recommend more strict relationships to make zero-configuration use more straightforward.
+      </t>
+    </section>
     <section anchor="sec-doc-ack" numbered="false">
       <name>Acknowledgments</name>
       <t>
