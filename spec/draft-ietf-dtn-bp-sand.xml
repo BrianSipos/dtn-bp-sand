@@ -1563,7 +1563,7 @@ If this parameter is absent there is no information about the required policy.
             <dd>
               <t>
 This pair uses key 6 and value type <tt>uint</tt> containing flags indicating which CL-specific roles the advertising node can act as.
-Details about how to interpret this common parameter are CL-type-specific.
+Details about how to interpret this general parameter are CL-type-specific.
               </t>
               <t>
 The role flag at bit 0 indicates that the node can act in a passive role.
@@ -2775,11 +2775,12 @@ Expert(s) are encouraged to be biased towards approving registrations unless the
       <section anchor="sec-iana-sand-msg-meta">
         <name>SAND Message Metadata</name>
         <t>
-IANA will create, under the "Bundle Protocol Secure Advertisement and Neighborhood Discovery (SAND)" registry group <xref target="IANA-BPSAND"/>, a registry titled "SAND Message Common Parameters" and initialize it with the contents of <xref target="tab-iana-sand-msg-meta"/>.
+IANA will create, under the "Bundle Protocol Secure Advertisement and Neighborhood Discovery (SAND)" registry group <xref target="IANA-BPSAND"/>, a registry titled "SAND Message Metadata Parameters" and initialize it with the contents of <xref target="tab-iana-sand-msg-meta"/>.
 The registration procedure is Specification Required.
         </t>
         <t>
-Specifications of new common parameters need to define the code point (an <tt>int16</tt> integer) as well as the CBOR form and meaning of the associated value.
+Specifications of new metadata parameters need to define the code point (an <tt>int16</tt> integer) as well as the CBOR form and meaning of the associated value.
+Specifications need to define how those CBOR parameters are used by a node to relate the encoded message to the node's information bases.
         </t>
         <t>
 Expert(s) are encouraged to be biased towards approving registrations unless they are abusive, frivolous, or actively harmful (not merely aesthetically displeasing, or architecturally dubious).
@@ -2829,7 +2830,8 @@ IANA will create, under the "Bundle Protocol Secure Advertisement and Neighborho
 The registration procedure is Specification Required.
         </t>
         <t>
-Specifications of new common parameters need to define the code point (an <tt>int16</tt> integer) as well as the CBOR form and meaning of the associated value.
+Specifications of new ULN data parameters need to define the code point (an <tt>int16</tt> integer) as well as the CBOR form and meaning of the associated value.
+Specifications need to define how those CBOR parameters are used by a node to relate the encoded message to the node's information bases.
         </t>
         <t>
 Expert(s) are encouraged to be biased towards approving registrations unless they are abusive, frivolous, or actively harmful (not merely aesthetically displeasing, or architecturally dubious).
@@ -2904,7 +2906,8 @@ IANA will create, under the "Bundle Protocol Secure Advertisement and Neighborho
 The registration procedure is Specification Required.
         </t>
         <t>
-Specifications of new common parameters need to define the code point (an <tt>int16</tt> integer) as well as the CBOR form and meaning of the associated value.
+Specifications of new CL common parameters need to define the code point (an <tt>int16</tt> integer) as well as the CBOR form and meaning of the associated value.
+Specifications need to define how those CBOR parameters are used by a node to relate the encoded message to the node's information bases.
         </t>
         <t>
 Expert(s) are encouraged to be biased towards approving registrations unless they are abusive, frivolous, or actively harmful (not merely aesthetically displeasing, or architecturally dubious).
@@ -3110,7 +3113,7 @@ IANA will create, under the "Bundle Protocol Secure Advertisement and Neighborho
 The registration procedure is Specification Required.
         </t>
         <t>
-Specifications of new common parameters need to define the associated CL type, code point (an <tt>int16</tt> integer), and the CBOR form and meaning of the associated value.
+Specifications of new type-specific parameters need to define the associated CL type, parameter code point (an <tt>int16</tt> integer), and the CBOR form and meaning of the associated value.
         </t>
         <table align="center" anchor="tab-iana-cl-param-types">
           <name>SAND CL Type-Specific Parameters</name>
@@ -3172,14 +3175,14 @@ IANA will create, under the "Bundle Protocol Secure Advertisement and Neighborho
 The registration procedure is Specification Required.
         </t>
         <t>
-Specifications of new peer parameters need to define the code point (an <tt>int16</tt> integer) as well as the CBOR form and meaning of the associated value.
+Specifications of new neighbor parameters need to define the code point (an <tt>int16</tt> integer) as well as the CBOR form and meaning of the associated value.
 Specifications need to define how those CBOR parameters are used by a node to relate the encoded message to the node's information bases.
         </t>
         <t>
 Expert(s) are encouraged to be biased towards approving registrations unless they are abusive, frivolous, or actively harmful (not merely aesthetically displeasing, or architecturally dubious).
         </t>
         <table align="center" anchor="tab-iana-nbr-param">
-          <name>SAND Local Topology Parameters</name>
+          <name>SAND Neighbor Parameters</name>
           <thead>
             <tr>
               <th>Code</th>
@@ -3345,7 +3348,7 @@ IANA will create, under the "Bundle Protocol Secure Advertisement and Neighborho
 The registration procedure is Specification Required.
         </t>
         <t>
-Specifications of new peer parameters need to define the code point (an <tt>int16</tt> integer) as well as the CBOR form and meaning of the associated value.
+Specifications of new endpoint parameters need to define the code point (an <tt>int16</tt> integer) as well as the CBOR form and meaning of the associated value.
 Specifications need to define how those CBOR parameters are used by a node to relate the encoded message to the node's information bases.
         </t>
         <t>
