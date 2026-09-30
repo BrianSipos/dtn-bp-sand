@@ -1616,7 +1616,7 @@ If a node has either IPv4 or IPv6 addresses assigned but is not listening on the
             </dd>
             <dt>IP Multicast List:</dt>
             <dd>
-This pair uses key 5 and value type <tt>ip-addr-ctr</tt> from IPv4 or IPv6 addresses encoded as 4-byte or 16-byte strings respectively.
+This pair uses key 7 and value type <tt>ip-addr-ctr</tt> from IPv4 or IPv6 addresses encoded as 4-byte or 16-byte strings respectively.
 Each address represents a multicast group for which the CL is a member in order to receive traffic.
 If this parameter is absent, an IP-based CL type <bcp14>SHALL</bcp14> be treated as if it does not participate in any multicast group.
             </dd>
@@ -1646,7 +1646,7 @@ $$cl-common-grp //= (
 )
 ; IP multicast address(es)
 $$cl-common-grp //= (
-    5: ip-addr-ctr
+    7: ip-addr-ctr
 )
 
 ; MAC bind address(es)
