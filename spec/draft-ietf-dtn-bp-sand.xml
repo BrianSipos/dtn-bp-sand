@@ -419,6 +419,10 @@ This is not necessarily the same as a path MTU between any peers on this network
               </td>
             </tr>
             <tr>
+              <td>ULN Labels</td>
+              <td>This is the set of (integer-valued) labels associated with this TP instance. The label "This Instance" is dynamically applied during message construction and will not appear in this table.</td>
+            </tr>
+            <tr>
               <td>SAND Timer Configuration</td>
               <td>
 This is the set of timers needed to configure SAND activities, as defined in <xref target="tab-info-local-timers"/>.
@@ -646,6 +650,17 @@ Due to having multiple-network connectivity, it is possible to have multiple rec
               <td>This is the latest bundle creation timestamp (<xref section="4.2.7" target="RFC9171"/>) for each <xref target="sec-iana-sand-msg-type">SAND Message Type</xref> received from the neighbor on this termination point, which is used to filter-out old, out-of-order messages in <xref target="sec-transport-latest"/>.</td>
             </tr>
             <tr>
+              <td>Timeout</td>
+              <td>This is the absolute local-clock time when this record becomes invalid.</td>
+            </tr>
+            <tr>
+              <td>Reachability</td>
+              <td>An indication of whether this neighbor has been only received from (HEARD), or if this node is present in that neighbor's own 1-hop neighbor list (SYMMETRIC), or if no messages have been received after some time (LOST).</td>
+            </tr>
+            <tr>
+              <td align="center" colspan="2">Properties below are received directly from the advertising node.</td>
+            </tr>
+            <tr>
               <td>DNS Name Set</td>
               <td>This is the set of DNS Names assigned to the neighbor node and accessible on the associated ULN.</td>
             </tr>
@@ -658,16 +673,12 @@ Due to having multiple-network connectivity, it is possible to have multiple rec
               <td>This is the configured or discovered MTU of the first-hop link for the neighbor on the associated ULN. Similar to the local interface Link MTU, the actual Path MTU to and from this peer might be reduced from any one-hop Link MTU and might be directional.</td>
             </tr>
             <tr>
-              <td>Reachability</td>
-              <td>An indication of whether this neighbor has been only received from (HEARD), or if this node is present in that neighbor's own 1-hop neighbor list (SYMMETRIC), or if no messages have been received after some time (LOST).</td>
+              <td>ULN Labels</td>
+              <td>This is the set of (integer-valued) labels associated with this instance. The same neighbor TP Index can have different labels if it appears in records with different local TP Index.</td>
             </tr>
             <tr>
               <td>Routing Metrics</td>
               <td>This is the set of routing metrics for expected path delay, maximum data rate, and bit error rate in each direction between the two termination points.</td>
-            </tr>
-            <tr>
-              <td>Timeout</td>
-              <td>This is the absolute local-clock time when this record becomes invalid.</td>
             </tr>
           </tbody>
         </table>
@@ -691,9 +702,6 @@ Due to having multiple-network connectivity, it is possible to have multiple rec
             <tr>
               <td>Neighbor Termination Point Index</td>
               <td>This is the neighbor-provided index for its termination point corresponding to this record.</td>
-            </tr>
-            <tr>
-              <td align="center" colspan="2">Properties below are based on the above unique key columns.</td>
             </tr>
             <tr>
               <td>CL Type</td>
@@ -731,6 +739,9 @@ Due to having multiple-network connectivity, it is possible to have multiple rec
             <tr>
               <td>Node ID</td>
               <td>This is the SAND Singleton EID for the node.</td>
+            </tr>
+            <tr>
+              <td align="center" colspan="2">Properties below are based on the above unique key columns.</td>
             </tr>
             <tr>
               <td>Latest Timestamps</td>
