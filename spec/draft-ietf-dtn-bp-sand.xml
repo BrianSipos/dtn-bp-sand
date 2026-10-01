@@ -3,10 +3,10 @@
  <!ENTITY nbsp    "&#160;">
  <!ENTITY zwsp   "&#8203;">
 ]>
-<rfc xmlns:xi="http://www.w3.org/2001/XInclude" category="std" consensus="true" docName="draft-ietf-dtn-bp-sand-04" ipr="trust200902" sortRefs="true" submissionType="IETF" tocDepth="4" tocInclude="true" version="3" xml:lang="en">
+<rfc xmlns:xi="http://www.w3.org/2001/XInclude" category="std" consensus="true" docName="draft-ietf-dtn-bp-sand-05" ipr="trust200902" sortRefs="true" submissionType="IETF" tocDepth="4" tocInclude="true" version="3" xml:lang="en">
   <front>
     <title abbrev="BP SAND">Bundle Protocol (BP) Secure Advertisement and Neighborhood Discovery (SAND)</title>
-    <seriesInfo name="Internet-Draft" value="draft-ietf-dtn-bp-sand-04"/>
+    <seriesInfo name="Internet-Draft" value="draft-ietf-dtn-bp-sand-05"/>
     <author fullname="Brian Sipos" initials="B." surname="Sipos">
       <organization abbrev="JHU/APL">The Johns Hopkins University Applied Physics Laboratory</organization>
       <address>
