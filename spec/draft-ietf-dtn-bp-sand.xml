@@ -32,7 +32,7 @@
     <abstract>
       <t>
 This document defines the Secure Advertisement and Neighborhood Discovery (SAND) protocol for Bundle Protocol version 7 (BPv7) within a delay-tolerant network (DTN).
-This protocol defines a general purpose advertisement mechanism with an initial set of message and data types able to be advertised by participating nodes in a BPv7 network.
+This protocol defines a general-purpose advertisement mechanism with an initial set of message and data types able to be advertised by participating nodes in a BPv7 network.
 The focus of this document is for advertisement to topological neighbors about local neighborhoods but can be expanded upon in the future through extension points.
       </t>
     </abstract>
@@ -120,7 +120,7 @@ Other use cases might be supported by or enhanced by SAND and are left to other 
         <section>
           <name>Zero-Configuration Neighbor Discovery</name>
           <t>
-This case is the most simple to explain, to discover enough information about BP neighbors to forward to them and receive from them without any prior in-band configuration needed.
+This case is the simplest to explain, to discover enough information about BP neighbors to forward to them and receive from them without any prior in-band configuration needed.
 It relies on a critical assumption about its operating environment: that nodes are listening on multicast group destinations for one or more default convergence layer (see <xref target="sec-transport-cls"/>) which is reachable from each advertising node through some shared medium.
           </t>
           <t>
@@ -427,7 +427,7 @@ This is the set of timers needed to configure SAND activities, as defined in <xr
           </tbody>
         </table>
         <t>
-The items in <xref target="tab-info-local-timers"/> represents the set of timer configuration needed to operate a participating node.
+The items in <xref target="tab-info-local-timers"/> represent the set of timer configuration needed to operate a participating node.
 As an information model, details such as specific units or encoding forms are left as an implementation matter.
 Because SAND uses the DTN time epoch and encoded form, SAND timer configuration <bcp14>SHOULD</bcp14> have a resolution down to at least one millisecond.
         </t>
@@ -479,11 +479,15 @@ The Identity information of <xref target="tab-info-local-identity-ee"/> is a log
           </thead>
           <tbody>
             <tr>
-              <td>Thumbnail</td>
-              <td>This is the <tt>x5t</tt> or <tt>c5t</tt> thumbnail of the encoded certificate, used as a selector.</td>
+              <td>Encoded Certificate</td>
+              <td>This is the DER-encoded X.509 certificate contents.</td>
             </tr>
             <tr>
               <td align="center" colspan="2">Properties below are based on the above unique key columns.</td>
+            </tr>
+            <tr>
+              <td>Thumbnails</td>
+              <td>These are thumbnails of the encoded certificate compatible with <tt>x5t</tt>, used as a selector. The algorithm SHA-256 (-16) is the interoperable minimum to support <xref target="RFC9360"/>.</td>
             </tr>
             <tr>
               <td>Key Usage</td>
@@ -492,10 +496,6 @@ The Identity information of <xref target="tab-info-local-identity-ee"/> is a log
             <tr>
               <td>Validity Time Interval</td>
               <td>This is the extracted Validity interval, from <xref section="4.1.2.5" target="RFC5280"/>, used as a selector.</td>
-            </tr>
-            <tr>
-              <td>Encoded Certificate</td>
-              <td>This is the DER-encoded X509 certificate contents.</td>
             </tr>
           </tbody>
         </table>
@@ -512,19 +512,19 @@ The trust anchor information of <xref target="tab-info-local-identity-ca"/> is a
           </thead>
           <tbody>
             <tr>
-              <td>Subject Key Identifier</td>
-              <td>This is the extracted Subject Key Identifier, from <xref section="4.2.1.2" target="RFC5280"/>, used as a selector.</td>
+              <td>Encoded Certificate</td>
+              <td>This is the DER-encoded X.509 certificate contents.</td>
             </tr>
             <tr>
               <td align="center" colspan="2">Properties below are based on the above unique key columns.</td>
             </tr>
             <tr>
-              <td>Validity Time Interval</td>
-              <td>This is the extracted Validity interval, from <xref section="4.1.2.5" target="RFC5280"/>, used as a selector.</td>
+              <td>Subject Key Identifier</td>
+              <td>This is the extracted Subject Key Identifier, from <xref section="4.2.1.2" target="RFC5280"/>, used as a selector.</td>
             </tr>
             <tr>
-              <td>Encoded Certificate</td>
-              <td>This is the DER-encoded X509 certificate contents.</td>
+              <td>Validity Time Interval</td>
+              <td>This is the extracted Validity interval, from <xref section="4.1.2.5" target="RFC5280"/>, used as a selector.</td>
             </tr>
           </tbody>
         </table>
@@ -575,7 +575,7 @@ This will cause the CL instance to no longer be associated with its previous par
             <tr>
               <td>Roles</td>
               <td>
-This indicates the logical roles which this CL instance is able to perform among "active" or "passive" options.
+This indicates the logical roles which this CL instance is able to perform among "initiator" or "responder" options.
 The definition of an active role is CL-specific, but is expected to involve initiating outgoing conversations/connections/sessions, while a passive role is expected to involve listening for incoming ones.
 A single CL instance can be capable of both roles.
               </td>
@@ -798,15 +798,19 @@ The Peer Certificate Information <bcp14>SHALL</bcp14> be de-duplicated from the 
               <td>This is the SAND Singleton EID for the node.</td>
             </tr>
             <tr>
-              <td>Thumbnail</td>
-              <td>This is <tt>x5t</tt> or <tt>c5t</tt> thumbnail of the encoded certificate, used as a selector.</td>
+              <td>Encoded Certificate</td>
+              <td>This is the DER-encoded X.509 certificate contents.</td>
+            </tr>
+            <tr>
+              <td align="center" colspan="2">Properties below are based on the above unique key columns.</td>
+            </tr>
+            <tr>
+              <td>Thumbnails</td>
+              <td>These are thumbnails of the encoded certificate compatible with <tt>x5t</tt>, used as a selector. The algorithm SHA-256 (-16) is the interoperable minimum to support <xref target="RFC9360"/>.</td>
             </tr>
             <tr>
               <td>Subject Key Identifier</td>
               <td>This is the extracted Subject Key Identifier, from <xref section="4.2.1.2" target="RFC5280"/>, used as a selector.</td>
-            </tr>
-            <tr>
-              <td align="center" colspan="2">Properties below are based on the above unique key columns.</td>
             </tr>
             <tr>
               <td>Key Usage</td>
@@ -815,10 +819,6 @@ The Peer Certificate Information <bcp14>SHALL</bcp14> be de-duplicated from the 
             <tr>
               <td>Validity Time Interval</td>
               <td>This is the extracted Validity interval, from <xref section="4.1.2.5" target="RFC5280"/>, used as a selector.</td>
-            </tr>
-            <tr>
-              <td>Encoded Certificate</td>
-              <td>This is the DER-encoded X509 certificate contents.</td>
             </tr>
           </tbody>
         </table>
@@ -832,7 +832,7 @@ The SAND relies on BPv7 for end-to-end transport, one or more CL for one-hop tra
       <section anchor="sec-transport-eid">
         <name>SAND Endpoints</name>
         <t>
-Within BPv7, the SAND uses two types of well-known endpoint identifier (EID) used as source and/or destination for bundles transported between SAND participants.
+Within BPv7, two types of well-known endpoint identifier (EID) are used as source and/or destination for bundles transported between SAND participants.
         </t>
         <dl>
           <dt>SAND Singleton EID:</dt>
@@ -1268,11 +1268,11 @@ Each bag <bcp14>SHOULD</bcp14> contain intermediate CA certificates up to, but n
           </dd>
         </dl>
         <t>
-Each Credential Advertisement <bcp14>SHALL</bcp14> contain an at least one end-entity credential identifying the advertising node.
+Each Credential Advertisement <bcp14>SHALL</bcp14> contain at least one end-entity credential identifying the advertising node.
 A Credential Advertisement <bcp14>SHALL NOT</bcp14> contain any end-entity credential that does not identify the advertising node.
         </t>
         <t>
-The Credential Advertisement message is populated in-part using the data identified in <xref target="tab-info-local-identity-ee"/>, part of the Local Node Information Base described in <xref target="local-info-bases"/>.
+The Credential Advertisement message is populated using the data identified in <xref target="tab-info-local-identity-ee"/>, part of the Local Node Information Base described in <xref target="local-info-bases"/>.
         </t>
         <figure anchor="fig-msg-credential">
           <name>Credential Advertisement Message CDDL</name>
@@ -1489,7 +1489,7 @@ ccsds-scid = [
       <section anchor="sec-msg-cl">
         <name>Convergence Layer (CL) Advertisement</name>
         <t>
-The CL Advertisement message indicates CL entities operating on the node sending the message, including both active and passive roles where applicable, and any parameters necessary for peers to make use of those CL instances.
+The CL Advertisement message indicates CL entities operating on the node sending the message, including both initiator and responder roles where applicable, and any parameters necessary for peers to make use of those CL instances.
 Each instance can also have an associated validity schedule.
         </t>
         <t>
@@ -1553,13 +1553,13 @@ Even in that case there is still value in discovering the presence of the non-li
 The general, technology-non-specific CL parameters are listed below and correspond with the CDDL of <xref target="fig-msg-cl-general"/>.
           </t>
           <dl>
-            <dt>Transport Security Required:</dt>
+            <dt anchor="cl-param-transec">Transport Security Required:</dt>
             <dd>
 This pair uses key 5 and value type <tt>bool</tt> indicating whether transport security is required (when <tt>true</tt>) or prohibited (when <tt>false</tt>).
 Details about how to interpret this common parameter are CL-type-specific.
 If this parameter is absent there is no information about the required policy.
             </dd>
-            <dt>Roles:</dt>
+            <dt anchor="cl-param-roles">Roles:</dt>
             <dd>
               <t>
 This pair uses key 6 and value type <tt>uint</tt> containing flags indicating which CL-specific roles the advertising node can act as.
@@ -1746,7 +1746,7 @@ This CL type <bcp14>SHALL</bcp14> be identified by code point 1.
           <t>
 If the Port Number parameter is absent, the default TCPCL port 4556 <bcp14>SHALL</bcp14> be used.
 The Transport Security Required parameter <bcp14>SHALL</bcp14> indicate both the Contact Header <tt>USE_TLS</tt> flag and the post-negotiation policy enforcement (<em>i.e.</em>, when the session will be disallowed).
-The Role parameter <bcp14>SHALL</bcp14> indicate whether the TCPCL entity on the node can function as either active or passive or both.
+The Roles parameter <bcp14>SHALL</bcp14> indicate whether the TCPCL entity on the node can function as either active (value initiator) or passive (value responder) or both.
           </t>
           <t>
 The CL-specific parameters are listed below and correspond with the CDDL of <xref target="fig-cl-tcpclv4"/>.
@@ -1804,6 +1804,7 @@ This CL type <bcp14>SHALL</bcp14> be identified by code point 2.
           <t>
 If the Port Number parameter is absent, the default UDPCL port 4556 <bcp14>SHALL</bcp14> be used.
 The Transport Security Required parameter <bcp14>SHALL</bcp14> indicate the need for DTLS security when receiving CL messages.
+The Roles parameter <bcp14>SHALL</bcp14> indicate whether the UDPCL entity on the node can function as either sender (value initiator) or receiver (value responder) or both.
           </t>
           <t>
 The CL-specific parameters are listed below and correspond with the CDDL of <xref target="fig-cl-udpclv2"/>.
@@ -1858,6 +1859,7 @@ The use of LTP CSID 1 to transport single BP PDUs as defined for BPv6 in Appendi
           <t>
 If the Port Number parameter is absent for LTP-over-UDP, the default LTP port 1113 <bcp14>SHALL</bcp14> be used.
 The BPv7 use of LTP does not specify a transport-layer security mechanism.
+The Roles parameter <bcp14>SHALL</bcp14> indicate whether the LTP entity on the node can function as either session sender (value initiator) or session receiver (value responder) or both.
           </t>
           <t>
 The CL-specific parameters are listed below and correspond with the CDDL of <xref target="fig-cl-type-ltpcl"/>.
@@ -2015,11 +2017,11 @@ $cl-recv /= {
         <name>Local Topology Advertisement</name>
         <t>
 The Local Topology Advertisement message allows a participating node to enumerate the 1-hop neighbors with which the advertising node can communicate (via some unspecified CL or combined aggregate of CLs).
-Each neighbor is identified by its SAND Singleton EID which is a unique across a BP network.
+Each neighbor is identified by its SAND Singleton EID which is unique across a BP network.
         </t>
         <t>
 Each 1-hop neighbor (peer) is associated with a reachability status and a set of communication metrics similar to the behavior of MANET NHDP <xref target="RFC6130"/>.
-The source of the metrics are not specified by this document, but might come from estimating based on SAND traffic exchanged with the peer. 
+The source(s) of the metrics are not specified by this document, but might come from estimating based on SAND traffic exchanged with the peer.
 In addition, some of the data comprising the Local Topology Advertisement message is sourced from the Neighbor Information Base, such as Reachability and Path Metrics as discussed in <xref target="tab-info-neighbor-reachable"/>.
         </t>
         <t>
@@ -2283,7 +2285,7 @@ If this parameter is absent there is no information about the required policy.
             <t>
 The security flag at bit 0 indicates that the payload <bcp14>SHALL</bcp14> be a target of a BIB that the node can accept.
 The security flag at bit 1 indicates that the payload <bcp14>SHALL</bcp14> be a target of a BCB that the node can accept.
-The security flag at bit 1 indicates that the any accepted security block <bcp14>SHALL</bcp14> bind to the primary block as AAD.
+The security flag at bit 2 indicates that any accepted security block <bcp14>SHALL</bcp14> bind to the primary block as AAD.
             </t>
           </dd>
         </dl>
@@ -2391,7 +2393,7 @@ The wait time <bcp14>MAY</bcp14> include a random jitter <xref target="RFC5148"/
         <name>Periodic Update</name>
         <t>
 A participating node <bcp14>MAY</bcp14> send periodic update advertisements based on an internal timer associated with the message type being advertised and the Destination EID being advertised to.
-A periodic update advertisement <bcp14>SHOULD</bcp14> be sent with an actual interval shorter than or equal to the <xref target="param-rep-intvl">Repetition Interval</xref> in sent with associated message type and destination.
+A periodic update advertisement <bcp14>SHOULD</bcp14> be sent with an actual interval shorter than or equal to the <xref target="param-rep-intvl">Repetition Interval</xref> sent with associated message type and destination.
         </t>
       </section>
     </section>
@@ -2463,7 +2465,7 @@ Another aspect of choice for an advertising node is when to send specific types 
 One valid strategy is for a node to have independent timers associated with different types of data, instances of data, and/or ULN termination points, and periodically sending an associated SAND message containing the state of that data.
 This makes advertisement behavior more deterministic and provides predictable message sizes and rates.
 The message metadata parameter Repetition Interval is meant to express an associated timer interval when this strategy is used and allow a message receiver to adapt to the expected message rates.
-In this case the parameter Validity Duration is expected be on the same order of magnitude as the Repetition Interval.
+In this case the parameter Validity Duration is expected to be on the same order of magnitude as the Repetition Interval.
         </t>
         <t>
 Another strategy is for a node to send SAND messages only when its associated state has changed.
@@ -2490,7 +2492,7 @@ This specification defines a mechanism with mandatory-to-implement structures an
         <t>
 The choice of a discovering node to authorize use of specific data (for reasons discussed below) is an implementation matter on that node.
 Authorization for use of SAND data can be dependent on the SAND data/message type, SAND bundle source or destination, or CL-related parameters about the reception of the bundle PDU.
-Authorization of for use of specific data can also be conditional on previously discovered or negotiated data about the advertising node.
+Authorization for use of specific data can also be conditional on previously discovered or negotiated data about the advertising node.
         </t>
       </section>
       <section anchor="sec-ops-culling">
@@ -2605,7 +2607,7 @@ For BP nodes enrolling in a network for the first time, with proper authorizatio
         </t>
         <t>
 A participating node <bcp14>SHOULD</bcp14> have the ability for an application to inspect the payload of a bundle as part of BPSec processing in order to extract necessary certificates from <xref format="title" target="sec-msg-credential"/> messages.
-If that is not possible, a advertising node <bcp14>SHOULD</bcp14> include necessary certificates within any BIB needed to satisfy requirements of <xref target="sec-transport-security"/>.
+If that is not possible, an advertising node <bcp14>SHOULD</bcp14> include necessary certificates within any BIB needed to satisfy requirements of <xref target="sec-transport-security"/>.
 Determination of this need is a network administration matter outside the scope of this document.
         </t>
       </section>

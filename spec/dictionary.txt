@@ -147,6 +147,7 @@ queueing
 reachability
 Reachability
 recv
+responder
 Responder
 retransmission
 retransmissions
@@ -160,6 +161,7 @@ SABR
 SANA
 SCID
 SDLP
+SHA
 SSL
 SSP
 STARTTLS
