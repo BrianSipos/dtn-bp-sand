@@ -319,13 +319,14 @@ Because advertisements need to be interpreted from the point of view of another 
           <t>
 For the case of IP technology, this means that link-local addressing is meaningful only in cases where there is an expectation that participating nodes will also have an address under the same prefix and there is reachability to the advertising node.
 Additionally, using IP as the "bottom" of a <xref target="sec-protocol-ident-cl">fully specified CL type</xref> assumes that there is some other mechanism by which the participating nodes ensure IP reachability (<em>e.g.</em>, the IPv4 Address Resolution Protocol <xref target="RFC826"/> or IPv6 Neighbor Discovery Protocol <xref target="RFC4861"/>).
+There is an expectation that routeable IP prefixes and addresses will be properly assigned by relevant internet numbering authorities <xref target="RFC7020"/> so that their uses do not collide across ULNs.
           </t>
           <t>
-For the case of SDLP technology, the various protocols each use a spacecraft identifier (SCID) to identify either the sending or receiving node and not a specific physical channel terminating at that node.
-The SCID identifies the receiving node in Earth-to-space "forward" modes, while the SCID identifies the sending node in space-to-Earth "return" modes.
+In the case of SDLP technology, each protocol uses a spacecraft identifier (SCID) to identify either the sending or receiving node, rather than a specific (physical or logical) channel terminating at that node.
+The SCID identifies the receiving node in Earth-to-space "forward" modes and the sending node in space-to-Earth "return" modes, as explained in Section&nbsp;2.2 of <xref target="CCSDS-SDLP"/>.
 The determination of which SCID to use for inter-satellite links or more complex cases is mission-specific. <cref>Is there a good reference for conventions here?</cref>
 The use of more fine grained "virtual channel" identifiers allows differentiation of frames within a data link instance (similar to IP differentiated services <xref target="RFC2474"/>) but these identifiers are not meant to have well-known meaning outside of that individual instance.
-A node is free to re-use virtual channel identifiers for entirely different purposes when communicating with different neighbors or even over different links.
+A node is free to re-use virtual channel identifiers for entirely different purposes when communicating with different neighbors or even over different links with the same neighbors.
           </t>
         </section>
       </section>
@@ -3615,6 +3616,7 @@ Expert(s) are encouraged to be biased towards approving registrations unless the
         <xi:include href="https://bib.ietf.org/public/rfc/bibxml/reference.RFC.5444.xml"/>
         <xi:include href="https://bib.ietf.org/public/rfc/bibxml/reference.RFC.5706.xml"/>
         <xi:include href="https://bib.ietf.org/public/rfc/bibxml/reference.RFC.6130.xml"/>
+        <xi:include href="https://bib.ietf.org/public/rfc/bibxml/reference.RFC.7020.xml"/>
         <xi:include href="https://bib.ietf.org/public/rfc/bibxml/reference.RFC.7942.xml"/>
         <xi:include href="https://bib.ietf.org/public/rfc/bibxml/reference.RFC.8085.xml"/>
         <xi:include href="https://bib.ietf.org/public/rfc/bibxml/reference.RFC.8175.xml"/>
@@ -3642,14 +3644,16 @@ Expert(s) are encouraged to be biased towards approving registrations unless the
       <name>Challenges with Zero-Configuration LTP</name>
       <t>
 The core LTP specification in <xref section="5" target="RFC5326"/> relies on an underlying transport to convey each LTP "segment" PDU between sending and receiving LTP engines for its normal operation.
+Each segment is associated with exactly one LTP session which is used to transfer a single contiguous "block" of data, which is treated as opaque bytes by each LTP engine.
+All sessions handled by an LTP engine are associated with a state machine independent of any other session.
       </t>
       <t>
 When using "red part" block data within a session, which is the requirement from CCSDS uses of LTP <xref target="CCSDS-BPv7-OB"/> <xref target="CCSDS-BPv7"/> as a CL, segments need to be conveyed in both directions between the block-sending engine to the block-receiving engine.
 Some of the segments contain block data, some contain reception reports, and others have acknowledgement or cancellation data.
       </t>
       <t>
-Each LTP session is uniquely identified by the pair of LTP Engine ID of the entity which initiated the session and a Session ID issued by that entity.
-The LTP engine and session state machines are not at all bound to the specific transport (or its parameters) used to convey LTP segments in either direction.
+Each LTP session is uniquely identified by the pair consisting of the LTP Engine ID of the entity that initiated the session and a Session ID issued by that entity.
+Beyond being independent of each other, the state machine of an LTP session is not at all bound to the specific transport (or its parameters) used to convey LTP segments in either direction from an LTP engine.
 This means that successful LTP operation can occur over unidirectional transports with dissimilar protocol stacking in either direction between any two engines, even using dissimilar stacks for different segments within a single LTP session.
 It also means that there is no guarantee that a transport which <em>does</em> allow for bi-directional capability is able to be used by both engines for that capability.
       </t>
