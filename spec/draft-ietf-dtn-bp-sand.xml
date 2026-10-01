@@ -1356,6 +1356,13 @@ This pair uses key 4 and value type <tt>mtu-size</tt> indicating the link MTU, a
 If this parameter is absent then other means of configuring or estimating link MTU are needed.
 Even when present, the link MTU only sets an upper bound on the path MTU to the advertising node if a path traverses multiple links.
             </dd>
+            <dt>ULN Labels:</dt>
+            <dd>
+This pair uses key 7 and value of an array of <tt>uln-label</tt> items.
+Labels enable special filtering or processing of specific TP instances.
+If this parameter is absent then the TP will not have any associated labels.
+The registry of ULN Label code points is IANA-managed and defined in <xref target="sec-iana-uln"/>.
+            </dd>
           </dl>
           <figure anchor="fig-msg-uln-general">
             <name>General ULN Parameters CDDL</name>
@@ -1370,11 +1377,24 @@ $$uln-grp //= (
     4: mtu-size
 )
 mtu-size = uint .gt 0
+
+; ULN Labels
+$$uln-grp //= (
+    7: [+ uln-label]
+)
+uln-label = int16
 ]]></sourcecode>
           </figure>
           <t>
 When present, the Link MTU <bcp14>SHALL</bcp14> adhere to the lower limit of 68 octets for IPv4 <xref target="RFC791"/> or 1280 for IPv6 <xref target="RFC8200"/> when those technologies are used on the termination point.
 Other ULN technologies will still have an MTU value but with a different lower bound.
+          </t>
+          <t>
+The set of available ULN Label code points is split between a range of well-known values and a range reserved for private and experimental use.
+This document defines a single ULN Label "This Instance" which is used to mark a single TP instance as being the one associated with the actual data plane over which the SAND Bundle was forwarded.
+The ULN Label "This Instance" <bcp14>SHALL NOT</bcp14> be present on more than one TP instance in a single message.
+The ULN Label "This Instance" <bcp14>SHOULD</bcp14> be present on one TP instance when the node has multiple, uniquely identifiable instances.
+The ULN Label "This Instance" <bcp14>SHALL</bcp14> be present on one TP instance in any message where there is ambiguity of which TP is associated with the message (<em>e.g.</em>, when using link-local addresses, or use of any SDLP).
           </t>
         </section>
         <section anchor="sec-msg-uln-ip">
@@ -1880,16 +1900,16 @@ There is no required minimum extension support defined for LTP.
             <name>LTPCL Over UDP Parameters CDDL</name>
             <sourcecode type="cddl"><![CDATA[
 $cl-recv /= {
-    cl-base<(3/252/253)>,
-    * $$cl-ltpudp-grp
+    cl-base<(3/7/8/252/253)>,
+    * $$cl-ltp-grp
 }
 
 ; LTP Engine ID
-$$cl-ltpudp-grp //= (
+$$cl-ltp-grp //= (
     -1: uint,
 )
 ; LTP extension support
-$$cl-ltpudp-grp //= (
+$$cl-ltp-grp //= (
     -2: [+ uint]
 )
 ]]></sourcecode>
@@ -2887,7 +2907,12 @@ Expert(s) are encouraged to be biased towards approving registrations unless the
               <td><xref target="sec-msg-uln-ccsds"/> of [This specification]</td>
             </tr>
             <tr>
-              <td>7 to 32511</td>
+              <td>7</td>
+              <td>ULN Labels</td>
+              <td><xref target="sec-msg-uln-general"/> of [This specification]</td>
+            </tr>
+            <tr>
+              <td>8 to 32511</td>
               <td>unassigned</td>
               <td></td>
             </tr>
@@ -2895,6 +2920,49 @@ Expert(s) are encouraged to be biased towards approving registrations unless the
               <td>32512 to 32767</td>
               <td>Reserved for private and experimental parameters</td>
               <td>[This specification]</td>
+            </tr>
+          </tbody>
+        </table>
+        <t>
+IANA will create, under the "Bundle Protocol Secure Advertisement and Neighborhood Discovery (SAND)" registry group <xref target="IANA-BPSAND"/>, a registry titled "SAND ULN Labels" and initialize it with the contents of <xref target="tab-iana-uln-label"/>.
+For positive code points the registration procedure is Specification Required.
+Negative code points are reserved for use on private networks for functions not published to the IANA.
+        </t>
+        <t>
+Specifications of new ULN Labels need to define the label value (an <tt>int16</tt> integer), as well as the purpose and meaning of the presence or absence of the label in any TP instance.
+        </t>
+        <t>
+Expert(s) are encouraged to be biased towards approving registrations unless they are abusive, frivolous, or actively harmful (not merely aesthetically displeasing, or architecturally dubious).
+        </t>
+        <table align="center" anchor="tab-iana-uln-label">
+          <name>SAND ULN Labels</name>
+          <thead>
+            <tr>
+              <th>Code</th>
+              <th>Name</th>
+              <th>Reference</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr>
+              <td>-32768 to -1</td>
+              <td>Reserved for private and experimental use</td>
+              <td>[This specification]</td>
+            </tr>
+            <tr>
+              <td>0</td>
+              <td>Reserved</td>
+              <td>[This specification]</td>
+            </tr>
+            <tr>
+              <td>1</td>
+              <td>This Instance</td>
+              <td><xref target="sec-msg-uln-general"/> of [This specification]</td>
+            </tr>
+            <tr>
+              <td>2 to 32767</td>
+              <td>unassigned</td>
+              <td/>
             </tr>
           </tbody>
         </table>
