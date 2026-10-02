@@ -4,6 +4,7 @@ Ack
 ACK
 acknowledgement
 acknowledgements
+Adaptors
 addr
 ADU
 anycast
@@ -71,6 +72,7 @@ EID
 EIDs
 encodings
 endian
+Endpts
 EPP
 EPPCL
 ethertype
@@ -147,6 +149,7 @@ queueing
 reachability
 Reachability
 recv
+responder
 Responder
 retransmission
 retransmissions
@@ -154,12 +157,14 @@ retransmit
 Retransmit
 retransmitted
 RKF
+routeable
 Routeable
 RPKI
 SABR
 SANA
 SCID
 SDLP
+SHA
 SSL
 SSP
 STARTTLS
@@ -191,7 +196,9 @@ Untrusted
 URI
 USLP
 UTF
+VC
 VCID
+VLAN
 wireshark
 Wireshark
 XPath
