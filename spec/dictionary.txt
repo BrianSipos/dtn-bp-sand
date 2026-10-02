@@ -155,6 +155,7 @@ retransmit
 Retransmit
 retransmitted
 RKF
+routeable
 Routeable
 RPKI
 SABR
@@ -195,6 +196,7 @@ USLP
 UTF
 VC
 VCID
+VLAN
 wireshark
 Wireshark
 XPath
