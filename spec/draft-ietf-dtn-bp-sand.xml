@@ -269,8 +269,13 @@ Because of this, the SAND protocol can be used by participating nodes operating 
         </t>
         <t>
 This technology independence applies not only to the data plane used to transport SAND PDUs, but also how underlayer network (ULN) technologies and related CL instances are advertised to peers.
-This document registers code points for well-known ULN parameters, CL types, and CL parameters corresponding to IP-based, MAC-based, and CCSDS-link-based data planes.
+This document registers code points for well-known ULN parameters, CL types, and CL parameters corresponding to IP-based, MAC-based, and SDLP-based data planes.
 Beyond this, arbitrary protocol layering can be identified by either future registrations or by private-use code points.
+        </t>
+        <t>
+Because of its neutrality, some of the general-purpose information base and parameter definitions require each ULN technology or CL type to define how the general parameter relates to its specific technology.
+For example, the CL roles defined in this document (see <xref target="cl-param-roles"/>) are "initiator" and "responder".
+The definition of an initiator role is CL-specific but is expected to involve initiating outgoing protocol conversations/connections/sessions, while a responder role is expected to involve listening for and responding to incoming ones.
         </t>
         <section>
           <name>Relationship to Specific Technologies</name>
@@ -618,7 +623,6 @@ This will cause the CL instance to no longer be associated with its previous par
               <td>Roles</td>
               <td>
 This indicates the logical roles which this CL instance is able to perform among "initiator" or "responder" options.
-The definition of an initiator role is CL-specific, but is expected to involve initiating outgoing conversations/connections/sessions, while a responder role is expected to involve listening for and responding to incoming ones.
 A single CL instance can be capable of both roles.
               </td>
             </tr>
@@ -1477,6 +1481,12 @@ This pair uses key 5 and value type <tt>mac-addr-ctr</tt> from EUI-48 or EUI-64 
 The encodings are consistent with the unwrapped CBOR tag 48 from <xref section="2.4" target="RFC9542"/>).
 If this parameter is absent the node <bcp14>SHALL</bcp14> be treated as not having a specific MAC address on the ULN.
             </dd>
+            <dt>MAC VLAN ID:</dt>
+            <dd>
+This pair uses key 8 and value type <tt>mac-vlan-id</tt> holding a single 12-bit integer VLAN ID <xref target="IEEE.802.1Q-2018"/>.
+If this parameter is absent the node <bcp14>SHALL</bcp14> be treated as not having a specific externally visible VLAN ID at the node interface.
+Trunking along an Ethernet path farther away from the node can still use VLAN separately from this ID being present or absent at the interface of the node itself.
+            </dd>
           </dl>
           <figure anchor="fig-msg-uln-ip">
             <name>IP Termination Point Parameters CDDL</name>
@@ -1517,6 +1527,13 @@ mac-addr-ctr = mac-address / [+ mac-address]
 mac-address = eui48-address / eui64-address
 eui48-address = bstr .size 6
 eui64-address = bstr .size 8
+
+; MAC VLAN ID
+$$uln-grp //= (
+    8: mac-vlan-id
+)
+mac-vlan-id = 0 .. 0xFFF
+
 ]]></sourcecode>
           </figure>
         </section>
@@ -1632,8 +1649,8 @@ This pair uses key 6 and value type <tt>uint</tt> containing flags indicating wh
 Details about how to interpret this general parameter are CL-type-specific.
               </t>
               <t>
-The role flag at bit 0 indicates that the node can act in a passive role.
-The role flag at bit 1 indicates that the node can act in an active role.
+The role flag at bit 0 indicates that the node can act in a responder role.
+The role flag at bit 1 indicates that the node can act in an initiator role.
 If this parameter is absent it is assumed to be <tt>0b11</tt> (the node can be either role).
               </t>
             </dd>
@@ -1651,15 +1668,14 @@ $$cl-common-grp //= (
     6: uint .bits cl-role-flags
 )
 cl-role-flags = &(
-    passive: 0,
-    active: 1,
+    responder: 0,
+    initiator: 1,
 )
 ]]></sourcecode>
           </figure>
           <t>
-The definition of an "active role" is CL-specific but is expected to involve initiating outgoing conversations/connections/sessions rather than responding to incoming ones.
-Even when acting in the active role only, the CL <bcp14>MAY</bcp14> still include specific transport parameters.
-For example, a source <xref target="sec-msg-cl-ip">bind port number</xref> for bidirectional CL protocols.
+Even when acting in the responder role only, the CL <bcp14>MAY</bcp14> still include specific transport parameters.
+For example, a source <xref target="sec-msg-cl-ip">bind port number</xref> for bidirectional CL protocols such as those using LTP.
           </t>
         </section>
         <section anchor="sec-msg-cl-ip">
@@ -1811,9 +1827,9 @@ This CL type specifically refers to the TCP Convergence Layer (TCPCL) version 4 
 This CL type <bcp14>SHALL</bcp14> be identified by code point 1.
           </t>
           <t>
-If the Port Number parameter is absent, the default TCPCL port 4556 <bcp14>SHALL</bcp14> be used.
+If the Bind Port Number parameter is absent, the default TCPCL port 4556 <bcp14>SHALL</bcp14> be used.
 The Transport Security Required parameter <bcp14>SHALL</bcp14> indicate both the Contact Header <tt>USE_TLS</tt> flag and the post-negotiation policy enforcement (<em>i.e.</em>, when the session will be disallowed).
-The Roles parameter <bcp14>SHALL</bcp14> indicate whether the TCPCL entity on the node can function as either active (value initiator) or passive (value responder) or both.
+The Roles parameter <bcp14>SHALL</bcp14> indicate whether the TCPCL entity on the node can function as either active connector (value "initiator") or passive listener (value "responder") or both.
           </t>
           <t>
 The CL-specific parameters are listed below and correspond with the CDDL of <xref target="fig-cl-tcpclv4"/>.
@@ -1869,9 +1885,9 @@ This CL type specifically refers to the UDPCL Version 2 of <xref target="I-D.iet
 This CL type <bcp14>SHALL</bcp14> be identified by code point 2.
           </t>
           <t>
-If the Port Number parameter is absent, the default UDPCL port 4556 <bcp14>SHALL</bcp14> be used.
+If the Bind Port Number parameter is absent, the default UDPCL port 4556 <bcp14>SHALL</bcp14> be used.
 The Transport Security Required parameter <bcp14>SHALL</bcp14> indicate the need for DTLS security when receiving CL messages.
-The Roles parameter <bcp14>SHALL</bcp14> indicate whether the UDPCL entity on the node can function as either sender (value initiator) or receiver (value responder) or both.
+The Roles parameter <bcp14>SHALL</bcp14> indicate whether the UDPCL entity on the node can function as either transfer sender (value "initiator") or receiver (value "responder") or both.
           </t>
           <t>
 The CL-specific parameters are listed below and correspond with the CDDL of <xref target="fig-cl-udpclv2"/>.
@@ -1924,9 +1940,9 @@ While there is no concrete specification for transporting BPv7 bundles over LTP 
 The use of LTP CSID 1 to transport single BP PDUs as defined for BPv6 in Appendix&nbsp;B3 of <xref target="CCSDS-BPv6"/> <bcp14>SHALL</bcp14> be identified by code point 253.
           </t>
           <t>
-If the Port Number parameter is absent for LTP-over-UDP, the default LTP port 1113 <bcp14>SHALL</bcp14> be used.
-The BPv7 use of LTP does not specify a transport-layer security mechanism.
-The Roles parameter <bcp14>SHALL</bcp14> indicate whether the LTP entity on the node can function as either session sender (value initiator) or session receiver (value responder) or both.
+If the Bind Port Number parameter is absent for LTP-over-UDP, the default LTP port 1113 <bcp14>SHALL</bcp14> be used.
+The Transport Security Required parameter has no use because the BPv7 binding to LTP does not specify a transport-layer security mechanism.
+The Roles parameter <bcp14>SHALL</bcp14> indicate whether the LTP entity on the node can function as either session sender (value "initiator") or session receiver (value "responder") or both.
           </t>
           <t>
 The CL-specific parameters are listed below and correspond with the CDDL of <xref target="fig-cl-type-ltpcl"/>.
@@ -1971,7 +1987,12 @@ This CL type specifically refers to the transport of BTP-U PDUs <xref target="I-
 This CL type <bcp14>SHALL</bcp14> be identified by code point 4.
           </t>
           <t>
+When this CL type is present, its parent TP instance <bcp14>SHALL</bcp14> contain at least a MAC Address List parameter.
+The parent TP instance <bcp14>MAY</bcp14> contain a MAC VLAN ID parameter to indicate that the frames associated with this binding use a VLAN tag.
+          </t>
+          <t>
 This CL type does not make use of any of the <xref target="sec-msg-cl-ip">IP-related parameters</xref> or the Transport Security Required parameter.
+The Roles parameter <bcp14>SHALL</bcp14> indicate whether the BTPU entity on the node can function as either transfer sender (value "initiator") or receiver (value "responder") or both.
           </t>
           <t>
 The CL-specific parameters are listed below and correspond with the CDDL of <xref target="fig-cl-btpuoe"/>.
@@ -2962,7 +2983,12 @@ Expert(s) are encouraged to be biased towards approving registrations unless the
               <td><xref target="sec-msg-uln-general"/> of [This specification]</td>
             </tr>
             <tr>
-              <td>8 to 32511</td>
+              <td>8</td>
+              <td>MAC VLAN ID</td>
+              <td><xref target="sec-msg-uln-ip"/> of [This specification]</td>
+            </tr>
+            <tr>
+              <td>9 to 32511</td>
               <td>unassigned</td>
               <td></td>
             </tr>
@@ -3515,6 +3541,7 @@ Expert(s) are encouraged to be biased towards approving registrations unless the
     </section>
   </middle>
   <back>
+    <displayreference target="IEEE.802.1Q-2018" to="IEEE-802.1Q"/>
     <references>
       <name>References</name>
       <references>
@@ -3652,6 +3679,7 @@ Expert(s) are encouraged to be biased towards approving registrations unless the
             <date month="July" year="2019"/>
           </front>
         </reference>
+        <xi:include href="https://bib.ietf.org/public/rfc/bibxml-misc/reference.IEEE.802.1Q-2018.xml"/>
         <xi:include href="https://bib.ietf.org/public/rfc/bibxml/reference.RFC.791.xml"/>
         <xi:include href="https://bib.ietf.org/public/rfc/bibxml/reference.RFC.1034.xml"/>
         <xi:include href="https://bib.ietf.org/public/rfc/bibxml/reference.RFC.2119.xml"/>
