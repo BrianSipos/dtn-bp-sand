@@ -4,6 +4,7 @@ Ack
 ACK
 acknowledgement
 acknowledgements
+Adaptors
 addr
 ADU
 anycast
@@ -71,6 +72,7 @@ EID
 EIDs
 encodings
 endian
+Endpts
 EPP
 EPPCL
 ethertype

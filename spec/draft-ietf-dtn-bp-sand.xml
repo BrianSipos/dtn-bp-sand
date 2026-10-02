@@ -55,12 +55,12 @@ This means long one-way light-time (OWLT) delays between neighbors, expected tim
 More detailed descriptions of the challenges of DTNs can be found in "Delay-Tolerant Network Architecture" <xref target="RFC4838"/>.
       </t>
       <t>
-Earlier research into discovery within a BP network led to development of the draft experimental IP Neighbor Discovery (IPND) protocol <xref target="I-D.irtf-dtnrg-ipnd"/>, but that protocol is intimately tied to its use of UDP datagram "beacons" and necessary use of an Internet Protocol (IP) underlay network.
+Earlier research into discovery within a BP network led to development of the draft experimental "IP Neighbor Discovery" protocol <xref target="I-D.irtf-dtnrg-ipnd"/>, but that protocol is intimately tied to its use of UDP datagram "beacons" and necessary use of an Internet Protocol (IP) underlay network.
 It also would require allocation of well-known UDP port number and IP multicast addresses or pre-configuration of those parameters across network nodes, but no such allocations were ever made.
       </t>
       <t>
 To mitigate the need for manual parameter discovery and configuration, an online neighborhood discovery protocol can be used, and such a protocol is defined in this document.
-The Secure Advertisement and Neighborhood Discovery (SAND) protocol operates at and above the BP-layer, as shown in <xref target="fig-dtn-ip-stack"/>, which insulates it from strict dependence on any specific CL for its message transport and allows the use of BPSec for message security.
+The Secure Advertisement and Neighborhood Discovery (SAND) protocol operates at and above the BP-layer, as shown in <xref target="fig-dtn-ip-stack"/>, which insulates it from strict dependence on any specific CL for its message transport and allows the use of Bundle Protocol Security (BPSec) for message security.
 The full protocol stack of this document uses the UDP Convergence Layer (UDPCL) version 2 <xref target="I-D.ietf-dtn-udpcl"/> as a <xref target="sec-transport-cls">zero-configuration default</xref> for its any-source multicast (ASM) capability but SAND could be, and is expected to be, used over other CL types (to include unicast transports, see <xref target="sec-protocol-uln"/>) which might be informed by lower-layer discovery protocols (see <xref target="sec-protocol-discovery"/>).
       </t>
       <figure anchor="fig-dtn-ip-stack">
@@ -81,6 +81,31 @@ The full protocol stack of this document uses the UDP Convergence Layer (UDPCL) 
 +-------------------------+
 ]]></artwork>
       </figure>
+      <t>
+The separation of SAND from its transport is illustrated more clearly in <xref target="fig-stack-planes"/>, where the SAND entities communicate to each other via SAND PDUs, their transport supported by BP Agents communicating via BP PDUs, and farther under that specific pairings or groupings (depending on unicast or multicast transport) of CL Adaptors communicating by various PDUs, themselves supported by specific underlayer network (ULN) technologies.
+      </t>
+      <figure anchor="fig-stack-planes">
+        <name>Separation of Protocol Entities into Control and Data Planes</name>
+        <artwork align="center" type="ascii-art"><![CDATA[
+        +---------------+     +---------------+    
+        |     Node      | ... |     Node      |    
+        |               |     |               |    
+        | +-----------+ |     | +-----------+ |    
+Control | |SAND Entity|<=======>|SAND Entity| |    
+Plane   | +-----------+ |     | +-----------+ |    
+~~~~~~~~|~~~~~~~~~~~~~~~|~~~~~|~~~~~~~~~~~~~~~|~~~~
+Data    | +-----------+ |     | +-----------+ |    
+Plane   | |  BP Agent |<=======>|  BP Agent | |    
+        | +-----------+ |     | +-----------+ |    
+        | +-----------+ |     | +-----------+ |    
+        | |CL Adaptors|<=======>|CL Adaptors| |    
+        | +-----------+ |     | +-----------+ |    
+        | +-----------+ |     | +-----------+ |    
+        | |ULN Endpts.|<=======>|ULN Endpts.| |    
+        | +-----------+ |     | +-----------+ |    
+        +---------------+     +---------------+    
+]]></artwork>
+      </figure>
       <section anchor="sec-intro-scope">
         <name>Scope</name>
         <t>
@@ -93,7 +118,7 @@ This document does not address:
         <ul spacing="normal">
           <li>
 The format of protocol data units of the Bundle Protocol, as those are defined elsewhere <xref target="RFC9171"/>.
-This includes the concept of bundle fragmentation or bundle encapsulation.
+This includes the concepts of bundle fragmentation, segmentation, and encapsulation.
           </li>
           <li>
 Logic for routing bundles along a path toward a bundle's endpoint.
@@ -107,7 +132,7 @@ Some networks could require specific extension blocks to be present for valid tr
 Policies or mechanisms for issuing Public Key Infrastructure Using X.509 (PKIX) certificates; provisioning, deploying, or accessing certificates and private keys; deploying or accessing certificate revocation lists (CRLs); or configuring security parameters on an individual entity or across a network.
           </li>
           <li>
-Uses of Bundle Protocol Security (BPSec) in which authentication of the Source Node ID is not possible (see <xref target="sec-security-noauth"/>).
+Uses of BPSec in which authentication of the Source Node ID is not possible (see <xref target="sec-security-noauth"/>).
           </li>
         </ul>
       </section>
@@ -264,11 +289,11 @@ Each type of data can be associated with a desired update time interval to ensur
       <section anchor="sec-protocol-uln">
         <name>Underlayer Technology Neutrality</name>
         <t>
-The protocol defined in this document depends on BPv7 and BPSec for its transport (see <xref target="sec-transport"/>) and is otherwise only loosely coupled to underlying protocols of its data plane.
+The protocol defined in this document depends on BPv7 and BPSec for its transport (see <xref target="sec-transport"/>) and is otherwise only loosely coupled to underlying protocols of its data plane (see <xref target="fig-stack-planes"/>).
 Because of this, the SAND protocol can be used by participating nodes operating convergence layers which are based on IP technology, Ethernet (or equivalently-framed) media access control (MAC) technology, Consultative Committee for Space Data Systems (CCSDS) space data link protocol (SDLP) technology, or any other arbitrary protocol layering.
         </t>
         <t>
-This technology independence applies not only to the data plane used to transport SAND PDUs, but also how underlayer network (ULN) technologies and related CL instances are advertised to peers.
+This technology independence applies not only to the data plane used to transport SAND PDUs, but also how ULN technologies and related CL instances are advertised to peers.
 This document registers code points for well-known ULN parameters, CL types, and CL parameters corresponding to IP-based, MAC-based, and CCSDS-link-based data planes.
 Beyond this, arbitrary protocol layering can be identified by either future registrations or by private-use code points.
         </t>
