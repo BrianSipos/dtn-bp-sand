@@ -1699,8 +1699,8 @@ cl-role-flags = &(
 ]]></sourcecode>
           </figure>
           <t>
-Even when acting in the responder role only, the CL <bcp14>MAY</bcp14> still include specific transport parameters.
-For example, a source <xref target="sec-msg-cl-ip">bind port number</xref> for bidirectional CL protocols such as those using LTP.
+When acting in the initiator role only, the CL <bcp14>MAY</bcp14> still include specific transport parameters.
+For example, a source <xref target="sec-msg-cl-ip">bind port number</xref> for bidirectional CL protocols such as LTP/UDP (to address the issues discussed in <xref target="sec-ltp-zeroconf"/>).
           </t>
         </section>
         <section anchor="sec-msg-cl-ip">
